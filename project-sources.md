@@ -7,4 +7,4 @@ Reviewed public repositories on 2026-09-24. Case studies describe documented wor
 - **Emerald Stay:** [repository](https://github.com/Dishan-dev/Emerald-Stay-Hotel-Management-System-), README, portal routes, server/package.json, and server/prisma/schema.prisma. Corrected the database from MySQL to PostgreSQL and used the repository's project name.
 - **PlanItNow:** [public repository](https://github.com/Dishan-dev/planitnow) returns an empty-repository response from GitHub's contents API. Kept only the existing portfolio brief. Removed unverified stack claims and generic implementation chapters. Needs the actual source repository before adding technical details.
 
-Photos were removed from the case-study viewer. Existing project cover cards remain as navigation thumbnails.
+Case-study chapters are text-only and centered within the desktop reading area. Existing project cover cards remain as navigation thumbnails.

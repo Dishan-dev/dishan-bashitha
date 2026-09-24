@@ -19,7 +19,7 @@ function ChapterMotion({ chapter, children }: { chapter: Chapter; children: Reac
       animate={{ opacity: 1, y: 0 }}
       exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
       transition={{ duration: reduceMotion ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full"
+      className="case-study-chapter w-full"
     >
       {children}
     </motion.div>
