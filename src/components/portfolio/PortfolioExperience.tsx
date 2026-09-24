@@ -89,7 +89,7 @@ export function PortfolioExperience() {
   useEffect(() => {
     const handleWheel = (event: WheelEvent) => {
       if (isCompact()) return;
-      if (document.body.dataset.projectViewer === "open") { event.preventDefault(); return; }
+      if (document.body.dataset.projectViewer === "open") return;
       if ((activeScene.id === "work" || activeScene.id === "experience") && Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       event.preventDefault();
       if (!event.deltaY) return;
