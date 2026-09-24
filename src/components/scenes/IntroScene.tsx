@@ -86,6 +86,7 @@ export function IntroScene({ onEnter = () => undefined, isTransitioning = false,
       <div aria-hidden="true" className="intro-color-panel absolute inset-x-[clamp(0.75rem,1.7vw,1.8rem)] bottom-[clamp(1.75rem,3vw,2.5rem)] top-[47svh] -z-10 rounded-[clamp(1.6rem,3vw,3rem)] bg-[var(--accent-fill)]" />
 
       <motion.div initial={reduceMotion ? false : { y: 84, clipPath: "inset(0 0 100% 0)" }} animate={{ y: 0, clipPath: "inset(0 0 0% 0)" }} transition={{ duration: reduceMotion ? 0 : 1.05, ease: editorialEase, delay: reduceMotion ? 0 : 0.12 }} className="intro-heading absolute left-[clamp(1.75rem,4.2vw,4rem)] top-[18svh] z-20 max-w-[min(30rem,32vw)]">
+        <p className="mobile-hero-eyebrow">Hi, I&apos;m Dishan <span aria-hidden="true">↗</span></p>
         <h1 id="intro-title" className="text-[clamp(3rem,5.6vw,6.8rem)] font-semibold leading-[0.86] tracking-[-0.09em]">I Build<br /><span className="text-[var(--accent)]">Digital</span><br /><span className="text-[var(--accent)]">Experiences</span></h1>
       </motion.div>
       <motion.div initial={reduceMotion ? false : { scale: 0, rotate: -35 }} animate={{ scale: 1, rotate: reduceMotion ? 0 : 360 }} transition={{ scale: { duration: reduceMotion ? 0 : 0.65, ease: editorialEase, delay: reduceMotion ? 0 : 0.6 }, rotate: { duration: 24, ease: "linear", repeat: Infinity } }} className="intro-sparkle absolute left-[clamp(20rem,25vw,31rem)] top-[22svh] z-20 text-[var(--accent)]"><Sparkles aria-hidden="true" size={46} strokeWidth={1.25} /></motion.div>
@@ -93,6 +94,10 @@ export function IntroScene({ onEnter = () => undefined, isTransitioning = false,
       <motion.div initial={reduceMotion ? false : { y: 58, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.8, ease: editorialEase, delay: reduceMotion ? 0 : 0.38 }} className="intro-impact absolute right-[clamp(1.75rem,5vw,5rem)] top-[19svh] z-20 w-[min(23rem,28vw)]">
         <p className="text-[clamp(2.5rem,4.4vw,5.5rem)] font-semibold leading-[0.88] tracking-[-0.08em]">That Make<br /><span className="text-[var(--accent)]">An Impact</span></p>
         <p className="mt-4 max-w-xs text-[clamp(0.9rem,1.25vw,1.1rem)] leading-relaxed text-[var(--muted)]">Software Engineer skilled in building scalable web applications and delivering intuitive user experiences.</p>
+        <div className="mobile-hero-actions">
+          <button type="button" onClick={() => onNavigate(2)}>Explore projects <span aria-hidden="true">↗</span></button>
+          <button type="button" onClick={() => onNavigate(5)}>Let&apos;s talk</button>
+        </div>
       </motion.div>
 
       <motion.div
