@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Scene } from "@/components/portfolio/Scene";
 import { projects } from "@/data/projects";
 
-type IntroSceneProps = { onEnter?: () => void; isTransitioning?: boolean; onNavigate?: (index: number) => void };
+type IntroSceneProps = { isReady?: boolean; onEnter?: () => void; isTransitioning?: boolean; onNavigate?: (index: number) => void };
 const featuredProject = projects[0];
 const navItems = [{ label: "Work", index: 2 }, { label: "Experience", index: 5 }, { label: "Projects", index: 3 }, { label: "About", index: 1 }, { label: "Contact", index: 6 }];
 const capabilities = [
@@ -30,7 +30,7 @@ const technologies = [
 const editorialEase = [0.22, 1, 0.36, 1] as const;
 
 /** Reference-inspired full-viewport cover; all content belongs to one composed frame. */
-export function IntroScene({ onEnter = () => undefined, isTransitioning = false, onNavigate = () => undefined }: IntroSceneProps) {
+export function IntroScene({ isReady = true, onEnter = () => undefined, isTransitioning = false, onNavigate = () => undefined }: IntroSceneProps) {
   const reduceMotion = useReducedMotion();
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isPortraitHovered, setIsPortraitHovered] = useState(false);
@@ -85,13 +85,13 @@ export function IntroScene({ onEnter = () => undefined, isTransitioning = false,
 
       <div aria-hidden="true" className="intro-color-panel absolute inset-x-[clamp(0.75rem,1.7vw,1.8rem)] bottom-[clamp(1.75rem,3vw,2.5rem)] top-[47svh] -z-10 rounded-[clamp(1.6rem,3vw,3rem)] bg-[var(--accent-fill)]" />
 
-      <motion.div initial={reduceMotion ? false : { y: 84, clipPath: "inset(0 0 100% 0)" }} animate={{ y: 0, clipPath: "inset(0 0 0% 0)" }} transition={{ duration: reduceMotion ? 0 : 1.05, ease: editorialEase, delay: reduceMotion ? 0 : 0.12 }} className="intro-heading absolute left-[clamp(1.75rem,4.2vw,4rem)] top-[18svh] z-20 max-w-[min(30rem,32vw)]">
+      <motion.div initial={false} animate={{ opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 1.05, ease: editorialEase, delay: reduceMotion ? 0 : 0.12 }} className="intro-heading absolute left-[clamp(1.75rem,4.2vw,4rem)] top-[18svh] z-20 max-w-[min(30rem,32vw)]">
         <p className="mobile-hero-eyebrow">Hi, I&apos;m Dishan <span aria-hidden="true">↗</span></p>
-        <h1 id="intro-title" className="text-[clamp(3rem,5.6vw,6.8rem)] font-semibold leading-[0.86] tracking-[-0.09em]">I Build<br /><span className="text-[var(--accent)]">Digital</span><br /><span className="text-[var(--accent)]">Experiences</span></h1>
+        <h1 id="intro-title" className="text-[clamp(3rem,5.6vw,6.8rem)] font-semibold leading-[0.86] tracking-[-0.09em]">{["I Build", "Digital", "Experiences"].map((line, index) => <span key={line} className="block overflow-hidden pb-[0.08em] -mb-[0.08em]"><motion.span className={`block ${index ? "text-[var(--accent)]" : ""}`} initial={{ y: "105%", opacity: 0 }} animate={{ y: isReady ? "0%" : "105%", opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.85, delay: reduceMotion ? 0 : 0.08 + index * 0.1, ease: editorialEase }}>{line}</motion.span></span>)}</h1>
       </motion.div>
       <motion.div initial={reduceMotion ? false : { scale: 0, rotate: -35 }} animate={{ scale: 1, rotate: reduceMotion ? 0 : 360 }} transition={{ scale: { duration: reduceMotion ? 0 : 0.65, ease: editorialEase, delay: reduceMotion ? 0 : 0.6 }, rotate: { duration: 24, ease: "linear", repeat: Infinity } }} className="intro-sparkle absolute left-[clamp(20rem,25vw,31rem)] top-[22svh] z-20 text-[var(--accent)]"><Sparkles aria-hidden="true" size={46} strokeWidth={1.25} /></motion.div>
 
-      <motion.div initial={reduceMotion ? false : { y: 58, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.8, ease: editorialEase, delay: reduceMotion ? 0 : 0.38 }} className="intro-impact absolute right-[clamp(1.75rem,5vw,5rem)] top-[19svh] z-20 w-[min(23rem,28vw)]">
+      <motion.div initial={reduceMotion ? false : { y: 20, opacity: 0 }} animate={{ y: isReady ? 0 : 20, opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.8, ease: editorialEase, delay: reduceMotion ? 0 : 0.38 }} className="intro-impact absolute right-[clamp(1.75rem,5vw,5rem)] top-[19svh] z-20 w-[min(23rem,28vw)]">
         <p className="text-[clamp(2.5rem,4.4vw,5.5rem)] font-semibold leading-[0.88] tracking-[-0.08em]">That Make<br /><span className="text-[var(--accent)]">An Impact</span></p>
         <p className="mt-4 max-w-xs text-[clamp(0.9rem,1.25vw,1.1rem)] leading-relaxed text-[var(--muted)]">Software Engineer skilled in building scalable web applications and delivering intuitive user experiences.</p>
         <div className="mobile-hero-actions">
@@ -116,7 +116,7 @@ export function IntroScene({ onEnter = () => undefined, isTransitioning = false,
         style={{ transformPerspective: 1200 }}
         className="intro-portrait absolute bottom-[clamp(0.75rem,1.7vw,1.8rem)] left-1/2 top-[11svh] z-30 w-[min(37vw,34rem)] min-w-[17rem] -translate-x-1/2 cursor-pointer"
       >
-        <motion.div initial={reduceMotion ? false : { y: 90, opacity: 0, scale: 0.94 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: reduceMotion ? 0 : 1.05, ease: editorialEase, delay: reduceMotion ? 0 : 0.2 }} className="absolute inset-0 z-10">
+        <motion.div initial={{ y: 24, opacity: 0, scale: 1.025 }} animate={{ y: isReady ? 0 : 24, opacity: isReady ? 1 : 0, scale: isReady ? 1 : 1.025 }} transition={{ duration: reduceMotion ? 0 : 1.05, ease: editorialEase, delay: reduceMotion ? 0 : 0.2 }} className="absolute inset-0 z-10">
           <Image src="/images/DishanBashitha.png" alt="Dishan Bashitha" fill priority unoptimized sizes="(max-width: 640px) 54vw, 34rem" className="origin-bottom scale-[1.22] object-cover object-center drop-shadow-[0_1.8rem_1.5rem_rgba(34,21,63,0.2)]" />
         </motion.div>
         <motion.div
@@ -135,7 +135,7 @@ export function IntroScene({ onEnter = () => undefined, isTransitioning = false,
         {!reduceMotion && <motion.span aria-hidden="true" animate={{ opacity: isPortraitHovered ? 1 : 0, left: `${revealPosition.x}%`, top: `${revealPosition.y}%`, scale: isPortraitHovered ? 1 : 0.6 }} transition={{ type: "spring", stiffness: 240, damping: 24 }} className="pointer-events-none absolute z-30 h-[min(25vw,13rem)] w-[min(25vw,13rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70 shadow-[0_0_0_0.4rem_rgba(118,82,212,0.12),0_0_2rem_rgba(118,82,212,0.5)]" />}
       </motion.div>
 
-      <motion.div initial={reduceMotion ? false : { y: 44, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.75, ease: editorialEase, delay: reduceMotion ? 0 : 0.7 }} className="intro-bio absolute bottom-[clamp(9rem,15svh,11rem)] left-[clamp(1.75rem,4.2vw,4rem)] z-30 w-[min(28rem,30vw)] text-white">
+      <motion.div initial={reduceMotion ? false : { y: 20, opacity: 0 }} animate={{ y: isReady ? 0 : 20, opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.75, ease: editorialEase, delay: reduceMotion ? 0 : 0.38 }} className="intro-bio absolute bottom-[clamp(9rem,15svh,11rem)] left-[clamp(1.75rem,4.2vw,4rem)] z-30 w-[min(28rem,30vw)] text-white">
         <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.13em] text-white/70">Based in Sri Lanka</p>
         <h2 className="mt-4 whitespace-nowrap text-[clamp(1.65rem,2.35vw,2.85rem)] font-semibold leading-tight tracking-[-0.06em]">Full Stack Developer</h2>
         <p className="mt-3 max-w-[25rem] text-sm leading-relaxed text-white/80">Passionate about clean code, modern web technologies and solving real-world problems.</p>
@@ -150,7 +150,7 @@ export function IntroScene({ onEnter = () => undefined, isTransitioning = false,
         })}
       </motion.div>
 
-      <motion.div initial={reduceMotion ? false : { y: 44, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.75, ease: editorialEase, delay: reduceMotion ? 0 : 0.86 }} className="intro-featured absolute bottom-[clamp(4rem,9svh,6rem)] right-[clamp(2rem,5.5vw,6rem)] z-30 w-[min(28rem,30vw)] text-white">
+      <motion.div initial={reduceMotion ? false : { y: 20, opacity: 0 }} animate={{ y: isReady ? 0 : 20, opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.75, ease: editorialEase, delay: reduceMotion ? 0 : 0.46 }} className="intro-featured absolute bottom-[clamp(4rem,9svh,6rem)] right-[clamp(2rem,5.5vw,6rem)] z-30 w-[min(28rem,30vw)] text-white">
         <div className="mb-6 grid grid-cols-4 gap-2">
           {capabilities.map((item) => {
             const Icon = item.icon;

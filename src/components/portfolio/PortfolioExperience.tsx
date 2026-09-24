@@ -66,8 +66,8 @@ export function PortfolioExperience() {
   }, []);
 
   useEffect(() => {
-    const leaveTimer = window.setTimeout(() => setIsLoaderLeaving(true), reduceMotion ? 220 : 1150);
-    const removeTimer = window.setTimeout(() => setShowLoader(false), reduceMotion ? 460 : 1910);
+    const leaveTimer = window.setTimeout(() => setIsLoaderLeaving(true), reduceMotion ? 80 : 1050);
+    const removeTimer = window.setTimeout(() => setShowLoader(false), reduceMotion ? 250 : 1750);
     return () => {
       window.clearTimeout(leaveTimer);
       window.clearTimeout(removeTimer);
@@ -134,7 +134,7 @@ export function PortfolioExperience() {
       {!isProjectViewerOpen && <PortfolioHeader activeIndex={activeIndex} onNavigate={navigateTo} />}
       <div className="relative h-full">
         <FrameTransition frameKey={activeScene.id}>
-          {activeScene.id === "intro" ? <IntroScene onEnter={enterPortfolio} isTransitioning={isIntroTransitioning} onNavigate={navigateTo} /> : <ActiveScene />}
+          {activeScene.id === "intro" ? <IntroScene isReady={isLoaderLeaving || !showLoader} onEnter={enterPortfolio} isTransitioning={isIntroTransitioning} onNavigate={navigateTo} /> : <ActiveScene />}
         </FrameTransition>
       </div>
       {!isProjectViewerOpen && <SceneNavigator activeIndex={activeIndex} onNavigate={navigateTo} />}
