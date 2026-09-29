@@ -1,5 +1,7 @@
 # Project content sources
 
+Updated from the user-supplied `DISHAN_BASHITHA.pdf` on 2026-09-29: LearniX naming and AI pipeline (Codex API / LangChain), plus PrimeCore's Zone24x7 mentorship, Bank Officer contribution, and team GitHub link. The résumé is the source for these updates; the earlier repository review below describes the previously inspected implementation and may differ from the résumé. The generic Event Planning Platform entry in the résumé is not explicitly named PlanItNow, so its stack and demo have not been assigned to that project.
+
 Reviewed public repositories on 2026-09-24. Case studies describe documented workflows and source structure, not verified production deployments or measured business outcomes. Project years remain the original portfolio values.
 
 - **Learnix:** [README](https://github.com/Dishan-dev/learnix-ai-educational-platform), [LLM service](https://github.com/Dishan-dev/learnix-ai-educational-platform/blob/main/server/src/services/llmQuizService.js), server/package.json, client routes, server/src/socket.js, and python-server/pdf_to_quiz.py. The LLM service defaults to DeepSeek-V3 through Hugging Face; the Python converter uses PyPDF2. Removed the unsupported Gemini attribution.

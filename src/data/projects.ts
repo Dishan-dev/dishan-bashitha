@@ -24,11 +24,11 @@ export interface Project {
 
 export const projects: readonly Project[] = [
   {
-    id: "01", slug: "learnix", title: "Learnix", shortTitle: "Learnix", year: "2026",
+    id: "01", slug: "learnix", title: "LearniX", shortTitle: "LearniX", year: "2026",
     role: "AI-powered learning platform", marker: "AI / Realtime",
     description: "AI-assisted quiz creation, classroom workspaces, and live multiplayer assessments for students and lecturers.",
     overview: "Learnix connects assessment preparation with interactive learning. Lecturers organize workspaces and assign quizzes; students practise individually, join live quiz rooms, and review their attempts and performance.",
-    technologies: ["Next.js", "TypeScript", "Express", "Prisma", "PostgreSQL", "Socket.IO", "DeepSeek", "Hugging Face"],
+    technologies: ["Next.js", "TypeScript", "Node.js", "Prisma", "PostgreSQL", "Socket.IO", "Codex API", "LangChain"],
     coverImage: "/images/projectLearnix.png", chapters: ["Overview", "Features", "Engineering", "Source"],
     githubUrl: "https://github.com/Dishan-dev/learnix-ai-educational-platform",
     capabilities: ["AI Quiz Generation", "Live Multiplayer", "Classroom Workspaces"],
@@ -40,9 +40,10 @@ export const projects: readonly Project[] = [
     engineering: [
       { title: "Application and data", description: "A Next.js and TypeScript client talks to an Express API, with Prisma and PostgreSQL handling persistent application data." },
       { title: "Realtime state", description: "Socket.IO manages live sessions while authentication and multiplayer contexts organize client-side session and lobby state." },
-      { title: "Content generation", description: "The quiz service calls the Hugging Face router with DeepSeek-V3 as its default model. A separate Python utility extracts PDF text using PyPDF2 for quiz conversion." },
+      { title: "Content generation", description: "An AI-assisted assessment pipeline integrates the Codex API, LangChain, and document processing to transform learning materials into structured quizzes and assessments." },
     ],
     sources: [
+      { label: "Résumé — project details", url: "/DISHAN_BASHITHA.pdf" },
       { label: "Project repository", url: "https://github.com/Dishan-dev/learnix-ai-educational-platform" },
       { label: "Quiz generation service", url: "https://github.com/Dishan-dev/learnix-ai-educational-platform/blob/main/server/src/services/llmQuizService.js" },
       { label: "Realtime server", url: "https://github.com/Dishan-dev/learnix-ai-educational-platform/blob/main/server/src/socket.js" },
@@ -50,12 +51,12 @@ export const projects: readonly Project[] = [
   },
   {
     id: "02", slug: "primecore-bank", title: "PrimeCore Bank", shortTitle: "PrimeCore", year: "2025",
-    role: "Digital banking platform", marker: "Fintech / Full Stack",
+    role: "Group project · Bank Officer module", marker: "Fintech / Full Stack",
     description: "A role-based banking application combining credit evaluation, loan eligibility, expense tracking, and money-transfer workflows.",
-    overview: "PrimeCore brings customer financial tools and banking operations into separate role-based workspaces. Its four product areas are CreditLens, LoanSense, SpendIQ, and Transact, supported by bank-officer and administrator interfaces.",
+    overview: "Built as a group project under industry mentorship from Zone24x7, with my primary responsibility being the Bank Officer module, frontend-to-API integration, and collaboration on overall system integration. PrimeCore brings customer financial tools and banking operations into role-based workspaces through CreditLens, LoanSense, SpendIQ, and Transact.",
     technologies: ["Next.js", "TypeScript", "Java 21", "Spring Boot", "Spring Security", "PostgreSQL", "Flyway"],
     coverImage: "/images/projectPrimeCore.png", chapters: ["Overview", "Features", "Engineering", "Source"],
-    githubUrl: "https://github.com/Dishan-dev/bank-web-app",
+    githubUrl: "https://github.com/Metaminds-BankWebApp",
     capabilities: ["CreditLens", "LoanSense", "SpendIQ / Transact"],
     features: [
       { title: "CreditLens and LoanSense", description: "Credit evaluation and reporting sit alongside eligibility checks for personal, vehicle, education, and housing loans." },
@@ -68,6 +69,7 @@ export const projects: readonly Project[] = [
       { title: "Persistence and reporting", description: "Spring Data JPA connects to PostgreSQL, Flyway manages migrations, and PDF libraries support financial reports and statements." },
     ],
     sources: [
+      { label: "Team repositories", url: "https://github.com/Metaminds-BankWebApp" },
       { label: "Frontend repository", url: "https://github.com/Dishan-dev/bank-web-app" },
       { label: "Backend repository", url: "https://github.com/Dishan-dev/Bank-Web-App-backend" },
       { label: "Loan eligibility service", url: "https://github.com/Dishan-dev/Bank-Web-App-backend/blob/main/src/main/java/com/bank_web_app/backend/loansense/service/LoanEligibilityService.java" },

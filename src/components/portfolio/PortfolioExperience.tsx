@@ -90,6 +90,17 @@ export function PortfolioExperience() {
     const handleWheel = (event: WheelEvent) => {
       if (isCompact()) return;
       if (document.body.dataset.projectViewer === "open") return;
+      // Let longer contact, skills, and experience content scroll before changing scenes.
+      let scrollTarget = event.target instanceof HTMLElement ? event.target : null;
+      while (scrollTarget && scrollTarget !== document.body) {
+        const { overflowY } = window.getComputedStyle(scrollTarget);
+        const canScroll = /auto|scroll/.test(overflowY) && scrollTarget.scrollHeight > scrollTarget.clientHeight;
+        if (canScroll && ((event.deltaY > 0 && scrollTarget.scrollTop + scrollTarget.clientHeight < scrollTarget.scrollHeight - 1) || (event.deltaY < 0 && scrollTarget.scrollTop > 0))) {
+          wheelDistance.current = 0;
+          return;
+        }
+        scrollTarget = scrollTarget.parentElement;
+      }
       if ((activeScene.id === "work" || activeScene.id === "experience") && Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       event.preventDefault();
       if (!event.deltaY) return;

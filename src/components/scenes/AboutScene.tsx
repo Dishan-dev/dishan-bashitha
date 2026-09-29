@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import Image from "next/image";
+import { profile } from "@/data/profile";
 import { Scene } from "@/components/portfolio/Scene";
 
 const editorialEase = [0.22, 1, 0.36, 1] as const;
@@ -35,18 +36,18 @@ export function AboutScene() {
         className="absolute left-[clamp(2rem,6vw,4rem)] right-[clamp(2rem,6vw,4rem)] top-1/2 z-20 -translate-y-1/2 md:left-[clamp(2rem,48vw,57rem)] md:right-[clamp(2rem,12vw,14rem)]"
       >
         <div className="mb-7 flex items-center gap-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
-          <span className="text-[var(--foreground)]">(01)</span><span>About</span><span className="h-px w-8 bg-[var(--border)]" /><span>Moratuwa, Sri Lanka</span>
+          <span className="text-[var(--foreground)]">(01)</span><span>About</span><span className="h-px w-8 bg-[var(--border)]" /><span>{profile.location}</span>
         </div>
         <h1 id="about-title" className="max-w-[12ch] text-[clamp(3.1rem,5vw,6.2rem)] font-semibold leading-[0.91] tracking-[-0.075em] text-[var(--foreground)]">
           Curious by default. <span className="text-[var(--accent)]">Intentional by choice.</span>
         </h1>
         <div className="mt-7 max-w-[43rem] space-y-4 text-[clamp(0.95rem,1.12vw,1.1rem)] leading-[1.58] text-[var(--muted)]">
-          <p>Full-stack software engineer focused on building scalable systems and polished digital experiences.</p>
-          <p>I combine backend engineering, modern frontend development, AI integrations, and thoughtful design to turn ideas into reliable products.</p>
+          <p>Software Engineering undergraduate at the University of Moratuwa, with professional experience building full-stack applications.</p>
+          <p>I work with Java, Spring Boot, React, Next.js, Node.js, and PostgreSQL to build maintainable products, from REST APIs and authentication to real-time systems and cloud deployment.</p>
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a href="mailto:dshnz029@gmail.com?subject=Resume%20request" className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)] transition-colors hover:bg-[var(--accent)]">Request resume ↗</a>
-          <a href="mailto:hello@dishanbashitha.com" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-medium text-[var(--foreground)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]">Get in touch</a>
+          <a href={profile.resume} download="DISHAN_BASHITHA.pdf" className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)] transition-colors hover:bg-[var(--accent)]">Download résumé ↗</a>
+          <a href={`mailto:${profile.email}`} className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-medium text-[var(--foreground)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]">Get in touch</a>
         </div>
       </motion.main>
 

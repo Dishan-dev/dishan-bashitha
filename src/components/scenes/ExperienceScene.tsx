@@ -12,8 +12,8 @@ const experienceGroups = [
       period: "2025 — 2026",
       role: "Software Engineer",
       organization: "NIOLLA (PVT) LTD",
-      description: "Worked across frontend and backend development on scalable enterprise applications, building APIs, interfaces, and data-driven systems using modern full-stack technologies.",
-      focus: "Spring Boot / React / Next.js / PostgreSQL",
+      description: "Developed enterprise web applications, REST APIs, and responsive interfaces. Designed and optimized PostgreSQL and MySQL databases, integrated third-party services, and collaborated in Agile workflows.",
+      focus: "Spring Boot / Node.js / React / Next.js / PostgreSQL / MySQL",
     }],
   },
   {
@@ -30,10 +30,52 @@ const experienceGroups = [
       },
       {
         period: "Leadership",
-        role: "Local Committee Vice President",
+        role: "Local Committee Vice President — PR & IM",
         organization: "AIESEC IN UNIVERSITY OF MORATUWA",
-        description: "Led communication, digital systems, and cross-functional coordination with a focus on ownership and thoughtful collaboration.",
+        description: "Local Committee Vice President for Public Relations & Information Management.",
         focus: "Leadership / Communication / Coordination",
+      },
+      {
+        period: "2026",
+        role: "Event Manager — IDEALIZE 2026",
+        organization: "AIESEC IN COLOMBO SOUTH",
+        description: "Event Manager for IDEALIZE 2026.",
+        focus: "Event Management / Leadership",
+      },
+      {
+        period: "Activities",
+        role: "Organizing Committee Member",
+        organization: "IEEE STUDENT BRANCH, UNIVERSITY OF MORATUWA",
+        description: "Organizing Committee Member for Robotics Day.",
+        focus: "Robotics Day / Community",
+      },
+    ],
+  },
+  {
+    id: "education",
+    label: "Education",
+    description: "Academic qualifications and ongoing study.",
+    experiences: [
+      {
+        period: "2024 — 2028",
+        role: "BSc (Hons) Information Technology & Management",
+        organization: "UNIVERSITY OF MORATUWA",
+        description: "Undergraduate study in Katubedda, Sri Lanka. Ongoing GPA: 3.54 / 4.00.",
+        focus: "Information Technology / Management",
+      },
+      {
+        period: "2022 — 2025",
+        role: "BEng (Hons) Software Engineering",
+        organization: "LONDON METROPOLITAN UNIVERSITY",
+        description: "Bachelor of Engineering (Hons) in Software Engineering, awarded First Class Honours.",
+        focus: "Software Engineering / First Class Honours",
+      },
+      {
+        period: "Higher National Diploma",
+        role: "Software Engineering",
+        organization: "ESOFT METRO CAMPUS",
+        description: "Higher National Diploma in Software Engineering, Kurunegala, Sri Lanka.",
+        focus: "Software Engineering",
       },
     ],
   },
@@ -54,10 +96,10 @@ export function ExperienceScene() {
             <p className="font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.16em] text-[var(--accent)]">Experience / 05</p>
             <h1 id="experience-title" className="mt-3 text-[clamp(3rem,5.2vw,5.8rem)] font-semibold leading-[0.86] tracking-[-0.08em]">Experience.</h1>
           </div>
-          <p className="hidden max-w-72 pb-1 text-right text-sm leading-relaxed text-[var(--muted)] md:block">A selection of professional software work and volunteer leadership.</p>
+          <p className="hidden max-w-72 pb-1 text-right text-sm leading-relaxed text-[var(--muted)] md:block">Professional software work, volunteer leadership, and education.</p>
         </header>
 
-        <nav role="tablist" aria-label="Experience type" className="mt-[clamp(2rem,4svh,3.5rem)] flex border-b border-[var(--border)]">
+        <nav role="tablist" aria-label="Experience type" className="mt-[clamp(2rem,4svh,3.5rem)] flex shrink-0 overflow-x-auto border-b border-[var(--border)]">
           {experienceGroups.map((group, index) => {
             const isActive = activeGroupIndex === index;
             return (
@@ -73,7 +115,7 @@ export function ExperienceScene() {
         <div id="experience-panel" role="tabpanel" aria-labelledby={`${activeGroup.id}-tab`} className="mt-6 flex min-h-0 flex-1 flex-col">
           <div className="flex items-end justify-between gap-6">
             <div>
-              <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--accent)]">{activeGroup.label} experiences</p>
+              <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-[var(--accent)]">{activeGroup.label}</p>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{activeGroup.description}</p>
             </div>
             <p className="hidden shrink-0 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.15em] text-[var(--muted)] sm:block">{String(activeGroup.experiences.length).padStart(2, "0")} total</p>
