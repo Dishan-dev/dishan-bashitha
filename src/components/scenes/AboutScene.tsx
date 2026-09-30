@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useSpring } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import Image from "next/image";
 import { profile } from "@/data/profile";
@@ -10,6 +10,9 @@ const editorialEase = [0.22, 1, 0.36, 1] as const;
 
 export function AboutScene() {
   const reduceMotion = useReducedMotion();
+  const rotateX = useSpring(0, { stiffness: 110, damping: 22 });
+  const rotateY = useSpring(0, { stiffness: 110, damping: 22 });
+  const resetTilt = () => { rotateX.set(0); rotateY.set(0); };
 
   return (
     <Scene id="about" eyebrow="" className="relative isolate overflow-hidden p-0">
@@ -17,6 +20,15 @@ export function AboutScene() {
       <div aria-hidden="true" className="absolute bottom-[9%] right-[8%] h-[min(18vw,15rem)] w-[min(18vw,15rem)] rounded-full border border-[var(--accent)]/15" />
 
       <motion.aside
+        style={{ rotateX: reduceMotion ? 0 : rotateX, rotateY: reduceMotion ? 0 : rotateY, transformPerspective: 1000 }}
+        onPointerMove={(event) => {
+          if (reduceMotion || event.pointerType !== "mouse") return;
+          const bounds = event.currentTarget.getBoundingClientRect();
+          rotateX.set((0.5 - (event.clientY - bounds.top) / bounds.height) * 8);
+          rotateY.set(((event.clientX - bounds.left) / bounds.width - 0.5) * 10);
+        }}
+        onPointerLeave={resetTilt}
+        onPointerCancel={resetTilt}
         initial={reduceMotion ? false : { y: 36, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: reduceMotion ? 0 : 0.8, ease: editorialEase, delay: reduceMotion ? 0 : 0.12 }}
@@ -24,8 +36,12 @@ export function AboutScene() {
       >
         <span className="font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.16em] text-[var(--muted)]">DB / ’26</span>
         <div aria-hidden="true" className="absolute inset-x-[12%] bottom-0 top-[18%] rounded-t-[8rem] bg-[var(--accent-soft)]" />
-        <div aria-hidden="true" className="absolute inset-x-[16%] bottom-[18%] top-[25%] rounded-full border border-[var(--accent)]/30" />
-        <Image src="/images/myphoto.png" alt="Dishan Bashitha" width={6000} height={3375} sizes="(min-width: 768px) 60rem, 100vw" quality={100} className="absolute bottom-[-2%] left-1/2 z-10 h-[118%] w-auto max-w-none -translate-x-1/2" priority />
+        <div aria-hidden="true" className="portrait-orbit absolute inset-x-[16%] bottom-[18%] top-[25%] rounded-full border border-[var(--accent)]/30">
+          <span className="absolute left-1/2 top-0 h-2 w-2 -translate-y-1/2 rounded-full bg-[var(--accent)] shadow-[0_0_16px_var(--accent)]" />
+        </div>
+        <div className="portrait-float absolute inset-0 z-10">
+          <Image src="/images/myphoto.png" alt="Dishan Bashitha" width={6000} height={3375} sizes="(min-width: 768px) 60rem, 100vw" quality={100} className="absolute bottom-[-2%] left-1/2 h-[118%] w-auto max-w-none -translate-x-1/2" priority />
+        </div>
         <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between font-[family-name:var(--font-mono)] text-[9px] uppercase tracking-[0.14em] text-[var(--muted)]"><span>Dishan Bashitha</span><span>Full-stack</span></div>
       </motion.aside>
 

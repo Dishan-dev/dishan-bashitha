@@ -1,6 +1,8 @@
 "use client";
 
 import { Scene } from "@/components/portfolio/Scene";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const experienceGroups = [
   {
@@ -107,6 +109,7 @@ const timelines = [
 ];
 
 export function ExperienceScene() {
+  const reduceMotion = useReducedMotion();
   return (
     <Scene id="experience" eyebrow="" className="experience-scene">
       <div className="experience-content">
@@ -124,8 +127,13 @@ export function ExperienceScene() {
                 <span>{String(timeline.entries.length).padStart(2, "0")}</span>
               </h2>
               <ol className="experience-timeline">
-                {timeline.entries.map((experience) => (
-                  <li key={experience.organization} className="experience-entry">
+                {timeline.entries.map((experience, index) => (
+                  <motion.li key={experience.organization} className="experience-entry"
+                    initial={reduceMotion ? false : { opacity: 0, x: -14 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: reduceMotion ? 0 : 0.55, delay: reduceMotion ? 0 : index * 0.09, ease: [0.22, 1, 0.36, 1] }}
+                  >
                     <span aria-hidden="true" className="experience-marker" />
                     <article>
                       <div className="experience-meta">
@@ -137,7 +145,7 @@ export function ExperienceScene() {
                       {timeline.id === "education" && <p className="experience-description">{experience.description}</p>}
                       {experience.category === "Professional" && <p className="experience-focus">{experience.focus}</p>}
                     </article>
-                  </li>
+                  </motion.li>
                 ))}
               </ol>
             </section>
