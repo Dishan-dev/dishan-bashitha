@@ -4,7 +4,7 @@ export const profile = {
   phone: "+94 76 086 8809",
   phoneHref: "tel:+94760868809",
   location: "Kurunegala, Sri Lanka",
-  linkedin: "https://linkedin.com/in/dishanbashitha",
+  linkedin: "https://www.linkedin.com/in/dishan-bashitha-60a138295/",
   github: "https://github.com/Dishan-dev",
   website: "https://dishan-bashitha.vercel.app/",
   resume: "/DISHAN_BASHITHA.pdf",
