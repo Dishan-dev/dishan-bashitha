@@ -68,7 +68,7 @@ export function ProjectPortalTransition({ origin }: { origin: { x: number; y: nu
   if (finished || reduceMotion) return null;
   return createPortal(
     <div ref={root} aria-hidden="true" className={styles.portalTransition} style={{ "--portal-x": `${origin.x}%`, "--portal-y": `${origin.y}%` } as CSSProperties}>
-      <svg data-portal-curtain className={styles.portalCurtain} viewBox="0 0 100 100"><path d="M50 0C55 30 70 45 100 50C70 55 55 70 50 100C45 70 30 55 0 50C30 45 45 30 50 0Z" fill="#100b1b" /></svg>
+      <svg data-portal-curtain className={styles.portalCurtain} viewBox="0 0 100 100"><path d="M50 0C55 30 70 45 100 50C70 55 55 70 50 100C45 70 30 55 0 50C30 45 45 30 50 0Z" fill="var(--background)" /></svg>
       <div data-portal-orb className={styles.portalOrb}>
         <canvas ref={canvas} className={styles.portalParticles} />
         <svg className={styles.portalStar} viewBox="0 0 100 100"><path d="M50 0C55 30 70 45 100 50C70 55 55 70 50 100C45 70 30 55 0 50C30 45 45 30 50 0Z" fill="currentColor" /></svg>

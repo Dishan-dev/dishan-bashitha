@@ -7,14 +7,15 @@ import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } f
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Project } from "@/data/projects";
 import { portfolioMotion } from "@/lib/motion";
+import { ThemeToggle } from "@/components/portfolio/ThemeToggle";
 import styles from "./ProjectViewer.module.css";
 
 type ProjectViewerProps = { project: Project; onClose: () => void; entranceDelay?: number };
-const projectAccents: Record<string, string> = {
-  learnix: "#bea4ff",
-  "primecore-bank": "#8dbbff",
-  "hotel-management-system": "#8bd9ba",
-  planitnow: "#edbb8f",
+const projectAccents: Record<string, { light: string; dark: string }> = {
+  learnix: { light: "#6841b9", dark: "#bea4ff" },
+  "primecore-bank": { light: "#275ea4", dark: "#8dbbff" },
+  "hotel-management-system": { light: "#216b50", dark: "#8bd9ba" },
+  planitnow: { light: "#8a491c", dark: "#edbb8f" },
 };
 const chapterIcons = { Overview: Sparkles, Features: Layers3, Engineering: Code2, Source: FileText };
 
@@ -27,7 +28,7 @@ export function ProjectViewer({ project, onClose, entranceDelay = 0 }: ProjectVi
   const readingProgress = useMotionValue(0);
   const reduceMotion = useReducedMotion();
   const chapters = project.chapters;
-  const accent = projectAccents[project.slug] ?? "#bea4ff";
+  const accent = projectAccents[project.slug] ?? projectAccents.learnix;
 
   const goToChapter = useCallback((index: number) => {
     const container = scrollArea.current;
@@ -109,11 +110,11 @@ export function ProjectViewer({ project, onClose, entranceDelay = 0 }: ProjectVi
       initial={reduceMotion ? false : { opacity: 0, y: entranceDelay ? 0 : 24 }}
       animate={{ opacity: 1, y: 0, transition: { delay: reduceMotion ? 0 : entranceDelay, duration: reduceMotion ? 0 : 0.5 } }}
       exit={{ opacity: 0, y: reduceMotion ? 0 : 18, transition: { duration: reduceMotion ? 0 : 0.3 } }}
-      className={styles.viewer} style={{ "--case-accent": accent } as CSSProperties}>
+      className={styles.viewer} style={{ "--case-accent-light": accent.light, "--case-accent-dark": accent.dark } as CSSProperties}>
       <header className={styles.topbar}>
         <button type="button" onClick={onClose} className={styles.back}><ArrowLeft size={17} aria-hidden="true" /><span>All projects</span></button>
         <p>Selected work <span>/</span> {project.id} <span>/</span> {project.shortTitle}</p>
-        <button type="button" onClick={onClose} className={styles.close} aria-label="Close project details"><span>Esc</span><X size={18} aria-hidden="true" /></button>
+        <div className={styles.topActions}><ThemeToggle /><button type="button" onClick={onClose} className={styles.close} aria-label="Close project details"><span>Esc</span><X size={18} aria-hidden="true" /></button></div>
         <motion.span aria-hidden="true" className={styles.progress} style={{ scaleX: readingProgress }} />
       </header>
 
