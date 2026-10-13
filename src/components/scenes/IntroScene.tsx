@@ -1,13 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useMotionTemplate, useSpring, useTransform } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Box, Code2, GraduationCap, Sparkles, UserRound } from "lucide-react";
 import Image from "next/image";
 import { FaJava, FaNodeJs, FaReact } from "react-icons/fa6";
 import { SiJavascript, SiSpringboot, SiTypescript } from "react-icons/si";
 import { useState } from "react";
+import { portfolioMotion } from "@/lib/motion";
 import { Scene } from "@/components/portfolio/Scene";
+import { SceneLabel } from "@/components/ui/SceneLabel";
 import { projects } from "@/data/projects";
 
 type IntroSceneProps = { isReady?: boolean; onEnter?: () => void; isTransitioning?: boolean; onNavigate?: (index: number) => void };
@@ -27,15 +29,30 @@ const technologies = [
   { label: "Spring Boot", icon: SiSpringboot, className: "text-[#5c9f43]" },
   { label: "Node.js", icon: FaNodeJs, className: "text-[#539e43]" },
 ];
-const editorialEase = [0.22, 1, 0.36, 1] as const;
+const editorialEase = portfolioMotion.ease;
 
 /** Reference-inspired full-viewport cover; all content belongs to one composed frame. */
 export function IntroScene({ isReady = true, onEnter = () => undefined, isTransitioning = false, onNavigate = () => undefined }: IntroSceneProps) {
   const reduceMotion = useReducedMotion();
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const tiltX = useSpring(0, { stiffness: 90, damping: 20 });
+  const tiltY = useSpring(0, { stiffness: 90, damping: 20 });
   const [isPortraitHovered, setIsPortraitHovered] = useState(false);
-  const [revealPosition, setRevealPosition] = useState({ x: 50, y: 46 });
-  const [backgroundPointer, setBackgroundPointer] = useState({ x: 0, y: 0 });
+  const revealX = useMotionValue(50);
+  const revealY = useMotionValue(46);
+  const mask = useMotionTemplate`radial-gradient(circle min(25vw, 13rem) at ${revealX}% ${revealY}%, #000 0%, #000 48%, transparent 72%)`;
+  const revealLeft = useMotionTemplate`${revealX}%`;
+  const revealTop = useMotionTemplate`${revealY}%`;
+  const backgroundX = useSpring(0, { stiffness: 55, damping: 22 });
+  const backgroundY = useSpring(0, { stiffness: 55, damping: 22 });
+  const glowX = useTransform(backgroundX, value => value * 48);
+  const glowY = useTransform(backgroundY, value => value * 36);
+  const orbitX = useTransform(backgroundX, value => value * -32);
+  const orbitY = useTransform(backgroundY, value => value * -24);
+  const orbitRotate = useTransform(backgroundX, value => value * 7);
+  const innerX = useTransform(backgroundX, value => value * 42);
+  const innerY = useTransform(backgroundY, value => value * 28);
+  const dotX = useTransform(backgroundX, value => value * -60);
+  const dotY = useTransform(backgroundY, value => value * -48);
 
   return (
     <Scene
@@ -43,11 +60,12 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
       eyebrow=""
       className="relative isolate p-0"
       onPointerMove={(event) => {
-        if (reduceMotion) return;
+        if (reduceMotion || event.pointerType !== "mouse") return;
         const bounds = event.currentTarget.getBoundingClientRect();
-        setBackgroundPointer({ x: (event.clientX - bounds.left) / bounds.width - 0.5, y: (event.clientY - bounds.top) / bounds.height - 0.5 });
+        backgroundX.set((event.clientX - bounds.left) / bounds.width - 0.5);
+        backgroundY.set((event.clientY - bounds.top) / bounds.height - 0.5);
       }}
-      onPointerLeave={() => setBackgroundPointer({ x: 0, y: 0 })}
+      onPointerLeave={() => { backgroundX.set(0); backgroundY.set(0); }}
     >
       <header aria-hidden="true" className="hidden">
         <button type="button" onClick={() => onNavigate(0)} className="text-left text-[clamp(0.9rem,1.2vw,1.25rem)] font-semibold uppercase leading-none tracking-[-0.04em]">
@@ -62,22 +80,22 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
         <motion.div
-          animate={{ x: backgroundPointer.x * 72, y: backgroundPointer.y * 54, scale: 1 + Math.abs(backgroundPointer.x) * 0.08 }}
+          style={{ x: reduceMotion ? 0 : glowX, y: reduceMotion ? 0 : glowY }}
           transition={{ type: "spring", stiffness: 45, damping: 18, mass: 0.8 }}
           className="absolute -left-[15%] top-[8%] h-[min(56vw,58rem)] w-[min(56vw,58rem)] rounded-full bg-[radial-gradient(circle,rgba(118,82,212,0.12)_0%,rgba(118,82,212,0.045)_42%,transparent_70%)]"
         />
         <motion.div
-          animate={{ x: backgroundPointer.x * -42, y: backgroundPointer.y * -30, rotate: backgroundPointer.x * 10, scale: 1 + Math.abs(backgroundPointer.y) * 0.06 }}
+          style={{ x: reduceMotion ? 0 : orbitX, y: reduceMotion ? 0 : orbitY, rotate: reduceMotion ? 0 : orbitRotate }}
           transition={{ type: "spring", stiffness: 55, damping: 18, mass: 0.8 }}
           className="absolute left-1/2 top-[16svh] h-[min(37vw,38rem)] w-[min(62vw,64rem)] -translate-x-1/2 rounded-[50%] border border-[var(--accent)]/15"
         />
         <motion.div
-          animate={{ x: backgroundPointer.x * 58, y: backgroundPointer.y * 38, rotate: backgroundPointer.x * -14 }}
+          style={{ x: reduceMotion ? 0 : innerX, y: reduceMotion ? 0 : innerY }}
           transition={{ type: "spring", stiffness: 62, damping: 18, mass: 0.8 }}
           className="absolute left-1/2 top-[25svh] h-[min(21vw,22rem)] w-[min(50vw,52rem)] -translate-x-1/2 rounded-[50%] border border-[var(--accent)]/12"
         />
         <motion.div
-          animate={{ x: backgroundPointer.x * -84, y: backgroundPointer.y * -70, opacity: 0.35 + Math.min(0.45, Math.abs(backgroundPointer.x) + Math.abs(backgroundPointer.y)), scale: 0.9 + Math.min(0.22, Math.abs(backgroundPointer.x) + Math.abs(backgroundPointer.y)) }}
+          style={{ x: reduceMotion ? 0 : dotX, y: reduceMotion ? 0 : dotY, opacity: 0.5 }}
           transition={{ type: "spring", stiffness: 70, damping: 17, mass: 0.65 }}
           className="absolute right-[14%] top-[24svh] h-2.5 w-2.5 rounded-full bg-[var(--accent-fill)] shadow-[0_0_2rem_rgba(118,82,212,0.7)]"
         />
@@ -86,10 +104,10 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
       <div aria-hidden="true" className="intro-color-panel absolute inset-x-[clamp(0.75rem,1.7vw,1.8rem)] bottom-[clamp(1.75rem,3vw,2.5rem)] top-[47svh] -z-10 rounded-[clamp(1.6rem,3vw,3rem)] bg-[var(--accent-fill)]" />
 
       <motion.div initial={false} animate={{ opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 1.05, ease: editorialEase, delay: reduceMotion ? 0 : 0.12 }} className="intro-heading absolute left-[clamp(1.75rem,4.2vw,4rem)] top-[18svh] z-20 max-w-[min(30rem,32vw)]">
-        <p className="mobile-hero-eyebrow">Hi, I&apos;m Dishan <span aria-hidden="true">↗</span></p>
+        <SceneLabel sceneId="intro" className="mb-5" />
         <h1 id="intro-title" className="text-[clamp(3rem,5.6vw,6.8rem)] font-semibold leading-[0.86] tracking-[-0.09em]">{["I Build", "Digital", "Experiences"].map((line, index) => <span key={line} className="block overflow-hidden pb-[0.08em] -mb-[0.08em]"><motion.span className={`block ${index ? "text-[var(--accent)]" : ""}`} initial={{ y: "105%", opacity: 0 }} animate={{ y: isReady ? "0%" : "105%", opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.85, delay: reduceMotion ? 0 : 0.08 + index * 0.1, ease: editorialEase }}>{line}</motion.span></span>)}</h1>
       </motion.div>
-      <motion.div initial={reduceMotion ? false : { scale: 0, rotate: -35 }} animate={{ scale: 1, rotate: reduceMotion ? 0 : 360 }} transition={{ scale: { duration: reduceMotion ? 0 : 0.65, ease: editorialEase, delay: reduceMotion ? 0 : 0.6 }, rotate: { duration: 24, ease: "linear", repeat: Infinity } }} className="intro-sparkle absolute left-[clamp(20rem,25vw,31rem)] top-[22svh] z-20 text-[var(--accent)]"><Sparkles aria-hidden="true" size={46} strokeWidth={1.25} /></motion.div>
+      <motion.div initial={reduceMotion ? false : { scale: 0, rotate: -35 }} animate={{ scale: 1, rotate: 0 }} transition={{ scale: { duration: reduceMotion ? 0 : 0.65, ease: editorialEase, delay: reduceMotion ? 0 : 0.6 }, rotate: { duration: 0.8 } }} className="intro-sparkle absolute left-[clamp(20rem,25vw,31rem)] top-[22svh] z-20 text-[var(--accent)]"><Sparkles aria-hidden="true" size={46} strokeWidth={1.25} /></motion.div>
 
       <motion.div initial={reduceMotion ? false : { y: 20, opacity: 0 }} animate={{ y: isReady ? 0 : 20, opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.8, ease: editorialEase, delay: reduceMotion ? 0 : 0.38 }} className="intro-impact absolute right-[clamp(1.75rem,5vw,5rem)] top-[19svh] z-20 w-[min(23rem,28vw)]">
         <p className="text-[clamp(2.5rem,4.4vw,5.5rem)] font-semibold leading-[0.88] tracking-[-0.08em]">That Make<br /><span className="text-[var(--accent)]">An Impact</span></p>
@@ -102,18 +120,19 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
 
       <motion.div
         onPointerMove={(event) => {
-          if (reduceMotion) return;
+          if (reduceMotion || event.pointerType !== "mouse") return;
           const bounds = event.currentTarget.getBoundingClientRect();
           const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
           const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
-          setTilt({ x: vertical * -5, y: horizontal * 6 });
-          setRevealPosition({ x: Math.max(8, Math.min(92, (horizontal + 0.5) * 100)), y: Math.max(8, Math.min(92, (vertical + 0.5) * 100)) });
+          tiltX.set(vertical * -5); tiltY.set(horizontal * 6);
+          revealX.set(Math.max(8, Math.min(92, (horizontal + 0.5) * 100)));
+          revealY.set(Math.max(8, Math.min(92, (vertical + 0.5) * 100)));
         }}
         onHoverStart={() => setIsPortraitHovered(true)}
-        onHoverEnd={() => { setIsPortraitHovered(false); setTilt({ x: 0, y: 0 }); }}
-        animate={{ rotateX: tilt.x, rotateY: tilt.y, y: isPortraitHovered && !reduceMotion ? -12 : 0, scale: isPortraitHovered && !reduceMotion ? 1.035 : 1 }}
+        onHoverEnd={() => { setIsPortraitHovered(false); tiltX.set(0); tiltY.set(0); }}
+        animate={{ y: isPortraitHovered && !reduceMotion ? -12 : 0, scale: isPortraitHovered && !reduceMotion ? 1.035 : 1 }}
         transition={{ type: "spring", stiffness: 90, damping: 20, mass: 0.7 }}
-        style={{ transformPerspective: 1200 }}
+        style={{ transformPerspective: 1200, rotateX: reduceMotion ? 0 : tiltX, rotateY: reduceMotion ? 0 : tiltY }}
         className="intro-portrait absolute bottom-[clamp(0.75rem,1.7vw,1.8rem)] left-1/2 top-[11svh] z-30 w-[min(37vw,34rem)] min-w-[17rem] -translate-x-1/2 cursor-pointer"
       >
         <motion.div initial={{ y: 24, opacity: 0, scale: 1.025 }} animate={{ y: isReady ? 0 : 24, opacity: isReady ? 1 : 0, scale: isReady ? 1 : 1.025 }} transition={{ duration: reduceMotion ? 0 : 1.05, ease: editorialEase, delay: reduceMotion ? 0 : 0.2 }} className="absolute inset-0 z-10">
@@ -125,21 +144,21 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
           animate={{ opacity: isPortraitHovered ? 1 : 0 }}
           transition={{ duration: reduceMotion ? 0 : 0.42, ease: editorialEase }}
           style={reduceMotion ? undefined : {
-            WebkitMaskImage: `radial-gradient(circle min(25vw, 13rem) at ${revealPosition.x}% ${revealPosition.y}%, #000 0%, #000 48%, transparent 72%)`,
-            maskImage: `radial-gradient(circle min(25vw, 13rem) at ${revealPosition.x}% ${revealPosition.y}%, #000 0%, #000 48%, transparent 72%)`,
+            WebkitMaskImage: mask,
+            maskImage: mask,
           }}
           className="pointer-events-none absolute inset-0 z-20"
         >
           <Image src="/images/DishanBashitha-anime-hoodie-aligned.png" alt="" fill unoptimized loading="eager" sizes="(max-width: 640px) 54vw, 34rem" className="origin-bottom scale-[1.22] object-cover object-center drop-shadow-[0_1.8rem_1.5rem_rgba(118,82,212,0.34)]" />
         </motion.div>
-        {!reduceMotion && <motion.span aria-hidden="true" animate={{ opacity: isPortraitHovered ? 1 : 0, left: `${revealPosition.x}%`, top: `${revealPosition.y}%`, scale: isPortraitHovered ? 1 : 0.6 }} transition={{ type: "spring", stiffness: 240, damping: 24 }} className="pointer-events-none absolute z-30 h-[min(25vw,13rem)] w-[min(25vw,13rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70 shadow-[0_0_0_0.4rem_rgba(118,82,212,0.12),0_0_2rem_rgba(118,82,212,0.5)]" />}
+        {!reduceMotion && <motion.span aria-hidden="true" style={{ left: revealLeft, top: revealTop }} animate={{ opacity: isPortraitHovered ? 1 : 0, scale: isPortraitHovered ? 1 : 0.6 }} transition={{ type: "spring", stiffness: 240, damping: 24 }} className="pointer-events-none absolute z-30 h-[min(25vw,13rem)] w-[min(25vw,13rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/70 shadow-[0_0_0_0.4rem_rgba(118,82,212,0.12),0_0_2rem_rgba(118,82,212,0.5)]" />}
       </motion.div>
 
       <motion.div initial={reduceMotion ? false : { y: 20, opacity: 0 }} animate={{ y: isReady ? 0 : 20, opacity: isReady ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.75, ease: editorialEase, delay: reduceMotion ? 0 : 0.38 }} className="intro-bio absolute bottom-[clamp(9rem,15svh,11rem)] left-[clamp(1.75rem,4.2vw,4rem)] z-30 w-[min(28rem,30vw)] text-white">
         <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.13em] text-white/70">Based in Sri Lanka</p>
         <h2 className="mt-4 whitespace-nowrap text-[clamp(1.65rem,2.35vw,2.85rem)] font-semibold leading-tight tracking-[-0.06em]">Full Stack Developer</h2>
         <p className="mt-3 max-w-[25rem] text-sm leading-relaxed text-white/80">Passionate about clean code, modern web technologies and solving real-world problems.</p>
-        <button type="button" onClick={onEnter} disabled={isTransitioning} className="mt-5 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)] disabled:cursor-wait">{isTransitioning ? "Entering" : "Explore My Work"} <span aria-hidden="true" className="ml-2">→</span></button>
+        <button data-magnetic type="button" onClick={onEnter} disabled={isTransitioning} className="mt-5 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)] disabled:cursor-wait">{isTransitioning ? "Entering" : "Explore My Work"} <span aria-hidden="true" className="ml-2">→</span></button>
         <p className="mt-5 font-[family-name:var(--font-mono)] text-[9px] uppercase tracking-[0.12em] text-white/70">TypeScript · React · Next.js · Motion</p>
       </motion.div>
 

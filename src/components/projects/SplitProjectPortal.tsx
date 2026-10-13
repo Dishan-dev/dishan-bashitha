@@ -1,169 +1,272 @@
 "use client";
 
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { animate, createAnimatable, createScope, spring, stagger } from "animejs";
+import { AnimatePresence } from "framer-motion";
+import { ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, ChevronDown, Code2, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 import { ProjectViewer } from "@/components/projects/ProjectViewer";
+import { SceneLabel } from "@/components/ui/SceneLabel";
+import { ProjectOrbitDeck } from "@/components/projects/ProjectOrbitDeck";
+import { ProjectPortalTransition, PROJECT_PORTAL_REVEAL_DELAY } from "@/components/projects/ProjectPortalTransition";
 import type { Project } from "@/data/projects";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import styles from "./ProjectShowcase.module.css";
 
-type SplitProjectPortalProps = { projects: readonly Project[] };
+const projectColors = ["#a88aef", "#8baae8", "#79bca5", "#d7a576"];
 
-export function SplitProjectPortal({ projects }: SplitProjectPortalProps) {
+export function SplitProjectPortal({ projects }: { projects: readonly Project[] }) {
+  const root = useRef<HTMLElement>(null);
+  const depthStage = useRef<HTMLDivElement>(null);
+  const tilt = useRef<ReturnType<typeof createAnimatable> | null>(null);
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const wheelLock = useRef(0);
+  const direction = useRef(1);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeSkill, setActiveSkill] = useState<string | null>(null);
+  const [showAllSkills, setShowAllSkills] = useState(false);
   const [openProject, setOpenProject] = useState<Project | null>(null);
-  const [isProjectTransitioning, setIsProjectTransitioning] = useState(false);
-  const didDrag = useRef(false);
-  const transitionTimer = useRef<number | null>(null);
-  const [transitionOriginIndex, setTransitionOriginIndex] = useState<number | null>(null);
+  const [portalOrigin, setPortalOrigin] = useState({ x: 50, y: 50 });
   const reduceMotion = useReducedMotion();
-  const previousIndex = (activeIndex - 1 + projects.length) % projects.length;
-  const nextIndex = (activeIndex + 1) % projects.length;
+  const skills = useMemo(() => {
+    const counts = new Map<string, number>();
+    projects.forEach(item => new Set(item.technologies).forEach(skill => counts.set(skill, (counts.get(skill) ?? 0) + 1)));
+    return Array.from(counts, ([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+  }, [projects]);
+  const filteredProjects = useMemo(() => activeSkill ? projects.filter(item => item.technologies.includes(activeSkill)) : projects, [projects, activeSkill]);
+  const project = filteredProjects[activeIndex];
+  const originalIndex = projects.findIndex(item => item.id === project.id);
+  const visibleSkills = showAllSkills ? skills : skills.filter((skill, index) => index < 4 || skill.name === activeSkill);
+  const canNavigate = filteredProjects.length > 1;
+  const displayedTechnologies = activeSkill ? [activeSkill, ...project.technologies.filter(skill => skill !== activeSkill)] : project.technologies;
+
+  const selectSkill = (skill: string | null) => {
+    const nextProjects = skill ? projects.filter(item => item.technologies.includes(skill)) : projects;
+    // Keep the current project if it matches; otherwise spotlight the first result.
+    setActiveIndex(Math.max(0, nextProjects.findIndex(item => item.id === project.id)));
+    setActiveSkill(skill);
+    direction.current = 1;
+    wheelLock.current = 0;
+  };
+
+  const revealPreview = useCallback(() => {
+    if (!window.matchMedia("(max-width: 1023px), (max-height: 600px)").matches) return;
+    root.current?.querySelector("#project-spotlight")?.scrollIntoView({ behavior: reduceMotion ? "instant" : "smooth", block: "start" });
+  }, [reduceMotion]);
 
   const selectProject = useCallback((index: number) => {
-    if (index === activeIndex || isProjectTransitioning) return;
-    setTransitionOriginIndex(activeIndex);
-    setIsProjectTransitioning(true);
+    direction.current = index >= activeIndex ? 1 : -1;
     setActiveIndex(index);
-    if (transitionTimer.current) window.clearTimeout(transitionTimer.current);
-    transitionTimer.current = window.setTimeout(() => {
-      setTransitionOriginIndex(null);
-      setIsProjectTransitioning(false);
-    }, reduceMotion ? 0 : 820);
-  }, [activeIndex, isProjectTransitioning, reduceMotion]);
-  const previousProject = useCallback(() => selectProject(previousIndex), [previousIndex, selectProject]);
-  const nextProject = useCallback(() => selectProject(nextIndex), [nextIndex, selectProject]);
-  const open = useCallback((project: Project) => {
+    revealPreview();
+  }, [activeIndex, revealPreview]);
+
+  const stepProject = useCallback((step: number) => {
+    if (filteredProjects.length < 2) return;
+    direction.current = step;
+    setActiveIndex((index) => (index + step + filteredProjects.length) % filteredProjects.length);
+  }, [filteredProjects.length]);
+
+  const open = () => {
+    const bounds = depthStage.current?.getBoundingClientRect();
+    if (bounds) setPortalOrigin({
+      x: Math.max(0, Math.min(100, (bounds.left + bounds.width / 2) / window.innerWidth * 100)),
+      y: Math.max(0, Math.min(100, (bounds.top + bounds.height / 2) / window.innerHeight * 100)),
+    });
+    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setOpenProject(project);
     window.history.pushState({ ...window.history.state, projectViewer: project.slug }, "", `#project-${project.slug}`);
-  }, []);
+  };
+
   const close = useCallback(() => {
-    if (window.history.state?.projectViewer === openProject?.slug) window.history.back();
-    else setOpenProject(null);
-  }, [openProject?.slug]);
+    if (openProject && window.history.state?.projectViewer === openProject.slug) window.history.back();
+    else { window.history.replaceState(window.history.state, "", "#projects"); setOpenProject(null); }
+  }, [openProject]);
 
   useEffect(() => {
-    const closeFromHistory = () => setOpenProject(null);
-    window.addEventListener("popstate", closeFromHistory);
-    return () => window.removeEventListener("popstate", closeFromHistory);
-  }, []);
+    const restoreProject = () => {
+      const selected = projects.find(item => `#project-${item.slug}` === window.location.hash);
+      setOpenProject(selected ?? null);
+      if (selected) { setActiveSkill(null); setActiveIndex(projects.indexOf(selected)); }
+    };
+    const frame = requestAnimationFrame(restoreProject);
+    window.addEventListener("popstate", restoreProject);
+    window.addEventListener("hashchange", restoreProject);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("popstate", restoreProject); window.removeEventListener("hashchange", restoreProject); };
+  }, [projects]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (openProject || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-      if (event.key === "ArrowLeft") { event.preventDefault(); previousProject(); }
-      if (event.key === "ArrowRight") { event.preventDefault(); nextProject(); }
+      if (openProject || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable='true'], [inert], [data-project-filters]")) return;
+      if (root.current?.closest("[inert]")) return;
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        stepProject(event.key === "ArrowRight" ? 1 : -1);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextProject, openProject, previousProject]);
+  }, [openProject, stepProject]);
 
-  useEffect(() => () => { if (transitionTimer.current) window.clearTimeout(transitionTimer.current); }, []);
+  useEffect(() => {
+    const element = root.current;
+    if (!element) return;
+    const onWheel = (event: WheelEvent) => {
+      if (event.target instanceof HTMLElement && event.target.closest("[data-project-filters]")) return;
+      if (openProject || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      if (Math.abs(event.deltaX) < 16 || performance.now() < wheelLock.current) return;
+      wheelLock.current = performance.now() + 650;
+      stepProject(event.deltaX > 0 ? 1 : -1);
+    };
+    element.addEventListener("wheel", onWheel, { passive: false });
+    return () => element.removeEventListener("wheel", onWheel);
+  }, [openProject, stepProject]);
+
+  // Scopes clean up animations on unmount, Strict Mode, and interrupted transitions.
+  useLayoutEffect(() => {
+    if (reduceMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const scope = createScope({ root }).add(() => {
+      animate("[data-gallery-enter]", {
+        opacity: [0, 1], y: [24, 0], delay: stagger(65), duration: 800, ease: "out(4)",
+      });
+    });
+    return () => scope.revert();
+  }, [reduceMotion]);
+
+  useLayoutEffect(() => {
+    if (reduceMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const scope = createScope({ root }).add(() => {
+      animate("[data-project-copy]", {
+        opacity: [0, 1], y: [18, 0], delay: stagger(55, { start: 100 }), duration: 620, ease: "out(4)",
+      });
+      animate("[data-project-progress]", { scaleX: [0, 1], duration: 850, ease: "out(4)" });
+    });
+    return () => scope.revert();
+  }, [project.id, reduceMotion]);
+
+  useEffect(() => {
+    const element = depthStage.current;
+    if (!element || reduceMotion) return;
+    const media = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
+    let scope: ReturnType<typeof createScope> | undefined;
+    const configure = () => {
+      tilt.current = null;
+      scope?.revert();
+      scope = undefined;
+      if (!media.matches || openProject) return;
+      scope = createScope({ root }).add(() => {
+        // One smoothed input drives all depth planes; no React renders on mousemove.
+        tilt.current = createAnimatable(element, {
+          "--pointer-x": 480, "--pointer-y": 480, "--lift": 650, ease: "out(3)",
+        });
+      });
+    };
+    configure();
+    media.addEventListener("change", configure);
+    const settle = () => {
+      const ease = spring({ duration: 950, bounce: 0.28 }).ease;
+      tilt.current?.["--pointer-x"](0, 950, ease);
+      tilt.current?.["--pointer-y"](0, 950, ease);
+      tilt.current?.["--lift"](0, 700);
+    };
+    window.addEventListener("blur", settle);
+    return () => {
+      media.removeEventListener("change", configure);
+      window.removeEventListener("blur", settle);
+      tilt.current = null;
+      scope?.revert();
+    };
+  }, [reduceMotion, openProject]);
+
+  const resetTilt = () => {
+    const ease = spring({ duration: 950, bounce: 0.28 }).ease;
+    tilt.current?.["--pointer-x"](0, 950, ease);
+    tilt.current?.["--pointer-y"](0, 950, ease);
+    tilt.current?.["--lift"](0, 700);
+  };
+  const movePreview = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse" || !tilt.current) return;
+    // Measure the stationary frame, never the rotating card (which causes feedback jitter).
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2));
+    const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height - 0.5) * 2));
+    tilt.current["--pointer-x"](x, 480, "out(3)");
+    tilt.current["--pointer-y"](y, 480, "out(3)");
+    tilt.current["--lift"](1, 450, "out(3)");
+  };
 
   return (
-    <LayoutGroup id="project-card-stage">
-      <section
-        aria-label="Selected projects"
-        onWheel={(event) => {
-          if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 24) return;
-          event.preventDefault();
-          if (isProjectTransitioning) return;
-          if (event.deltaX > 0) nextProject(); else previousProject();
-        }}
-        className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
-      >
-        <header className="relative z-20 flex items-start justify-between font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.15em] text-[var(--muted)]">
-          <p>Selected projects</p>
-          <nav aria-label="Choose a project" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 text-[clamp(0.72rem,0.82vw,0.9rem)] lg:flex">
-            {projects.map((project, index) => <button key={project.id} type="button" onClick={() => selectProject(index)} aria-current={index === activeIndex ? "page" : undefined} className={index === activeIndex ? "text-[var(--accent)]" : "transition-colors hover:text-[var(--foreground)]"}>{project.id} {project.shortTitle}</button>)}
-          </nav>
-          <p className="project-carousel-count">{String(activeIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}</p><p className="project-list-count">{String(projects.length).padStart(2, "0")} projects</p>
+    <>
+      <section ref={root} inert={Boolean(openProject)} aria-label="Project showcase" className={styles.showcase} style={{ "--project-color": projectColors[originalIndex % projectColors.length] } as CSSProperties}>
+        <header className={styles.heading}>
+          <div data-gallery-enter>
+            <SceneLabel sceneId="work" />
+            <h1 id="work-title">Selected <span>work.</span><sup>({String(projects.length).padStart(2, "0")})</sup></h1>
+          </div>
+          <p data-gallery-enter className={styles.headingNote}>A few things I&apos;ve built.<br />Thoughtful interfaces. Real-world systems.<ArrowDownRight size={22} aria-hidden="true" /></p>
         </header>
-
-        <p aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[clamp(5rem,16vw,17rem)] font-semibold tracking-[-0.1em] text-[var(--foreground)]/[0.045]">PROJECTS</p>
-
-        <div className="project-carousel relative flex min-h-0 flex-1 items-center justify-center [perspective:1600px] [transform-style:preserve-3d]">
-          {projects.map((project, index) => {
-            const rawPosition = (activeIndex - index + projects.length) % projects.length;
-            const position = rawPosition > projects.length / 2 ? rawPosition - projects.length : rawPosition;
-            const isActive = index === activeIndex;
-            const halfWheelPose = ({
-              "-2": { x: -760, y: 130, scale: 0.68, rotateY: 48, rotateZ: -7, opacity: 0, zIndex: 10 },
-              "-1": { x: -470, y: 62, scale: 0.8, rotateY: 34, rotateZ: -4, opacity: 0.58, zIndex: 40 },
-              "0": { x: 0, y: 0, scale: 1, rotateY: 0, rotateZ: 0, opacity: 1, zIndex: 80 },
-              "1": { x: 470, y: 62, scale: 0.8, rotateY: -34, rotateZ: 4, opacity: 0.58, zIndex: 40 },
-              "2": { x: 760, y: 130, scale: 0.68, rotateY: -48, rotateZ: 7, opacity: 0, zIndex: 10 },
-            }[String(position)] ?? { x: position * 760, y: 130, scale: 0.68, rotateY: position < 0 ? 48 : -48, rotateZ: position < 0 ? -7 : 7, opacity: 0, zIndex: 10 });
-            const originIndex = transitionOriginIndex;
-            const previousRawPosition = originIndex === null ? rawPosition : (originIndex - index + projects.length) % projects.length;
-            const previousPosition = previousRawPosition > projects.length / 2 ? previousRawPosition - projects.length : previousRawPosition;
-            const previousPose = ({
-              "-2": { x: -760, y: 130, scale: 0.68, rotateY: 48, rotateZ: -7, opacity: 0 },
-              "-1": { x: -470, y: 62, scale: 0.8, rotateY: 34, rotateZ: -4, opacity: 0.58 },
-              "0": { x: 0, y: 0, scale: 1, rotateY: 0, rotateZ: 0, opacity: 1 },
-              "1": { x: 470, y: 62, scale: 0.8, rotateY: -34, rotateZ: 4, opacity: 0.58 },
-              "2": { x: 760, y: 130, scale: 0.68, rotateY: -48, rotateZ: 7, opacity: 0 },
-            }[String(previousPosition)] ?? { x: previousPosition * 760, y: 130, scale: 0.68, rotateY: previousPosition < 0 ? 48 : -48, rotateZ: previousPosition < 0 ? -7 : 7, opacity: 0 });
-            const entersFromLeft = previousPosition > 1 && position < 0;
-            const leavesThroughBottom = Math.abs(previousPosition) === 1 && Math.abs(position) > 1;
-            const usesWrapPath = entersFromLeft || leavesThroughBottom;
-            const cardAnimation = entersFromLeft
-              ? { ...halfWheelPose, x: [-760, -600, halfWheelPose.x], y: [260, 150, halfWheelPose.y], rotateY: [48, 42, halfWheelPose.rotateY], rotateZ: [-7, -6, halfWheelPose.rotateZ], opacity: [0, 0.18, halfWheelPose.opacity] }
-              : leavesThroughBottom
-                ? { ...halfWheelPose, x: [previousPose.x, previousPose.x * 1.12, halfWheelPose.x], y: [previousPose.y, 360, halfWheelPose.y], rotateY: [previousPose.rotateY, previousPose.rotateY, halfWheelPose.rotateY], rotateZ: [previousPose.rotateZ, previousPose.rotateZ, halfWheelPose.rotateZ], opacity: [previousPose.opacity, 0.08, 0] }
-                : halfWheelPose;
-
-            return (
-              <motion.article
-                key={project.id}
-                layoutId={`project-preview-${project.id}`}
-                onClick={() => {
-                  if (didDrag.current) { didDrag.current = false; return; }
-                  if (isActive || window.matchMedia("(max-width: 1023px), (max-height: 600px)").matches) open(project); else selectProject(index);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.preventDefault();
-                  if (isActive || window.matchMedia("(max-width: 1023px), (max-height: 600px)").matches) open(project); else selectProject(index);
-                }}
-                tabIndex={0}
-                role="button"
-                aria-current={isActive ? "true" : undefined}
-                aria-label={`Open ${project.title} case study`}
-                drag={isActive && !reduceMotion ? "x" : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.12}
-                onDragStart={() => { didDrag.current = false; }}
-                onDragEnd={(_, info) => { didDrag.current = Math.abs(info.offset.x) > 8; if (info.offset.x < -70) nextProject(); if (info.offset.x > 70) previousProject(); }}
-                initial={false}
-                animate={reduceMotion ? undefined : cardAnimation}
-                transition={reduceMotion ? { duration: 0 } : usesWrapPath ? { duration: 0.82, ease: [0.22, 1, 0.36, 1], times: [0, 0.58, 1] } : { duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                style={{ transformOrigin: "50% 120%", zIndex: halfWheelPose.zIndex }}
-                className={`absolute aspect-[16/10] w-[min(76vw,38rem)] overflow-hidden rounded-[clamp(1.5rem,2.5vw,2.25rem)] bg-[#111226] text-left shadow-[0_2rem_4rem_rgba(36,25,59,0.22)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] md:w-[min(46vw,38rem)] ${isActive ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"} ${Math.abs(position) > 1 ? "pointer-events-none" : ""}`}
-              >
-                <div className="absolute inset-0 bg-[#111226]">
-                  <Image src={project.coverImage} alt="" fill priority={isActive} sizes="(min-width: 768px) 38rem, 76vw" className="object-contain" />
-                </div>
-                <div className={`absolute bottom-4 left-4 max-w-[min(84%,28rem)] rounded-2xl border border-white/10 bg-[#101428]/90 px-4 py-3 text-[var(--inverse-text)] shadow-xl backdrop-blur-md transition-opacity duration-300 sm:bottom-5 sm:left-5 sm:px-5 sm:py-4 ${isActive ? "opacity-100" : "opacity-65"}`}>
-                  <p className="font-[family-name:var(--font-mono)] text-[9px] uppercase tracking-[0.15em] text-[var(--accent-soft)]">{project.marker}</p>
-                  <h1 id={isActive ? "work-title" : undefined} className="mt-2 text-[clamp(1.55rem,2.4vw,2.7rem)] font-semibold leading-[0.9] tracking-[-0.06em]">{project.title}</h1>
-                  <p className="mt-2 max-w-[24rem] text-xs leading-relaxed text-white/70">{project.description}</p>
-                </div>
-                <p className={`absolute right-4 top-4 rounded-full bg-[#101428]/90 px-3 py-2 font-[family-name:var(--font-mono)] text-[9px] uppercase tracking-[0.14em] text-[var(--inverse-text)]/85 shadow-lg backdrop-blur-sm transition-opacity sm:right-5 sm:top-5 ${isActive ? "opacity-100" : "opacity-0"}`}>Open case study ↗</p>
-              </motion.article>
-            );
-          })}
+        <div data-gallery-enter data-project-filters className={styles.filters} role="group" aria-labelledby="project-filter-label">
+          <div className={styles.filterHeading}>
+            <p id="project-filter-label"><SlidersHorizontal size={14} aria-hidden="true" /> Filter by tech skill</p>
+            <p className={styles.filterCount}>{filteredProjects.length} of {projects.length} projects</p>
+          </div>
+          <div id="project-skill-options" className={styles.filterOptions}>
+            <button type="button" onClick={() => selectSkill(null)} aria-pressed={activeSkill === null} aria-controls="project-results" className={styles.filterChip}>All projects<span>{projects.length}</span></button>
+            {visibleSkills.map(skill => <button key={skill.name} type="button" onClick={() => selectSkill(skill.name)} aria-pressed={activeSkill === skill.name} aria-controls="project-results" className={styles.filterChip}>{skill.name}<span>{skill.count}</span></button>)}
+            {skills.length > 4 && <button type="button" className={styles.moreSkills} onClick={() => setShowAllSkills(value => !value)} aria-expanded={showAllSkills} aria-controls="project-skill-options">{showAllSkills ? "Fewer skills" : "All skills"}<ChevronDown size={14} aria-hidden="true" /></button>}
+            <select className={styles.skillSelect} aria-label="Filter by any technology" value={activeSkill ?? ""} onChange={event => selectSkill(event.target.value || null)}>
+              <option value="">All technologies</option>
+              {skills.map(skill => <option key={skill.name} value={skill.name}>{skill.name} ({skill.count})</option>)}
+            </select>
+          </div>
         </div>
-        <motion.button type="button" onClick={(event) => { event.stopPropagation(); previousProject(); }} aria-label={`Show ${projects[previousIndex].title}`} whileHover={reduceMotion ? undefined : { x: -4, scale: 1.04 }} whileTap={{ scale: 0.96 }} className="absolute left-5 top-[25%] z-[300] grid size-11 place-items-center rounded-full border border-[var(--border)] bg-[var(--background)]/95 text-[var(--foreground)] shadow-lg backdrop-blur-md transition-opacity hover:border-[var(--accent)] sm:left-8 sm:size-12">
-          <ArrowLeft aria-hidden="true" size={19} strokeWidth={1.7} />
-        </motion.button>
-        <motion.button type="button" onClick={(event) => { event.stopPropagation(); nextProject(); }} aria-label={`Show ${projects[nextIndex].title}`} whileHover={reduceMotion ? undefined : { x: 4, scale: 1.04 }} whileTap={{ scale: 0.96 }} className="absolute right-5 top-[25%] z-[300] grid size-11 place-items-center rounded-full border border-[var(--border)] bg-[var(--background)]/95 text-[var(--foreground)] shadow-lg backdrop-blur-md transition-opacity hover:border-[var(--accent)] sm:right-8 sm:size-12">
-          <ArrowRight aria-hidden="true" size={19} strokeWidth={1.7} />
-        </motion.button>
+        <div id="project-results" className={styles.gallery}>
 
+          <div id="project-spotlight" className={styles.spotlight}>
+            <div ref={depthStage} data-scroll-camera className={styles.previewFrame} onPointerMove={movePreview} onPointerLeave={resetTilt} onPointerCancel={resetTilt} onBlur={resetTilt}>
+              <div className={styles.previewTopline}><span><i /> Project spotlight</span><span>{project.year} <ArrowUpRight size={13} aria-hidden="true" /></span></div>
+              <div className={styles.previewPerspective}>
+                <ProjectOrbitDeck projects={filteredProjects} activeIndex={activeIndex} direction={direction} onSelect={selectProject} onStep={stepProject} onOpen={open} />
+              </div>
+              <div className={styles.previewBottomline}><span className={styles.depthHint}>Move your mouse to explore</span><span className={styles.touchHint}>{project.marker}</span><div className={styles.navigation}><span className={styles.navigationHint}>{canNavigate ? "Swipe or use arrow keys" : "One matching project"}</span><button type="button" disabled={!canNavigate} onClick={() => { stepProject(-1); }} aria-label="Previous project"><ArrowLeft size={18} aria-hidden="true" /></button><span className={styles.counter}>{String(activeIndex + 1).padStart(2, "0")}<span> / {String(filteredProjects.length).padStart(2, "0")}</span></span><button type="button" disabled={!canNavigate} onClick={() => { stepProject(1); }} aria-label="Next project"><ArrowRight size={18} aria-hidden="true" /></button></div></div>
+            </div>
+            <div className={styles.projectDetails}>
+              <div className={styles.projectDescription}>
+                <div data-project-copy className={styles.titleRow}><h2>{project.title}</h2><span>{project.year}</span></div>
+                <p data-project-copy>{project.description}</p>
+                {project.technologies.length > 0 && <ul data-project-copy className={styles.technologies} aria-label="Key technologies">{displayedTechnologies.slice(0, 4).map(technology => <li key={technology} data-selected={technology === activeSkill}>{technology}</li>)}{project.technologies.length > 4 && <li>+{project.technologies.length - 4} more</li>}</ul>}
+              </div>
+              <div data-project-copy className={styles.projectActions}>
+                <button type="button" onClick={open} className={styles.caseStudy}>View case study<ArrowUpRight size={18} aria-hidden="true" /></button>
+                {project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noreferrer" className={styles.sourceLink}><Code2 size={15} aria-hidden="true" /> Source code <span className="sr-only">(opens in a new tab)</span></a>}
+              </div>
+            </div>
+          </div>
+          <aside className={styles.index}>
+            <div data-gallery-enter className={styles.indexLabel}><span>Project index</span><span>{projects[projects.length - 1].year} — {projects[0].year}</span></div>
+            <nav aria-label="Choose a project" className={styles.projectList}>
+              {filteredProjects.map((item, index) => (
+                <button data-gallery-enter key={item.id} type="button" onClick={() => selectProject(index)} aria-pressed={index === activeIndex} aria-controls="project-spotlight" className={styles.projectItem}>
+                  <span className={styles.itemNumber}>{item.id}</span>
+                  <span className={styles.thumbnail}><Image src={item.coverImage} alt="" fill sizes="72px" className={styles.thumbnailImage} /></span>
+                  <span className={styles.itemText}><strong>{item.shortTitle}</strong><span>{item.marker}</span></span>
+                  <ArrowUpRight size={18} aria-hidden="true" className={styles.itemArrow} />
+                  {index === activeIndex && <span data-project-progress className={styles.itemProgress} />}
+                </button>
+              ))}
+            </nav>
+          </aside>
+        </div>
+        <footer data-gallery-enter className={styles.footer}>
+          <p><span className={styles.footerDot} /> Built with curiosity. Crafted with care.</p>
+
+        </footer>
+        <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{filteredProjects.length} {activeSkill ? `${activeSkill} ` : ""}{filteredProjects.length === 1 ? "project" : "projects"}. Showing {activeIndex + 1} of {filteredProjects.length}: {project.title}.</p>
       </section>
-      <AnimatePresence>{openProject && <ProjectViewer project={openProject} onClose={close} />}</AnimatePresence>
-    </LayoutGroup>
+      <AnimatePresence onExitComplete={() => returnFocus.current?.focus()}>{openProject && <ProjectViewer key={openProject.id} project={openProject} onClose={close} entranceDelay={PROJECT_PORTAL_REVEAL_DELAY} />}</AnimatePresence>
+      {openProject && <ProjectPortalTransition origin={portalOrigin} />}
+    </>
   );
 }

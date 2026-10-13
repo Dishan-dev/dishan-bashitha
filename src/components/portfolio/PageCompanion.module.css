@@ -1,0 +1,71 @@
+.track {
+  --companion-size: 44px;
+  --frame-gap: clamp(.45rem, 1.2vw, 1.1rem);
+  --hang-start: 80px;
+  position: absolute;
+  z-index: 60;
+  top: calc(var(--frame-gap) + var(--hang-start));
+  right: calc(var(--frame-gap) + 24px);
+  bottom: calc(var(--frame-gap) + 128px);
+  width: var(--companion-size);
+  pointer-events: none;
+  user-select: none;
+}
+
+.position {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: var(--companion-size);
+  height: 52px;
+}
+
+.rig { position: absolute; top: 0; right: 0; width: 100%; }
+.anchor { position: absolute; left: 29px; top: calc(0px - var(--hang-start) - 3px); width: 7px; height: 7px; border: 1px solid var(--muted); border-radius: 50%; background: var(--background); }
+.cord { position: absolute; left: 32px; top: calc(0px - var(--hang-start)); bottom: -3px; width: 1px; background: color-mix(in srgb, var(--muted) 30%, transparent); }
+.character { display: block; position: relative; width: 40px; height: 50px; margin-inline: 2px; transform-origin: 30px 3px; }
+.robot { display: block; width: 100%; height: 100%; overflow: visible; }
+.trigger { display: block; position: relative; width: 44px; height: 52px; padding: 0; border: 0; border-radius: 14px; background: transparent; cursor: pointer; pointer-events: auto; }
+.hint { position: absolute; right: calc(100% + 8px); bottom: 8px; display: flex; align-items: center; gap: 8px; padding: 6px 9px; border-radius: 20px; border: 1px solid var(--border); background: var(--background); color: var(--muted); font: 10px var(--font-mono), monospace; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity .2s; }
+.trigger:hover .hint, .trigger:focus-visible .hint, .trigger[aria-expanded="true"] .hint { opacity: 1; visibility: visible; }
+.menu { position: absolute; right: calc(100% + 12px); width: min(270px, calc(100vw - 76px)); max-height: min(370px, calc(50dvh - 16px)); overflow-y: auto; overscroll-behavior: contain; padding: 12px; border: 1px solid var(--border); border-radius: 20px; background: var(--background); color: var(--foreground); box-shadow: 0 16px 60px #0003; pointer-events: auto; }
+.menuHeading { display: flex; justify-content: space-between; align-items: center; padding: 8px 8px 14px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
+.menuHeading span { font: 9px var(--font-mono), monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.menuHeading p { margin-top: 5px; font-size: 17px; letter-spacing: -.03em; }
+.menuHeading button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; }
+.menu a { display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 10px; border-radius: 10px; font-size: 13px; }
+.menu a > span { font: 10px var(--font-mono), monospace; color: var(--muted); }
+.menu a > svg { margin-left: auto; }
+.menu a:hover, .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+
+.eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 8s ease-in-out infinite;
+}
+
+.wave { transform-origin: 18px 48px; animation: wave 1.4s .25s ease-in-out 1; }
+
+@keyframes blink {
+  0%, 43%, 47%, 100% { transform: scaleY(1); }
+  45% { transform: scaleY(0.1); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0); }
+  25%, 65% { transform: rotate(-16deg); }
+  45%, 85% { transform: rotate(5deg); }
+}
+
+@media (max-width: 1023px), (max-height: 600px) {
+  .track {
+    --hang-start: 80px;
+    top: calc(var(--hang-start) + env(safe-area-inset-top));
+    right: max(2px, env(safe-area-inset-right));
+    bottom: calc(128px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track *, .track *::before, .track *::after { animation: none !important; }
+}

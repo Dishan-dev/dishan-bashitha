@@ -1,7 +1,12 @@
 "use client";
 
 import { Scene } from "@/components/portfolio/Scene";
+import { SceneLabel } from "@/components/ui/SceneLabel";
 import { motion } from "framer-motion";
+import { useId, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BriefcaseBusiness, GraduationCap, Users } from "lucide-react";
+import { portfolioMotion } from "@/lib/motion";
+import styles from "./ExperienceScene.module.css";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const experienceGroups = [
@@ -108,50 +113,80 @@ const timelines = [
   },
 ];
 
+const categoryIcons = [BriefcaseBusiness, Users, GraduationCap];
+
 export function ExperienceScene() {
   const reduceMotion = useReducedMotion();
-  return (
-    <Scene id="experience" eyebrow="" className="experience-scene">
-      <div className="experience-content">
-        <header className="experience-heading">
-          <p className="experience-eyebrow">Experience / 05</p>
-          <h1 id="experience-title">My journey.</h1>
-          <p className="experience-intro">Building software, leading teams, and always learning.</p>
-        </header>
+  const instance = useId();
+  const detail = useRef<HTMLDivElement>(null);
+  const [categoryIndex, setCategoryIndex] = useState(0);
+  const [entryIndex, setEntryIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const timeline = timelines[categoryIndex];
+  const entry = timeline.entries[entryIndex];
+  const Icon = categoryIcons[categoryIndex];
+  const year = entry.period.match(/\d{4}/)?.[0];
+  const selectCategory = (index: number) => {
+    setDirection(index >= categoryIndex ? 1 : -1);
+    setCategoryIndex(index);
+    setEntryIndex(0);
+  };
+  const selectEntry = (index: number) => {
+    setDirection(index >= entryIndex ? 1 : -1);
+    setEntryIndex(index);
+    if (window.matchMedia("(max-width: 1023px), (max-height: 600px)").matches) {
+      detail.current?.scrollIntoView({ behavior: reduceMotion ? "instant" : "smooth", block: "start" });
+    }
+  };
 
-        <div className="experience-overview" role="region" aria-label="Experience timelines" tabIndex={0}>
-          {timelines.map((timeline) => (
-            <section key={timeline.id} aria-labelledby={`experience-${timeline.id}`} className="experience-group">
-              <h2 id={`experience-${timeline.id}`} className="experience-group-title">
-                {timeline.label}
-                <span>{String(timeline.entries.length).padStart(2, "0")}</span>
-              </h2>
-              <ol className="experience-timeline">
-                {timeline.entries.map((experience, index) => (
-                  <motion.li key={experience.organization} className="experience-entry"
-                    initial={reduceMotion ? false : { opacity: 0, x: -14 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: reduceMotion ? 0 : 0.55, delay: reduceMotion ? 0 : index * 0.09, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <span aria-hidden="true" className="experience-marker" />
-                    <article>
-                      <div className="experience-meta">
-                        <p className="experience-period">{experience.period}</p>
-                        {timeline.id !== "education" && <span className="experience-category">{experience.category}</span>}
-                      </div>
-                      <h3>{experience.role}</h3>
-                      <p className="experience-organization">{experience.organization}</p>
-                      {timeline.id === "education" && <p className="experience-description">{experience.description}</p>}
-                      {experience.category === "Professional" && <p className="experience-focus">{experience.focus}</p>}
-                    </article>
-                  </motion.li>
-                ))}
-              </ol>
-            </section>
-          ))}
+  return <Scene id="experience" eyebrow="" className={`experience-scene ${styles.scene}`}>
+    <div className={styles.content}>
+      <header className={styles.heading}>
+        <div>
+          <SceneLabel sceneId="experience" />
+          <h1 id="experience-title">A journey in <span>motion.</span></h1>
+        </div>
+        <p className={styles.intro}>Building software. Leading teams.{" "}<br />Always learning.</p>
+      </header>
+      <div className={styles.body}>
+        <aside className={styles.index}>
+          <nav aria-label="Experience categories" className={styles.categories}>
+            {timelines.map((item, index) => <button key={item.id} type="button" aria-pressed={categoryIndex === index} aria-controls={`${instance}-entries`} onClick={() => selectCategory(index)}>
+              {item.label}<span>{String(item.entries.length).padStart(2, "0")}</span>
+              {categoryIndex === index && <motion.i aria-hidden="true" layoutId={`${instance}-category`} transition={{ duration: reduceMotion ? 0 : 0.35, ease: portfolioMotion.ease }} />}
+            </button>)}
+          </nav>
+          <ol id={`${instance}-entries`} className={styles.entries} aria-label={`${timeline.label} timeline`}>
+            {timeline.entries.map((item, index) => <li key={item.organization}>
+              <button type="button" aria-pressed={entryIndex === index} aria-controls={`${instance}-detail`} onClick={() => selectEntry(index)} className={styles.entry}>
+                <span className={styles.node} aria-hidden="true"><span /></span>
+                <span className={styles.entryText}><span className={styles.period}>{item.period}</span><strong>{item.organization}</strong></span>
+                <ArrowUpRight aria-hidden="true" size={17} className={styles.entryArrow} />
+                {entryIndex === index && <motion.span aria-hidden="true" className={styles.activeEntry} layoutId={`${instance}-entry`} transition={{ duration: reduceMotion ? 0 : 0.4, ease: portfolioMotion.ease }} />}
+              </button>
+            </li>)}
+          </ol>
+          <div className={styles.indexFooter}>
+            <span>{String(entryIndex + 1).padStart(2, "0")}<i> / {String(timeline.entries.length).padStart(2, "0")}</i></span>
+            <div><button type="button" aria-label="Previous experience" disabled={entryIndex === 0} onClick={() => selectEntry(entryIndex - 1)}><ArrowLeft size={17} /></button><button type="button" aria-label="Next experience" disabled={entryIndex === timeline.entries.length - 1} onClick={() => selectEntry(entryIndex + 1)}><ArrowRight size={17} /></button></div>
+          </div>
+        </aside>
+        <div ref={detail} id={`${instance}-detail`} className={styles.detail} aria-labelledby={`${instance}-role`}>
+          <span aria-hidden="true" className={styles.year}>{year ?? String(entryIndex + 1).padStart(2, "0")}</span>
+          <span aria-hidden="true" className={styles.orbit} />
+          <motion.article key={`${timeline.id}-${entryIndex}`} className={styles.article}
+            initial={reduceMotion ? false : { opacity: 0, x: direction * 22 }} animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.55, ease: portfolioMotion.ease }}>
+            <div className={styles.meta}><span className={styles.icon}><Icon size={22} strokeWidth={1.4} /></span><span>{entry.category}</span><span className={styles.detailPeriod}>{entry.period}</span></div>
+            <h2 id={`${instance}-role`}>{entry.role}</h2>
+            <p className={styles.organization}>{entry.organization}</p>
+            {timeline.id !== "leadership" && <p className={styles.description}>{entry.description}</p>}
+            <div className={styles.focus}><span>Areas of focus</span><ul>{entry.focus.split(" / ").map(tool => <li key={tool}>{tool}</li>)}</ul></div>
+          </motion.article>
+          <div aria-hidden="true" className={styles.detailRule}><span /><i>CHAPTER {String(categoryIndex + 1).padStart(2, "0")} / {timeline.label.toUpperCase()}</i></div>
         </div>
       </div>
-    </Scene>
-  );
+      <p className="sr-only" role="status" aria-live="polite">{timeline.label}. {entryIndex + 1} of {timeline.entries.length}: {entry.role}, {entry.organization}.</p>
+    </div>
+  </Scene>;
 }

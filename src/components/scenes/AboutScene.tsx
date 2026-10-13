@@ -4,9 +4,11 @@ import { motion, useSpring } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import Image from "next/image";
 import { profile } from "@/data/profile";
+import { portfolioMotion } from "@/lib/motion";
 import { Scene } from "@/components/portfolio/Scene";
+import { SceneLabel } from "@/components/ui/SceneLabel";
 
-const editorialEase = [0.22, 1, 0.36, 1] as const;
+const editorialEase = portfolioMotion.ease;
 
 export function AboutScene() {
   const reduceMotion = useReducedMotion();
@@ -15,7 +17,7 @@ export function AboutScene() {
   const resetTilt = () => { rotateX.set(0); rotateY.set(0); };
 
   return (
-    <Scene id="about" eyebrow="" className="relative isolate overflow-hidden p-0">
+    <Scene id="about" eyebrow="" className="about-scene relative isolate p-0">
       <div aria-hidden="true" className="absolute left-[11%] top-[18%] h-[min(31vw,28rem)] w-[min(31vw,28rem)] rounded-full bg-[var(--accent-soft)]" />
       <div aria-hidden="true" className="absolute bottom-[9%] right-[8%] h-[min(18vw,15rem)] w-[min(18vw,15rem)] rounded-full border border-[var(--accent)]/15" />
 
@@ -39,21 +41,19 @@ export function AboutScene() {
         <div aria-hidden="true" className="portrait-orbit absolute inset-x-[16%] bottom-[18%] top-[25%] rounded-full border border-[var(--accent)]/30">
           <span className="absolute left-1/2 top-0 h-2 w-2 -translate-y-1/2 rounded-full bg-[var(--accent)] shadow-[0_0_16px_var(--accent)]" />
         </div>
-        <div className="portrait-float absolute inset-0 z-10">
+        <div data-scroll-depth="24" className="absolute inset-0 z-10">
           <Image src="/images/myphoto.png" alt="Dishan Bashitha" width={6000} height={3375} sizes="(min-width: 768px) 60rem, 100vw" quality={100} className="absolute bottom-[-2%] left-1/2 h-[118%] w-auto max-w-none -translate-x-1/2" priority />
         </div>
         <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between font-[family-name:var(--font-mono)] text-[9px] uppercase tracking-[0.14em] text-[var(--muted)]"><span>Dishan Bashitha</span><span>Full-stack</span></div>
       </motion.aside>
 
-      <motion.main
+      <motion.div
         initial={reduceMotion ? false : { y: 42, clipPath: "inset(0 0 100% 0)" }}
         animate={{ y: 0, clipPath: "inset(0 0 0% 0)" }}
         transition={{ duration: reduceMotion ? 0 : 0.9, ease: editorialEase, delay: reduceMotion ? 0 : 0.18 }}
-        className="absolute left-[clamp(2rem,6vw,4rem)] right-[clamp(2rem,6vw,4rem)] top-1/2 z-20 -translate-y-1/2 md:left-[clamp(2rem,48vw,57rem)] md:right-[clamp(2rem,12vw,14rem)]"
+        className="about-copy absolute left-[clamp(2rem,6vw,4rem)] right-[clamp(2rem,6vw,4rem)] top-1/2 z-20 -translate-y-1/2 md:left-[clamp(2rem,48vw,57rem)] md:right-[clamp(2rem,12vw,14rem)]"
       >
-        <div className="mb-7 flex items-center gap-3 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.16em] text-[var(--muted)]">
-          <span className="text-[var(--foreground)]">(01)</span><span>About</span><span className="h-px w-8 bg-[var(--border)]" /><span>{profile.location}</span>
-        </div>
+        <SceneLabel sceneId="about" className="mb-7" />
         <h1 id="about-title" className="max-w-[12ch] text-[clamp(3.1rem,5vw,6.2rem)] font-semibold leading-[0.91] tracking-[-0.075em] text-[var(--foreground)]">
           Curious by default. <span className="text-[var(--accent)]">Intentional by choice.</span>
         </h1>
@@ -62,16 +62,16 @@ export function AboutScene() {
           <p>I work with Java, Spring Boot, React, Next.js, Node.js, and PostgreSQL to build maintainable products, from REST APIs and authentication to real-time systems and cloud deployment.</p>
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a href={profile.resume} download="DISHAN_BASHITHA.pdf" className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)] transition-colors hover:bg-[var(--accent)]">Download résumé ↗</a>
+          <a data-magnetic href={profile.resume} download="DISHAN_BASHITHA.pdf" className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)] transition-colors hover:bg-[var(--accent)]">Download résumé ↗</a>
           <a href={`mailto:${profile.email}`} className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-medium text-[var(--foreground)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]">Get in touch</a>
         </div>
-      </motion.main>
+      </motion.div>
 
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduceMotion ? 0 : 0.65, ease: editorialEase, delay: reduceMotion ? 0 : 0.58 }}
-        className="absolute bottom-[clamp(4.8rem,10svh,7.5rem)] left-[clamp(2rem,6vw,4rem)] right-[clamp(2rem,6vw,4rem)] z-20 flex flex-wrap gap-x-8 gap-y-2 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.14em] text-[var(--muted)] md:left-[clamp(2rem,14vw,15rem)] md:right-[clamp(2rem,12vw,14rem)]"
+        className="about-footer absolute bottom-[clamp(4.8rem,10svh,7.5rem)] left-[clamp(2rem,6vw,4rem)] right-[clamp(2rem,6vw,4rem)] z-20 flex flex-wrap gap-x-8 gap-y-2 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.14em] text-[var(--muted)] md:left-[clamp(2rem,14vw,15rem)] md:right-[clamp(2rem,12vw,14rem)]"
       >
         <span>Software Engineer</span><span>Full Stack Development</span><span>AI / Product / Creative Technology</span>
       </motion.div>

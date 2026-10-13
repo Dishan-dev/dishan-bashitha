@@ -1,0 +1,12 @@
+.stage { position: relative; height: 100%; isolation: isolate; overflow: hidden; background: var(--canvas); }
+.frame { position: absolute; inset: 0; padding: clamp(.45rem, 1.2vw, 1.1rem); perspective: 1800px; }
+.surface { position: relative; height: 100%; width: 100%; overflow: hidden; border-radius: clamp(1.25rem, 2.1vw, 2rem); border: 1px solid var(--border); background: var(--background); box-shadow: 0 1.5rem 4rem #20163038; }
+.ornament { position: absolute; width: 0; height: 0; z-index: 3; pointer-events: none; opacity: 0; perspective: 900px; color: var(--accent); }
+.ring { position: absolute; left: -80px; top: -80px; width: 160px; height: 160px; fill: none; stroke: currentColor; stroke-width: 1; }
+.ring:nth-child(2) { stroke-dasharray: 3 7; }
+.line { position: absolute; width: 2px; left: -1px; top: -50vh; background: linear-gradient(transparent, var(--accent) 22%, var(--accent) 78%, transparent); box-shadow: 0 0 16px var(--accent); }
+.star { position: absolute; left: -38px; top: -38px; width: 76px; height: 76px; fill: none; stroke: currentColor; stroke-width: .75; }
+@media (max-width: 1023px), (max-height: 600px) {
+  .frame { padding: 0; }
+  .surface { border: 0; border-radius: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: contain; }
+}

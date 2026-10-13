@@ -288,3 +288,168 @@ a, button { transition: color 240ms var(--ease-editorial), border-color 240ms va
   .project-viewer .case-study-content h2 { font-size: clamp(2rem, 8vw, 3rem); }
   .project-viewer footer { margin-top: auto; }
 }
+/* Cinematic scenes retain document space instead of shrinking into the frame. */
+.section-dock { position: fixed; right: 44px; bottom: 28px; z-index: 40; display: flex; align-items: center; gap: 10px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 30px; background: var(--background); box-shadow: 0 6px 24px #100b1b14; overflow: hidden; }
+.section-dock > span { display: flex; align-items: center; gap: 12px; font-size: 12px; min-width: 94px; justify-content: center; }
+.section-dock-number { font: 10px var(--font-mono), monospace; color: var(--accent); }
+.section-dock button { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
+.section-dock button:hover { background: var(--surface); }
+.section-dock button:disabled { opacity: .25; cursor: default; }
+.section-dock-progress { position: absolute; inset: auto 0 0; height: 2px; background: var(--accent); transform-origin: left; }
+.skills-content { max-width: 1320px; width: 100%; margin-inline: auto; }
+.skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 72px; margin-top: 64px; }
+.skills-grid .skill-group { position: relative; border-top: 1px solid var(--border); padding: 28px 0 36px; perspective: 900px; }
+.skills-grid .skill-group h2 { font-size: 12px; }
+.skills-grid .skill-group p { margin-top: 16px; font-size: clamp(17px, 1.4vw, 22px); line-height: 1.65; }
+.experience-timeline { position: relative; }
+.experience-track { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: var(--border); list-style: none; }
+.experience-track > span { display: block; width: 100%; height: 100%; background: var(--accent); }
+.experience-entry { border-left-color: transparent; }
+.contact-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, .65fr); align-items: center; gap: clamp(48px, 8vw, 120px); padding-block: 64px; margin-block: auto; }
+@media (min-width: 1024px) and (min-height: 601px) {
+  .portfolio-header { top: 18px; inset-inline: 18px; min-height: 88px; padding: 18px clamp(28px, 3.4vw, 60px); background: color-mix(in srgb, var(--background) 94%, transparent); border-radius: 24px 24px 0 0; backdrop-filter: blur(12px); }
+  #skills.skills-scene, #experience.experience-scene { overflow-y: auto; padding-top: 150px; padding-bottom: 120px; scrollbar-width: thin; }
+  #experience .experience-content { height: auto; max-width: 1320px; margin-inline: auto; }
+  #experience .experience-heading { margin-bottom: 64px; }
+  #experience .experience-overview { overflow: visible; gap: 48px; padding: 0; }
+  #experience .experience-entry { padding-bottom: 40px; }
+  #experience .experience-entry:last-child { padding-bottom: 0; }
+  #experience .experience-group-title { font-size: 18px; padding-bottom: 22px; }
+  #experience .experience-entry h3 { font-size: 20px; line-height: 1.4; }
+  #experience .experience-description { font-size: 14px; line-height: 1.8; }
+  #contact.contact-scene { overflow-y: auto; padding: 0; scrollbar-width: thin; }
+  #contact > div:last-child { height: auto; min-height: 100%; padding-top: 140px; padding-bottom: 100px; }
+  #contact .contact-grid > div:last-child > div { padding-block: 20px; }
+  #contact .contact-grid a { font-size: 16px; }
+  #about.about-scene { display: grid; grid-template-columns: minmax(250px, .75fr) minmax(0, 1.25fr); align-content: center; align-items: center; column-gap: clamp(48px, 7vw, 100px); overflow-y: auto; padding: 145px max(6vw, 40px) 100px; }
+  #about > aside { position: relative; inset: auto; translate: none; width: 100%; min-width: 0; height: clamp(360px, 45vh, 550px); max-width: 440px; justify-self: center; }
+  #about .about-copy { position: relative; inset: auto; translate: none; }
+  #about .about-copy h1 { font-size: clamp(44px, 4.5vw, 72px); line-height: 1.05; }
+  #about .about-copy p { line-height: 1.8; }
+  #about .about-footer { position: relative; inset: auto; grid-column: 1 / -1; margin-top: 56px; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .skills-grid .skill-group { transition: border-color 250ms, transform 400ms var(--ease-editorial); }
+  .skills-grid .skill-group:hover { transform: translateY(-4px) rotateX(2deg); }
+}
+@media (max-width: 1023px), (max-height: 600px) {
+  .section-dock { display: none; }
+  #about .about-copy { position: relative; inset: auto; translate: none; }
+  #about .about-footer { position: relative; inset: auto; margin-top: 40px; }
+  .skills-grid { grid-template-columns: 1fr; margin-top: 40px; }
+  .skills-grid .skill-group { padding: 24px 0; }
+  .contact-grid { grid-template-columns: 1fr; padding-block: 24px; gap: 40px; }
+  #contact .contact-grid { margin-block: 0; }
+}
+@media (prefers-reduced-motion: reduce) { [data-magnetic] { transform: none !important; } }
+/* Desktop pages fit the frame rather than becoming long documents. */
+.experience-tabs { display: none; }
+@media (min-width: 1024px) and (min-height: 601px) {
+  .portfolio-header { min-height: 76px; padding-block: 14px; }
+  #skills.skills-scene, #experience.experience-scene { height: 100%; overflow: clip; padding-top: clamp(112px, 13vh, 150px); padding-bottom: 78px; }
+  .skills-content { display: grid; grid-template-columns: minmax(230px, .7fr) minmax(0, 1.6fr); gap: clamp(32px, 5vw, 80px); align-items: center; height: 100%; min-height: 0; }
+  #skills > div[aria-hidden="true"] { height: min(46vw, 60vh); width: min(46vw, 60vh); }
+  #skills-title { font-size: clamp(40px, 5vw, 72px); line-height: .98; }
+  #skills .skills-grid { margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 3vw, 48px); align-content: center; }
+  .skills-grid .skill-group { padding: clamp(12px, 2vh, 24px) 0; }
+  .skills-grid .skill-group h2 { font-size: 10px; }
+  .skills-grid .skill-group p { font-size: clamp(14px, 1.6vh, 18px); line-height: 1.6; margin-top: 10px; }
+  #experience .experience-content { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: clamp(16px, 2.5vh, 28px); }
+  #experience .experience-heading { margin: 0; }
+  #experience .experience-heading h1 { font-size: clamp(40px, 5.5vh, 64px); }
+  #experience .experience-intro { font-size: 13px; margin-top: 10px; }
+  .experience-tabs { display: flex; gap: 10px; }
+  .experience-tabs button { display: flex; align-items: center; gap: 20px; min-height: 40px; border-radius: 24px; padding: 8px 18px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; }
+  .experience-tabs button span { font: 10px var(--font-mono), monospace; color: var(--muted); }
+  .experience-tabs button[aria-pressed="true"] { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+  .experience-tabs button[aria-pressed="true"] span { color: inherit; opacity: .7; }
+  #experience .experience-overview { display: block; height: 100%; overflow: visible; }
+  #experience .experience-group { display: none; height: 100%; }
+  #experience .experience-group[data-active="true"] { display: flex; flex-direction: column; }
+  #experience .experience-group-title { display: none; }
+  #experience .experience-timeline { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2.5vw, 36px); height: 100%; margin: 0; }
+  #experience .experience-track, #experience .experience-marker { display: none; }
+  #experience .experience-entry { padding: clamp(18px, 2.5vw, 32px); border: 1px solid var(--border); border-radius: 16px; background: var(--surface); align-self: stretch; display: flex; align-items: center; }
+  #experience .experience-entry:last-child { padding-bottom: clamp(18px, 2.5vw, 32px); }
+  #experience .experience-entry h3 { font-size: clamp(17px, 2.3vh, 25px); line-height: 1.35; margin-top: 18px; }
+  #experience .experience-organization { font-size: 10px; line-height: 1.7; margin-top: 16px; }
+  #experience .experience-description, #experience .experience-focus { font-size: clamp(12px, 1.5vh, 15px); line-height: 1.7; margin-top: 18px; }
+  #about.about-scene { height: 100%; overflow: clip; padding-top: 114px; padding-bottom: 72px; column-gap: 6vw; }
+  #about > aside { height: min(48vh, 500px); }
+  #about .about-copy h1 { font-size: clamp(38px, 4.1vw, 64px); }
+  #about .about-copy > div:first-child { margin-bottom: 20px; }
+  #about .about-copy > div:nth-child(3) { margin-top: 20px; }
+  #about .about-copy > div:last-child { margin-top: 22px; }
+  #about .about-copy p { font-size: clamp(13px, 1.6vh, 16px); line-height: 1.7; }
+  #about .about-footer { margin-top: 28px; }
+  #contact.contact-scene { height: 100%; overflow: clip; }
+  #contact > div:last-child { height: 100%; min-height: 0; padding-top: 112px; padding-bottom: 76px; }
+  #contact .contact-grid { flex: 1; min-height: 0; margin: 0; padding-block: 20px; gap: 6vw; }
+  #contact-title { font-size: clamp(48px, 7.8vh, 94px); line-height: .9; }
+  #contact .contact-grid > div:last-child > div { padding-block: clamp(8px, 1.1vh, 14px); }
+  #contact .contact-grid a { font-size: 14px; }
+  #contact footer { flex-shrink: 0; }
+}
+@media (min-width: 1024px) and (min-height: 601px) and (max-height: 740px) {
+  #skills.skills-scene, #experience.experience-scene { padding-top: 106px; padding-bottom: 64px; }
+  .skills-grid .skill-group { padding-block: 10px; }
+  .skills-grid .skill-group p { font-size: 14px; line-height: 1.5; }
+  #about.about-scene { padding-top: 102px; padding-bottom: 60px; }
+  #about .about-copy h1 { font-size: 38px; }
+  #about .about-copy > div:first-child { margin-bottom: 14px; }
+  #about .about-copy > div:nth-child(3) { margin-top: 14px; }
+  #about .about-copy > div:last-child { margin-top: 16px; }
+  #about .about-copy p { font-size: 13px; line-height: 1.6; }
+  #about .about-footer { margin-top: 18px; font-size: 9px; }
+  #contact > div:last-child { padding-top: 106px; padding-bottom: 64px; }
+  #contact .contact-grid { padding-block: 14px; }
+  #contact .contact-grid > div:first-child > p { margin-top: 18px; font-size: 13px; }
+  #contact .contact-grid > div:last-child > div { padding-block: 6px; }
+  #contact .contact-grid a { font-size: 13px; }
+  #contact footer { font-size: 9px; }
+  #experience .experience-entry h3 { margin-top: 12px; }
+  #experience .experience-organization, #experience .experience-description, #experience .experience-focus { margin-top: 12px; }
+}
+/* Navigation belongs to each page and travels with its composition. */
+.portfolio-header { position: absolute; background: transparent; backdrop-filter: none; border: 0; border-radius: 0; }
+.section-dock { position: absolute; }
+@media (min-width: 1024px) and (min-height: 601px) {
+  .portfolio-header { top: 0; inset-inline: 0; min-height: 76px; padding: 18px clamp(28px, 3.4vw, 60px); }
+  .section-dock { bottom: 12px; right: 26px; }
+
+  /* Leave room for the page label and keep the entire headline above the panel. */
+  #intro .intro-heading {
+    top: max(96px, 16svh);
+    width: min(30rem, 32vw);
+    max-width: none;
+    container-type: inline-size;
+  }
+  #intro .intro-heading > div:first-child { margin-bottom: 16px; }
+  #intro .intro-heading h1 {
+    font-size: min(17cqi, 6.8svh, 5.75rem);
+    line-height: 0.94;
+    letter-spacing: -0.075em;
+  }
+  #intro .intro-heading h1 > span { white-space: nowrap; }
+  #intro .intro-color-panel { top: 50svh; }
+  #intro .intro-bio {
+    top: calc(50svh + clamp(20px, 3svh, 36px));
+    bottom: auto;
+  }
+  #intro .intro-bio h2 {
+    margin-top: clamp(8px, 1.5svh, 16px);
+    font-size: min(2.35vw, 3.4svh, 2.85rem);
+  }
+  #intro .intro-bio > p:nth-of-type(2) {
+    margin-top: clamp(8px, 1.2svh, 12px);
+    font-size: clamp(12px, 1.65svh, 14px);
+  }
+  #intro .intro-bio > button {
+    margin-top: clamp(12px, 1.8svh, 20px);
+    padding-block: clamp(8px, 1.4svh, 12px);
+  }
+  #intro .intro-bio > p:last-child { margin-top: clamp(12px, 1.8svh, 20px); }
+}
+@media (max-width: 1023px), (max-height: 600px) {
+  .portfolio-header { position: absolute; background: transparent; border: 0; }
+}

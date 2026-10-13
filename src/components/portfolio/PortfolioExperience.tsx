@@ -2,11 +2,11 @@
 
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TransitionShape } from "@/components/motion/TransitionShape";
 import { FrameTransition } from "@/components/motion/FrameTransition";
 import { PortfolioLoader } from "@/components/motion/PortfolioLoader";
 import { PortfolioHeader } from "@/components/portfolio/PortfolioHeader";
 import { SceneNavigator } from "@/components/portfolio/SceneNavigator";
+import { PageCompanion } from "@/components/portfolio/PageCompanion";
 import { AboutScene } from "@/components/scenes/AboutScene";
 import { ContactScene } from "@/components/scenes/ContactScene";
 import { ExperienceScene } from "@/components/scenes/ExperienceScene";
@@ -14,7 +14,6 @@ import { IntroScene } from "@/components/scenes/IntroScene";
 import { SkillsScene } from "@/components/scenes/SkillsScene";
 import { WorkScene } from "@/components/scenes/WorkScene";
 import { useSceneNavigation } from "@/hooks/useSceneNavigation";
-import { useSwipe } from "@/hooks/useSwipe";
 
 const sceneComponents = {
   intro: IntroScene,
@@ -30,7 +29,7 @@ function isInteractiveElement(target: EventTarget | null) {
 }
 
 export function PortfolioExperience() {
-  const { activeIndex, activeScene, navigateTo, nextScene, previousScene } = useSceneNavigation();
+  const { activeIndex, activeScene, direction, navigateTo, nextScene, previousScene } = useSceneNavigation();
   const reduceMotion = useReducedMotion();
   const wheelDistance = useRef(0);
   const wheelResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -41,24 +40,11 @@ export function PortfolioExperience() {
   const [isLoaderLeaving, setIsLoaderLeaving] = useState(false);
   const ActiveScene = sceneComponents[activeScene.id];
   const isCompact = () => window.matchMedia("(max-width: 1023px), (max-height: 600px)").matches;
-  const swipeHandlers = useSwipe({
-    onSwipeUp: () => { if (!isCompact()) nextScene(); },
-    onSwipeDown: () => { if (!isCompact()) previousScene(); },
-  });
 
   const enterPortfolio = useCallback(() => {
-    if (isIntroTransitioning) return;
+    if (isIntroTransitioning || !navigateTo(2)) return;
     setIsIntroTransitioning(true);
-    const revealStatement = () => {
-      if (!navigateTo(1)) {
-        setIsIntroTransitioning(false);
-        return;
-      }
-      window.setTimeout(() => setIsIntroTransitioning(false), reduceMotion ? 0 : 780);
-    };
-
-    if (reduceMotion) revealStatement();
-    else enterTimer.current = setTimeout(revealStatement, 620);
+    enterTimer.current = setTimeout(() => setIsIntroTransitioning(false), reduceMotion ? 0 : 1250);
   }, [isIntroTransitioning, navigateTo, reduceMotion]);
 
   useEffect(() => () => {
@@ -66,8 +52,8 @@ export function PortfolioExperience() {
   }, []);
 
   useEffect(() => {
-    const leaveTimer = window.setTimeout(() => setIsLoaderLeaving(true), reduceMotion ? 80 : 1050);
-    const removeTimer = window.setTimeout(() => setShowLoader(false), reduceMotion ? 250 : 1750);
+    const leaveTimer = window.setTimeout(() => setIsLoaderLeaving(true), reduceMotion ? 80 : 450);
+    const removeTimer = window.setTimeout(() => setShowLoader(false), reduceMotion ? 250 : 1150);
     return () => {
       window.clearTimeout(leaveTimer);
       window.clearTimeout(removeTimer);
@@ -90,6 +76,7 @@ export function PortfolioExperience() {
     const handleWheel = (event: WheelEvent) => {
       if (isCompact()) return;
       if (document.body.dataset.projectViewer === "open") return;
+      if (event.target instanceof HTMLElement && event.target.closest("[data-page-guide]")) return;
       // Let longer contact, skills, and experience content scroll before changing scenes.
       let scrollTarget = event.target instanceof HTMLElement ? event.target : null;
       while (scrollTarget && scrollTarget !== document.body) {
@@ -116,7 +103,10 @@ export function PortfolioExperience() {
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      if (wheelResetTimer.current) clearTimeout(wheelResetTimer.current);
+    };
   }, [activeScene.id, nextScene, previousScene]);
 
   useEffect(() => {
@@ -139,16 +129,16 @@ export function PortfolioExperience() {
   }, [activeScene.id, nextScene, previousScene]);
 
   return (
-    <main {...swipeHandlers} className="portfolio-shell isolate h-[100svh] touch-none overflow-hidden" aria-roledescription="scene-based portfolio">
+    <main className="portfolio-shell isolate h-[100svh] touch-pan-y overflow-hidden" aria-roledescription="scene-based portfolio">
       {showLoader && <PortfolioLoader isLeaving={isLoaderLeaving} />}
-      {activeScene.id !== "contact" && <TransitionShape isExpanding={isIntroTransitioning} />}
-      {!isProjectViewerOpen && <PortfolioHeader activeIndex={activeIndex} onNavigate={navigateTo} />}
       <div className="relative h-full">
-        <FrameTransition frameKey={activeScene.id}>
+        <FrameTransition frameKey={activeScene.id} direction={direction}>
+          {!isProjectViewerOpen && <PortfolioHeader activeIndex={activeIndex} onNavigate={navigateTo} />}
           {activeScene.id === "intro" ? <IntroScene isReady={isLoaderLeaving || !showLoader} onEnter={enterPortfolio} isTransitioning={isIntroTransitioning} onNavigate={navigateTo} /> : <ActiveScene />}
+          {!isProjectViewerOpen && <SceneNavigator activeIndex={activeIndex} onNavigate={navigateTo} />}
         </FrameTransition>
+        <PageCompanion activeIndex={activeIndex} direction={direction} hidden={showLoader || isProjectViewerOpen} onNavigate={navigateTo} />
       </div>
-      {!isProjectViewerOpen && <SceneNavigator activeIndex={activeIndex} onNavigate={navigateTo} />}
     </main>
   );
 }

@@ -18,7 +18,7 @@ const navItems = [
 
 export function PortfolioHeader({ activeIndex, onNavigate }: PortfolioHeaderProps) {
   return (
-    <header className={`portfolio-header fixed inset-x-[clamp(1.5rem,4.2vw,4rem)] top-[clamp(1.35rem,3vw,2.8rem)] z-50 flex items-center justify-between transition-colors duration-200 text-[var(--foreground)]`}>
+    <header className={`portfolio-header absolute inset-x-[clamp(1.5rem,4.2vw,4rem)] top-[clamp(1.35rem,3vw,2.8rem)] z-50 flex items-center justify-between transition-colors duration-200 text-[var(--foreground)]`}>
       <button type="button" onClick={() => onNavigate(0)} className="text-left text-[clamp(0.9rem,1.2vw,1.25rem)] font-semibold uppercase leading-none tracking-[-0.04em]">
         Dishan Bashitha
         <span className="mt-1 flex items-center gap-1.5 font-[family-name:var(--font-mono)] text-[10px] font-normal normal-case tracking-normal text-[var(--accent)]"><i className="h-2 w-2 rounded-full bg-[var(--accent)]" />Software Engineer</span>
