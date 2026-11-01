@@ -9,14 +9,14 @@ import type { CSSProperties, PointerEvent } from "react";
 import { ProjectViewer } from "@/components/projects/ProjectViewer";
 import { SceneLabel } from "@/components/ui/SceneLabel";
 import { ProjectOrbitDeck } from "@/components/projects/ProjectOrbitDeck";
-import { ProjectPortalTransition, PROJECT_PORTAL_REVEAL_DELAY } from "@/components/projects/ProjectPortalTransition";
+import { ProjectPortalTransition, PROJECT_PORTAL_REVEAL_DELAY, type PortalBounds } from "@/components/projects/ProjectPortalTransition";
 import type { Project } from "@/data/projects";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import styles from "./ProjectShowcase.module.css";
 
 const projectColors = ["#a88aef", "#8baae8", "#79bca5", "#d7a576"];
 
-export function SplitProjectPortal({ projects }: { projects: readonly Project[] }) {
+export function SplitProjectPortal({ projects, progress = 1 }: { projects: readonly Project[]; progress?: number }) {
   const root = useRef<HTMLElement>(null);
   const depthStage = useRef<HTMLDivElement>(null);
   const tilt = useRef<ReturnType<typeof createAnimatable> | null>(null);
@@ -27,7 +27,7 @@ export function SplitProjectPortal({ projects }: { projects: readonly Project[] 
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
   const [showAllSkills, setShowAllSkills] = useState(false);
   const [openProject, setOpenProject] = useState<Project | null>(null);
-  const [portalOrigin, setPortalOrigin] = useState({ x: 50, y: 50 });
+  const [portalOrigin, setPortalOrigin] = useState<PortalBounds | null>(null);
   const reduceMotion = useReducedMotion();
   const skills = useMemo(() => {
     const counts = new Map<string, number>();
@@ -68,11 +68,11 @@ export function SplitProjectPortal({ projects }: { projects: readonly Project[] 
   }, [filteredProjects.length]);
 
   const open = () => {
-    const bounds = depthStage.current?.getBoundingClientRect();
-    if (bounds) setPortalOrigin({
-      x: Math.max(0, Math.min(100, (bounds.left + bounds.width / 2) / window.innerWidth * 100)),
-      y: Math.max(0, Math.min(100, (bounds.top + bounds.height / 2) / window.innerHeight * 100)),
-    });
+    const anchor = depthStage.current?.querySelector<HTMLElement>(`[data-project-anchor="${project.id}"]`);
+    const bounds = (anchor ?? depthStage.current)?.getBoundingClientRect();
+    setPortalOrigin(bounds ? {
+      left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height,
+    } : null);
     returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setOpenProject(project);
     window.history.pushState({ ...window.history.state, projectViewer: project.slug }, "", `#project-${project.slug}`);
@@ -228,7 +228,7 @@ export function SplitProjectPortal({ projects }: { projects: readonly Project[] 
             <div ref={depthStage} data-scroll-camera className={styles.previewFrame} onPointerMove={movePreview} onPointerLeave={resetTilt} onPointerCancel={resetTilt} onBlur={resetTilt}>
               <div className={styles.previewTopline}><span><i /> Project spotlight</span><span>{project.year} <ArrowUpRight size={13} aria-hidden="true" /></span></div>
               <div className={styles.previewPerspective}>
-                <ProjectOrbitDeck projects={filteredProjects} activeIndex={activeIndex} direction={direction} onSelect={selectProject} onStep={stepProject} onOpen={open} />
+                <ProjectOrbitDeck projects={filteredProjects} activeIndex={activeIndex} direction={direction} progress={progress} onSelect={selectProject} onStep={stepProject} onOpen={open} />
               </div>
               <div className={styles.previewBottomline}><span className={styles.depthHint}>Move your mouse to explore</span><span className={styles.touchHint}>{project.marker}</span><div className={styles.navigation}><span className={styles.navigationHint}>{canNavigate ? "Swipe or use arrow keys" : "One matching project"}</span><button type="button" disabled={!canNavigate} onClick={() => { stepProject(-1); }} aria-label="Previous project"><ArrowLeft size={18} aria-hidden="true" /></button><span className={styles.counter}>{String(activeIndex + 1).padStart(2, "0")}<span> / {String(filteredProjects.length).padStart(2, "0")}</span></span><button type="button" disabled={!canNavigate} onClick={() => { stepProject(1); }} aria-label="Next project"><ArrowRight size={18} aria-hidden="true" /></button></div></div>
             </div>
@@ -266,7 +266,7 @@ export function SplitProjectPortal({ projects }: { projects: readonly Project[] 
         <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{filteredProjects.length} {activeSkill ? `${activeSkill} ` : ""}{filteredProjects.length === 1 ? "project" : "projects"}. Showing {activeIndex + 1} of {filteredProjects.length}: {project.title}.</p>
       </section>
       <AnimatePresence onExitComplete={() => returnFocus.current?.focus()}>{openProject && <ProjectViewer key={openProject.id} project={openProject} onClose={close} entranceDelay={PROJECT_PORTAL_REVEAL_DELAY} />}</AnimatePresence>
-      {openProject && <ProjectPortalTransition origin={portalOrigin} />}
+      {openProject && portalOrigin && <ProjectPortalTransition key={openProject.id} origin={portalOrigin} image={openProject.coverImage} title={openProject.title} />}
     </>
   );
 }
