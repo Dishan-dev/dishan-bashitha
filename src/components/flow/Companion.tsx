@@ -42,7 +42,7 @@ export function Companion({ active, hidden, onNext }: { active: string; hidden: 
 
   return (
     <div ref={root} className={styles.companion} data-hidden={hidden ? "true" : undefined} data-waving={waving.has(active) ? "true" : undefined}>
-      <p key={`line-${active}`} className={styles.bubble} aria-hidden="true">{lines[active] ?? lines.home}</p>
+      <p key={`line-${active}-${hidden}`} className={styles.bubble} aria-hidden="true">{lines[active] ?? lines.home}</p>
       <button type="button" className={styles.bot} onClick={onNext} aria-label={active === "contact" ? "Back to the top" : "Go to the next section"}>
         <span key={active} className={styles.botHop}>
           <svg viewBox="0 0 80 100" aria-hidden="true">
