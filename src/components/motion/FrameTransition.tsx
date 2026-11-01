@@ -45,9 +45,8 @@ export function FrameTransition({ frameKey, children, direction = 1 }: Props) {
       gsap.set(outgoing, { pointerEvents: "none" });
       const timeline = createSceneConnection({ lower: reverse ? incoming : outgoing, upper: reverse ? outgoing : incoming, ornament, effect, compact });
       timeline.duration(portfolioMotion.scene);
-      timeline.eventCallback(reverse ? "onReverseComplete" : "onComplete", () => setPrevious(null));
-      if (reverse) timeline.reverse(0);
-      else timeline.play(0);
+      timeline.eventCallback("onComplete", () => setPrevious(null));
+      timeline.play(0);
     }, root);
     return () => context.revert();
   }, [current.key, current.direction, previous, reduceMotion]);
