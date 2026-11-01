@@ -41,9 +41,9 @@ export function FrameTransition({ frameKey, children, direction = 1 }: Props) {
 
     const context = gsap.context(() => {
       const compact = window.matchMedia("(max-width: 1023px), (max-height: 600px)").matches;
-      const { reverse, effect } = sceneConnection(previous.key, current.key);
+      const { effect } = sceneConnection(previous.key, current.key);
       gsap.set(outgoing, { pointerEvents: "none" });
-      const timeline = createSceneConnection({ lower: reverse ? incoming : outgoing, upper: reverse ? outgoing : incoming, ornament, effect, compact });
+      const timeline = createSceneConnection({ lower: outgoing, upper: incoming, ornament, effect, compact });
       timeline.duration(portfolioMotion.scene);
       timeline.eventCallback("onComplete", () => setPrevious(null));
       timeline.play(0);
