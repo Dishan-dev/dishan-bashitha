@@ -24,7 +24,7 @@ function subscribe(onChange: () => void) {
   };
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const dark = useSyncExternalStore(subscribe, () => document.documentElement.dataset.theme === "dark", () => false);
   const label = `Switch to ${dark ? "light" : "dark"} mode`;
   return (
@@ -34,7 +34,7 @@ export function ThemeToggle() {
         document.documentElement.dataset.theme = theme;
         try { localStorage.setItem(storageKey, theme); } catch { /* Keep the toggle usable without storage. */ }
       }}
-      className="grid size-11 shrink-0 place-items-center rounded-full border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)]">
+      className={className ?? "grid size-11 shrink-0 place-items-center rounded-full border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)]"}>
       {dark ? <Sun aria-hidden="true" size={19} /> : <Moon aria-hidden="true" size={19} />}
     </button>
   );

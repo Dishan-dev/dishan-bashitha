@@ -93,7 +93,7 @@ a, button { transition: color 240ms var(--ease-editorial), border-color 240ms va
 .case-study-sources a:hover { color: var(--accent); border-color: var(--accent); }
 
 /* Connected timelines share one reading area on shorter desktops. */
-#experience.experience-scene { padding: clamp(112px, 14svh, 144px) var(--space-4) 104px; }
+.portfolio-shell #experience.experience-scene { padding: clamp(112px, 14svh, 144px) var(--space-4) 104px; }
 .experience-content { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .experience-heading { flex-shrink: 0; margin-bottom: 28px; }
 .experience-eyebrow { font-family: var(--font-mono), monospace; color: var(--accent); font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; }
@@ -132,25 +132,13 @@ a, button { transition: color 240ms var(--ease-editorial), border-color 240ms va
   .experience-marker { transition: scale 250ms var(--ease-editorial); }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .skill-group:hover { border-color: var(--accent); }
+  .skill-group:hover .skill-rule { background: var(--accent); }
   .skill-group:hover h2 { translate: 5px 0; }
   .experience-entry:hover .experience-marker { scale: 1.3; }
 }
 
 /* Compact screens use readable document flow inside each section. */
 @media (max-width: 1023px), (max-height: 600px) {
-  .portfolio-shell { height: 100dvh; touch-action: pan-y pinch-zoom; }
-  [data-frame] { padding: 0; isolation: isolate; }
-  [data-frame-surface] {
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    border: 0;
-    border-radius: 0;
-    scrollbar-width: thin;
-    scroll-padding-top: calc(90px + env(safe-area-inset-top));
-    scroll-padding-bottom: calc(80px + env(safe-area-inset-bottom));
-  }
   .portfolio-header {
     inset: 0 0 auto;
     min-height: 76px;
@@ -194,57 +182,57 @@ a, button { transition: color 240ms var(--ease-editorial), border-color 240ms va
   .portfolio-scene p { overflow-wrap: anywhere; }
   .portfolio-shell > div[aria-hidden="true"] { display: none; }
 
-  #intro { display: flex; flex-direction: column; gap: 20px; max-width: 640px; margin-inline: auto; padding-top: calc(100px + env(safe-area-inset-top)); padding-inline: 20px; }
-  #intro .intro-heading, #intro .intro-impact, #intro .intro-bio, #intro .intro-featured {
+  .portfolio-shell #intro { display: flex; flex-direction: column; gap: 20px; max-width: 640px; margin-inline: auto; padding-top: calc(100px + env(safe-area-inset-top)); padding-inline: 20px; }
+  .portfolio-shell #intro .intro-heading, .portfolio-shell #intro .intro-impact, .portfolio-shell #intro .intro-bio, .portfolio-shell #intro .intro-featured {
     position: relative; inset: auto; width: 100%; max-width: none;
   }
-  #intro .intro-heading h1 { font-size: clamp(2.9rem, 11.5vw, 4.75rem); line-height: 0.96; letter-spacing: -0.065em; }
-  #intro .mobile-hero-eyebrow { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-  #intro .mobile-hero-eyebrow span { color: var(--accent); font-size: 18px; }
-  #intro .intro-sparkle, #intro .intro-color-panel { display: none; }
-  #intro .intro-impact > p:first-child { font-size: clamp(1.35rem, 5.6vw, 2rem); line-height: 1.2; letter-spacing: -0.04em; }
-  #intro .intro-impact > p:first-child br { display: none; }
-  #intro .intro-impact > p:first-child span { margin-left: 0.22em; }
-  #intro .intro-impact > p:nth-child(2) { max-width: 34rem; margin-top: 12px; font-size: 14px; line-height: 1.65; }
-  #intro .mobile-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-  #intro .mobile-hero-actions button { min-height: 44px; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); }
-  #intro .mobile-hero-actions button:first-child { display: flex; align-items: center; gap: 16px; background: var(--accent-fill); border-color: var(--accent-fill); color: white; }
-  #intro .intro-portrait {
+  .portfolio-shell #intro .intro-heading h1 { font-size: clamp(2.9rem, 11.5vw, 4.75rem); line-height: 0.96; letter-spacing: -0.065em; }
+  .portfolio-shell #intro .mobile-hero-eyebrow { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .portfolio-shell #intro .mobile-hero-eyebrow span { color: var(--accent); font-size: 18px; }
+  .portfolio-shell #intro .intro-sparkle, .portfolio-shell #intro .intro-color-panel { display: none; }
+  .portfolio-shell #intro .intro-impact > p:first-child { font-size: clamp(1.35rem, 5.6vw, 2rem); line-height: 1.2; letter-spacing: -0.04em; }
+  .portfolio-shell #intro .intro-impact > p:first-child br { display: none; }
+  .portfolio-shell #intro .intro-impact > p:first-child span { margin-left: 0.22em; }
+  .portfolio-shell #intro .intro-impact > p:nth-child(2) { max-width: 34rem; margin-top: 12px; font-size: 14px; line-height: 1.65; }
+  .portfolio-shell #intro .mobile-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .portfolio-shell #intro .mobile-hero-actions button { min-height: 44px; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); }
+  .portfolio-shell #intro .mobile-hero-actions button:first-child { display: flex; align-items: center; gap: 16px; background: var(--accent-fill); border-color: var(--accent-fill); color: white; }
+  .portfolio-shell #intro .intro-portrait {
     position: relative; inset: auto; translate: none;
     width: 100%; min-width: 0; height: clamp(250px, 72vw, 340px);
     overflow: hidden; border-radius: 22px; background: radial-gradient(ellipse at 50% 100%, var(--accent-soft) 30%, var(--surface) 100%);
     border: 1px solid var(--border);
     pointer-events: none;
   }
-  #intro .intro-portrait img { object-fit: cover; object-position: center bottom; scale: 1.2; }
-  #intro .intro-bio, #intro .intro-featured { padding: 20px; border-radius: 22px; background: var(--surface); color: var(--foreground); border: 1px solid var(--border); }
-  #intro .intro-bio p, #intro .intro-featured > p, #intro .intro-featured > div p { color: var(--muted); }
-  #intro .intro-featured > div > div { border-color: var(--border); }
-  #intro .intro-bio h2 { white-space: normal; font-size: 1.75rem; }
-  #intro .intro-featured > button { flex-direction: column; }
-  #intro .intro-featured > button > div { width: 100%; height: 140px; }
-  #intro .intro-featured > button > span > span:nth-child(2) { font-size: 14px; }
+  .portfolio-shell #intro .intro-portrait img { object-fit: cover; object-position: center bottom; scale: 1.2; }
+  .portfolio-shell #intro .intro-bio, .portfolio-shell #intro .intro-featured { padding: 20px; border-radius: 22px; background: var(--surface); color: var(--foreground); border: 1px solid var(--border); }
+  .portfolio-shell #intro .intro-bio p, .portfolio-shell #intro .intro-featured > p, .portfolio-shell #intro .intro-featured > div p { color: var(--muted); }
+  .portfolio-shell #intro .intro-featured > div > div { border-color: var(--border); }
+  .portfolio-shell #intro .intro-bio h2 { white-space: normal; font-size: 1.75rem; }
+  .portfolio-shell #intro .intro-featured > button { flex-direction: column; }
+  .portfolio-shell #intro .intro-featured > button > div { width: 100%; height: 140px; }
+  .portfolio-shell #intro .intro-featured > button > span > span:nth-child(2) { font-size: 14px; }
 
-  #about > aside { display: none; }
-  #about > main { position: relative; inset: auto; translate: none; }
-  #about > main > div:first-child { flex-wrap: wrap; font-size: 10px; gap: 10px; }
-  #about > div:last-child { position: relative; inset: auto; margin-top: 40px; gap: 12px; }
-  #skills > div:last-child { gap: 36px; }
-  #skills > div[aria-hidden="true"] { display: none; }
-  #skills > div:last-child > div:last-child { margin-bottom: 0; grid-template-columns: 1fr; }
+  .portfolio-shell #about > aside { display: none; }
+  .portfolio-shell #about > main { position: relative; inset: auto; translate: none; }
+  .portfolio-shell #about > main > div:first-child { flex-wrap: wrap; font-size: 10px; gap: 10px; }
+  .portfolio-shell #about > div:last-child { position: relative; inset: auto; margin-top: 40px; gap: 12px; }
+  .portfolio-shell #skills > div:last-child { gap: 36px; }
+  .portfolio-shell #skills > div[aria-hidden="true"] { display: none; }
+  .portfolio-shell #skills > div:last-child > div:last-child { margin-bottom: 0; grid-template-columns: 1fr; }
 
-  #experience.experience-scene { padding: calc(104px + env(safe-area-inset-top)) 24px calc(100px + env(safe-area-inset-bottom)); }
-  #experience .experience-content { height: auto; }
-  #experience .experience-overview { overflow: visible; grid-template-columns: 1fr; gap: 32px; padding: 0; }
-  #experience .experience-heading { margin-bottom: 32px; }
-  #experience .experience-entry { padding: 0 0 26px 24px; }
-  #experience .experience-entry:last-child { padding-bottom: 0; }
+  .portfolio-shell #experience.experience-scene { padding: calc(104px + env(safe-area-inset-top)) 24px calc(100px + env(safe-area-inset-bottom)); }
+  .portfolio-shell #experience .experience-content { height: auto; }
+  .portfolio-shell #experience .experience-overview { overflow: visible; grid-template-columns: 1fr; gap: 32px; padding: 0; }
+  .portfolio-shell #experience .experience-heading { margin-bottom: 32px; }
+  .portfolio-shell #experience .experience-entry { padding: 0 0 26px 24px; }
+  .portfolio-shell #experience .experience-entry:last-child { padding-bottom: 0; }
 
-  #work { min-height: 0; padding-top: calc(96px + env(safe-area-inset-top)); padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
-  #work > section[aria-label="Selected projects"] { flex: none; overflow: visible; padding-bottom: 0; }
-  #work > section[aria-label="Selected projects"] > header nav, #work > section[aria-label="Selected projects"] > p[aria-hidden="true"] { display: none; }
-  #work .project-carousel-count { display: none; }
-  #work .project-list-count { display: block; }
+  .portfolio-shell #work { min-height: 0; padding-top: calc(96px + env(safe-area-inset-top)); padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .portfolio-shell #work > section[aria-label="Selected projects"] { flex: none; overflow: visible; padding-bottom: 0; }
+  .portfolio-shell #work > section[aria-label="Selected projects"] > header nav, .portfolio-shell #work > section[aria-label="Selected projects"] > p[aria-hidden="true"] { display: none; }
+  .portfolio-shell #work .project-carousel-count { display: none; }
+  .portfolio-shell #work .project-list-count { display: block; }
   .project-carousel { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; margin-top: 16px; perspective: none; transform-style: flat; }
   .project-carousel article {
     display: block; position: relative; width: 100%; aspect-ratio: auto; border-radius: 20px;
@@ -256,20 +244,20 @@ a, button { transition: color 240ms var(--ease-editorial), border-color 240ms va
     position: relative; inset: auto; max-width: none; border: 0; border-radius: 0;
     padding: 16px; opacity: 1;
   }
-  #work .project-carousel article h1 { font-size: 1.75rem; line-height: 1.1; }
+  .portfolio-shell #work .project-carousel article h1 { font-size: 1.75rem; line-height: 1.1; }
   .project-carousel article > div:nth-child(2) p:first-child { color: var(--inverse-accent); font-size: 10px; }
   .project-carousel article > div:nth-child(2) p { font-size: 14px; line-height: 1.6; }
   .project-carousel article > p:last-child { top: 12px; right: 12px; opacity: 1; }
-  #work > section[aria-label="Selected projects"] > button { display: none; }
+  .portfolio-shell #work > section[aria-label="Selected projects"] > button { display: none; }
 
-  #contact > div[aria-hidden="true"] { display: none; }
-  #contact > div:last-child { height: auto; padding: 0; gap: 32px; }
-  #contact > div:last-child > div:first-child { flex-wrap: wrap; font-size: 10px; }
-  #contact > div:last-child > div:nth-child(2) { grid-template-columns: 1fr; margin: 0; gap: 36px; }
-  #contact h1 { max-width: none; }
-  #contact a, #contact button { min-height: 44px; display: inline-flex; align-items: center; }
-  #contact a { overflow-wrap: anywhere; }
-  #contact footer { flex-direction: column; align-items: flex-start; }
+  .portfolio-shell #contact > div[aria-hidden="true"] { display: none; }
+  .portfolio-shell #contact > div:last-child { height: auto; padding: 0; gap: 32px; }
+  .portfolio-shell #contact > div:last-child > div:first-child { flex-wrap: wrap; font-size: 10px; }
+  .portfolio-shell #contact > div:last-child > div:nth-child(2) { grid-template-columns: 1fr; margin: 0; gap: 36px; }
+  .portfolio-shell #contact h1 { max-width: none; }
+  .portfolio-shell #contact a, .portfolio-shell #contact button { min-height: 44px; display: inline-flex; align-items: center; }
+  .portfolio-shell #contact a { overflow-wrap: anywhere; }
+  .portfolio-shell #contact footer { flex-direction: column; align-items: flex-start; }
 
   .project-viewer { overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y pinch-zoom; }
   .project-viewer > div[aria-hidden="true"] { display: none; }
@@ -298,7 +286,7 @@ a, button { transition: color 240ms var(--ease-editorial), border-color 240ms va
 .section-dock-progress { position: absolute; inset: auto 0 0; height: 2px; background: var(--accent); transform-origin: left; }
 .skills-content { max-width: 1320px; width: 100%; margin-inline: auto; }
 .skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 72px; margin-top: 64px; }
-.skills-grid .skill-group { position: relative; border-top: 1px solid var(--border); padding: 28px 0 36px; perspective: 900px; }
+.skills-grid .skill-group { position: relative; padding: 28px 0 36px; }
 .skills-grid .skill-group h2 { font-size: 12px; }
 .skills-grid .skill-group p { margin-top: 16px; font-size: clamp(17px, 1.4vw, 22px); line-height: 1.65; }
 .experience-timeline { position: relative; }
@@ -308,148 +296,206 @@ a, button { transition: color 240ms var(--ease-editorial), border-color 240ms va
 .contact-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, .65fr); align-items: center; gap: clamp(48px, 8vw, 120px); padding-block: 64px; margin-block: auto; }
 @media (min-width: 1024px) and (min-height: 601px) {
   .portfolio-header { top: 18px; inset-inline: 18px; min-height: 88px; padding: 18px clamp(28px, 3.4vw, 60px); background: color-mix(in srgb, var(--background) 94%, transparent); border-radius: 24px 24px 0 0; backdrop-filter: blur(12px); }
-  #skills.skills-scene, #experience.experience-scene { overflow-y: auto; padding-top: 150px; padding-bottom: 120px; scrollbar-width: thin; }
-  #experience .experience-content { height: auto; max-width: 1320px; margin-inline: auto; }
-  #experience .experience-heading { margin-bottom: 64px; }
-  #experience .experience-overview { overflow: visible; gap: 48px; padding: 0; }
-  #experience .experience-entry { padding-bottom: 40px; }
-  #experience .experience-entry:last-child { padding-bottom: 0; }
-  #experience .experience-group-title { font-size: 18px; padding-bottom: 22px; }
-  #experience .experience-entry h3 { font-size: 20px; line-height: 1.4; }
-  #experience .experience-description { font-size: 14px; line-height: 1.8; }
-  #contact.contact-scene { overflow-y: auto; padding: 0; scrollbar-width: thin; }
-  #contact > div:last-child { height: auto; min-height: 100%; padding-top: 140px; padding-bottom: 100px; }
-  #contact .contact-grid > div:last-child > div { padding-block: 20px; }
-  #contact .contact-grid a { font-size: 16px; }
-  #about.about-scene { display: grid; grid-template-columns: minmax(250px, .75fr) minmax(0, 1.25fr); align-content: center; align-items: center; column-gap: clamp(48px, 7vw, 100px); overflow-y: auto; padding: 145px max(6vw, 40px) 100px; }
-  #about > aside { position: relative; inset: auto; translate: none; width: 100%; min-width: 0; height: clamp(360px, 45vh, 550px); max-width: 440px; justify-self: center; }
-  #about .about-copy { position: relative; inset: auto; translate: none; }
-  #about .about-copy h1 { font-size: clamp(44px, 4.5vw, 72px); line-height: 1.05; }
-  #about .about-copy p { line-height: 1.8; }
-  #about .about-footer { position: relative; inset: auto; grid-column: 1 / -1; margin-top: 56px; }
+  .portfolio-shell #skills.skills-scene, .portfolio-shell #experience.experience-scene { overflow-y: auto; padding-top: 150px; padding-bottom: 120px; scrollbar-width: thin; }
+  .portfolio-shell #experience .experience-content { height: auto; max-width: 1320px; margin-inline: auto; }
+  .portfolio-shell #experience .experience-heading { margin-bottom: 64px; }
+  .portfolio-shell #experience .experience-overview { overflow: visible; gap: 48px; padding: 0; }
+  .portfolio-shell #experience .experience-entry { padding-bottom: 40px; }
+  .portfolio-shell #experience .experience-entry:last-child { padding-bottom: 0; }
+  .portfolio-shell #experience .experience-group-title { font-size: 18px; padding-bottom: 22px; }
+  .portfolio-shell #experience .experience-entry h3 { font-size: 20px; line-height: 1.4; }
+  .portfolio-shell #experience .experience-description { font-size: 14px; line-height: 1.8; }
+  .portfolio-shell #contact.contact-scene { overflow-y: auto; padding: 0; scrollbar-width: thin; }
+  .portfolio-shell #contact > div:last-child { height: auto; min-height: 100%; padding-top: 140px; padding-bottom: 100px; }
+  .portfolio-shell #contact .contact-grid > div:last-child > div { padding-block: 20px; }
+  .portfolio-shell #contact .contact-grid a { font-size: 16px; }
+  .portfolio-shell #about.about-scene { display: grid; grid-template-columns: minmax(250px, .75fr) minmax(0, 1.25fr); align-content: center; align-items: center; column-gap: clamp(48px, 7vw, 100px); overflow-y: auto; padding: 145px max(6vw, 40px) 100px; }
+  .portfolio-shell #about > aside { position: relative; inset: auto; translate: none; width: 100%; min-width: 0; height: clamp(360px, 45vh, 550px); max-width: 440px; justify-self: center; }
+  .portfolio-shell #about .about-copy { position: relative; inset: auto; translate: none; }
+  .portfolio-shell #about .about-copy h1 { font-size: clamp(44px, 4.5vw, 72px); line-height: 1.05; }
+  .portfolio-shell #about .about-copy p { line-height: 1.8; }
+  .portfolio-shell #about .about-footer { position: relative; inset: auto; grid-column: 1 / -1; margin-top: 56px; }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .skills-grid .skill-group { transition: border-color 250ms, transform 400ms var(--ease-editorial); }
-  .skills-grid .skill-group:hover { transform: translateY(-4px) rotateX(2deg); }
+  .skill-rule { transition: background 250ms ease; }
 }
 @media (max-width: 1023px), (max-height: 600px) {
   .section-dock { display: none; }
-  #about .about-copy { position: relative; inset: auto; translate: none; }
-  #about .about-footer { position: relative; inset: auto; margin-top: 40px; }
+  .portfolio-shell #about .about-copy { position: relative; inset: auto; translate: none; }
+  .portfolio-shell #about .about-footer { position: relative; inset: auto; margin-top: 40px; }
   .skills-grid { grid-template-columns: 1fr; margin-top: 40px; }
   .skills-grid .skill-group { padding: 24px 0; }
   .contact-grid { grid-template-columns: 1fr; padding-block: 24px; gap: 40px; }
-  #contact .contact-grid { margin-block: 0; }
+  .portfolio-shell #contact .contact-grid { margin-block: 0; }
 }
-@media (prefers-reduced-motion: reduce) { [data-magnetic] { transform: none !important; } }
+[data-magnetic] { translate: var(--magnet-x, 0px) var(--magnet-y, 0px); }
+@media (prefers-reduced-motion: reduce) { [data-magnetic] { translate: none !important; } }
 /* Desktop pages fit the frame rather than becoming long documents. */
 .experience-tabs { display: none; }
 @media (min-width: 1024px) and (min-height: 601px) {
   .portfolio-header { min-height: 76px; padding-block: 14px; }
-  #skills.skills-scene, #experience.experience-scene { height: 100%; overflow: clip; padding-top: clamp(112px, 13vh, 150px); padding-bottom: 78px; }
+  .portfolio-shell #skills.skills-scene, .portfolio-shell #experience.experience-scene { height: 100%; overflow: clip; padding-top: clamp(112px, 13vh, 150px); padding-bottom: 78px; }
   .skills-content { display: grid; grid-template-columns: minmax(230px, .7fr) minmax(0, 1.6fr); gap: clamp(32px, 5vw, 80px); align-items: center; height: 100%; min-height: 0; }
-  #skills > div[aria-hidden="true"] { height: min(46vw, 60vh); width: min(46vw, 60vh); }
-  #skills-title { font-size: clamp(40px, 5vw, 72px); line-height: .98; }
-  #skills .skills-grid { margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 3vw, 48px); align-content: center; }
+  .portfolio-shell #skills > div[aria-hidden="true"] { height: min(46vw, 60vh); width: min(46vw, 60vh); }
+  .portfolio-shell #skills-title { font-size: clamp(40px, 5vw, 72px); line-height: .98; }
+  .portfolio-shell #skills .skills-grid { margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 3vw, 48px); align-content: center; }
   .skills-grid .skill-group { padding: clamp(12px, 2vh, 24px) 0; }
   .skills-grid .skill-group h2 { font-size: 10px; }
   .skills-grid .skill-group p { font-size: clamp(14px, 1.6vh, 18px); line-height: 1.6; margin-top: 10px; }
-  #experience .experience-content { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: clamp(16px, 2.5vh, 28px); }
-  #experience .experience-heading { margin: 0; }
-  #experience .experience-heading h1 { font-size: clamp(40px, 5.5vh, 64px); }
-  #experience .experience-intro { font-size: 13px; margin-top: 10px; }
+  .portfolio-shell #experience .experience-content { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: clamp(16px, 2.5vh, 28px); }
+  .portfolio-shell #experience .experience-heading { margin: 0; }
+  .portfolio-shell #experience .experience-heading h1 { font-size: clamp(40px, 5.5vh, 64px); }
+  .portfolio-shell #experience .experience-intro { font-size: 13px; margin-top: 10px; }
   .experience-tabs { display: flex; gap: 10px; }
   .experience-tabs button { display: flex; align-items: center; gap: 20px; min-height: 40px; border-radius: 24px; padding: 8px 18px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; }
   .experience-tabs button span { font: 10px var(--font-mono), monospace; color: var(--muted); }
   .experience-tabs button[aria-pressed="true"] { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
   .experience-tabs button[aria-pressed="true"] span { color: inherit; opacity: .7; }
-  #experience .experience-overview { display: block; height: 100%; overflow: visible; }
-  #experience .experience-group { display: none; height: 100%; }
-  #experience .experience-group[data-active="true"] { display: flex; flex-direction: column; }
-  #experience .experience-group-title { display: none; }
-  #experience .experience-timeline { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2.5vw, 36px); height: 100%; margin: 0; }
-  #experience .experience-track, #experience .experience-marker { display: none; }
-  #experience .experience-entry { padding: clamp(18px, 2.5vw, 32px); border: 1px solid var(--border); border-radius: 16px; background: var(--surface); align-self: stretch; display: flex; align-items: center; }
-  #experience .experience-entry:last-child { padding-bottom: clamp(18px, 2.5vw, 32px); }
-  #experience .experience-entry h3 { font-size: clamp(17px, 2.3vh, 25px); line-height: 1.35; margin-top: 18px; }
-  #experience .experience-organization { font-size: 10px; line-height: 1.7; margin-top: 16px; }
-  #experience .experience-description, #experience .experience-focus { font-size: clamp(12px, 1.5vh, 15px); line-height: 1.7; margin-top: 18px; }
-  #about.about-scene { height: 100%; overflow: clip; padding-top: 114px; padding-bottom: 72px; column-gap: 6vw; }
-  #about > aside { height: min(48vh, 500px); }
-  #about .about-copy h1 { font-size: clamp(38px, 4.1vw, 64px); }
-  #about .about-copy > div:first-child { margin-bottom: 20px; }
-  #about .about-copy > div:nth-child(3) { margin-top: 20px; }
-  #about .about-copy > div:last-child { margin-top: 22px; }
-  #about .about-copy p { font-size: clamp(13px, 1.6vh, 16px); line-height: 1.7; }
-  #about .about-footer { margin-top: 28px; }
-  #contact.contact-scene { height: 100%; overflow: clip; }
-  #contact > div:last-child { height: 100%; min-height: 0; padding-top: 112px; padding-bottom: 76px; }
-  #contact .contact-grid { flex: 1; min-height: 0; margin: 0; padding-block: 20px; gap: 6vw; }
-  #contact-title { font-size: clamp(48px, 7.8vh, 94px); line-height: .9; }
-  #contact .contact-grid > div:last-child > div { padding-block: clamp(8px, 1.1vh, 14px); }
-  #contact .contact-grid a { font-size: 14px; }
-  #contact footer { flex-shrink: 0; }
+  .portfolio-shell #experience .experience-overview { display: block; height: 100%; overflow: visible; }
+  .portfolio-shell #experience .experience-group { display: none; height: 100%; }
+  .portfolio-shell #experience .experience-group[data-active="true"] { display: flex; flex-direction: column; }
+  .portfolio-shell #experience .experience-group-title { display: none; }
+  .portfolio-shell #experience .experience-timeline { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2.5vw, 36px); height: 100%; margin: 0; }
+  .portfolio-shell #experience .experience-track, .portfolio-shell #experience .experience-marker { display: none; }
+  .portfolio-shell #experience .experience-entry { padding: clamp(18px, 2.5vw, 32px); border: 1px solid var(--border); border-radius: 16px; background: var(--surface); align-self: stretch; display: flex; align-items: center; }
+  .portfolio-shell #experience .experience-entry:last-child { padding-bottom: clamp(18px, 2.5vw, 32px); }
+  .portfolio-shell #experience .experience-entry h3 { font-size: clamp(17px, 2.3vh, 25px); line-height: 1.35; margin-top: 18px; }
+  .portfolio-shell #experience .experience-organization { font-size: 10px; line-height: 1.7; margin-top: 16px; }
+  .portfolio-shell #experience .experience-description, .portfolio-shell #experience .experience-focus { font-size: clamp(12px, 1.5vh, 15px); line-height: 1.7; margin-top: 18px; }
+  .portfolio-shell #about.about-scene { height: 100%; overflow: clip; padding-top: 114px; padding-bottom: 72px; column-gap: 6vw; }
+  .portfolio-shell #about > aside { height: min(48vh, 500px); }
+  .portfolio-shell #about .about-copy h1 { font-size: clamp(38px, 4.1vw, 64px); }
+  .portfolio-shell #about .about-copy > div:first-child { margin-bottom: 20px; }
+  .portfolio-shell #about .about-copy > .about-text { margin-top: 20px; }
+  .portfolio-shell #about .about-copy > div:last-child { margin-top: 22px; }
+  .portfolio-shell #about .about-copy p { font-size: clamp(13px, 1.6vh, 16px); line-height: 1.7; }
+  .portfolio-shell #about .about-footer { margin-top: 28px; }
+  .portfolio-shell #contact.contact-scene { height: 100%; overflow: clip; }
+  .portfolio-shell #contact > div:last-child { height: 100%; min-height: 0; padding-top: 112px; padding-bottom: 76px; }
+  .portfolio-shell #contact .contact-grid { flex: 1; min-height: 0; margin: 0; padding-block: 20px; gap: 6vw; }
+  .portfolio-shell #contact-title { font-size: clamp(48px, 7.8vh, 94px); line-height: .9; }
+  .portfolio-shell #contact .contact-grid > div:last-child > div { padding-block: clamp(8px, 1.1vh, 14px); }
+  .portfolio-shell #contact .contact-grid a { font-size: 14px; }
+  .portfolio-shell #contact footer { flex-shrink: 0; }
 }
 @media (min-width: 1024px) and (min-height: 601px) and (max-height: 740px) {
-  #skills.skills-scene, #experience.experience-scene { padding-top: 106px; padding-bottom: 64px; }
+  .portfolio-shell #skills.skills-scene, .portfolio-shell #experience.experience-scene { padding-top: 106px; padding-bottom: 64px; }
   .skills-grid .skill-group { padding-block: 10px; }
   .skills-grid .skill-group p { font-size: 14px; line-height: 1.5; }
-  #about.about-scene { padding-top: 102px; padding-bottom: 60px; }
-  #about .about-copy h1 { font-size: 38px; }
-  #about .about-copy > div:first-child { margin-bottom: 14px; }
-  #about .about-copy > div:nth-child(3) { margin-top: 14px; }
-  #about .about-copy > div:last-child { margin-top: 16px; }
-  #about .about-copy p { font-size: 13px; line-height: 1.6; }
-  #about .about-footer { margin-top: 18px; font-size: 9px; }
-  #contact > div:last-child { padding-top: 106px; padding-bottom: 64px; }
-  #contact .contact-grid { padding-block: 14px; }
-  #contact .contact-grid > div:first-child > p { margin-top: 18px; font-size: 13px; }
-  #contact .contact-grid > div:last-child > div { padding-block: 6px; }
-  #contact .contact-grid a { font-size: 13px; }
-  #contact footer { font-size: 9px; }
-  #experience .experience-entry h3 { margin-top: 12px; }
-  #experience .experience-organization, #experience .experience-description, #experience .experience-focus { margin-top: 12px; }
+  .portfolio-shell #about.about-scene { padding-top: 102px; padding-bottom: 60px; }
+  .portfolio-shell #about .about-copy h1 { font-size: 38px; }
+  .portfolio-shell #about .about-copy > div:first-child { margin-bottom: 14px; }
+  .portfolio-shell #about .about-copy > .about-text { margin-top: 14px; }
+  .portfolio-shell #about .about-copy > div:last-child { margin-top: 16px; }
+  .portfolio-shell #about .about-copy p { font-size: 13px; line-height: 1.6; }
+  .portfolio-shell #about .about-footer { margin-top: 18px; font-size: 9px; }
+  .portfolio-shell #contact > div:last-child { padding-top: 106px; padding-bottom: 64px; }
+  .portfolio-shell #contact .contact-grid { padding-block: 14px; }
+  .portfolio-shell #contact .contact-grid > div:first-child > p { margin-top: 18px; font-size: 13px; }
+  .portfolio-shell #contact .contact-grid > div:last-child > div { padding-block: 6px; }
+  .portfolio-shell #contact .contact-grid a { font-size: 13px; }
+  .portfolio-shell #contact footer { font-size: 9px; }
+  .portfolio-shell #experience .experience-entry h3 { margin-top: 12px; }
+  .portfolio-shell #experience .experience-organization, .portfolio-shell #experience .experience-description, .portfolio-shell #experience .experience-focus { margin-top: 12px; }
 }
 /* Navigation belongs to each page and travels with its composition. */
 .portfolio-header { position: absolute; background: transparent; backdrop-filter: none; border: 0; border-radius: 0; }
-.section-dock { position: absolute; }
 @media (min-width: 1024px) and (min-height: 601px) {
   .portfolio-header { top: 0; inset-inline: 0; min-height: 76px; padding: 18px clamp(28px, 3.4vw, 60px); }
   .section-dock { bottom: 12px; right: 26px; }
 
   /* Leave room for the page label and keep the entire headline above the panel. */
-  #intro .intro-heading {
+  .portfolio-shell #intro .intro-heading {
     top: max(96px, 16svh);
     width: min(30rem, 32vw);
     max-width: none;
     container-type: inline-size;
   }
-  #intro .intro-heading > div:first-child { margin-bottom: 16px; }
-  #intro .intro-heading h1 {
+  .portfolio-shell #intro .intro-heading > div:first-child { margin-bottom: 16px; }
+  .portfolio-shell #intro .intro-heading h1 {
     font-size: min(17cqi, 6.8svh, 5.75rem);
     line-height: 0.94;
     letter-spacing: -0.075em;
   }
-  #intro .intro-heading h1 > span { white-space: nowrap; }
-  #intro .intro-color-panel { top: 50svh; }
-  #intro .intro-bio {
+  .portfolio-shell #intro .intro-heading h1 > span { white-space: nowrap; }
+  .portfolio-shell #intro .intro-color-panel { top: 50svh; }
+  .portfolio-shell #intro .intro-bio {
     top: calc(50svh + clamp(20px, 3svh, 36px));
     bottom: auto;
   }
-  #intro .intro-bio h2 {
+  .portfolio-shell #intro .intro-bio h2 {
     margin-top: clamp(8px, 1.5svh, 16px);
     font-size: min(2.35vw, 3.4svh, 2.85rem);
   }
-  #intro .intro-bio > p:nth-of-type(2) {
+  .portfolio-shell #intro .intro-bio > p:nth-of-type(2) {
     margin-top: clamp(8px, 1.2svh, 12px);
     font-size: clamp(12px, 1.65svh, 14px);
   }
-  #intro .intro-bio > button {
+  .portfolio-shell #intro .intro-bio > button {
     margin-top: clamp(12px, 1.8svh, 20px);
     padding-block: clamp(8px, 1.4svh, 12px);
   }
-  #intro .intro-bio > p:last-child { margin-top: clamp(12px, 1.8svh, 20px); }
+  .portfolio-shell #intro .intro-bio > p:last-child { margin-top: clamp(12px, 1.8svh, 20px); }
 }
 @media (max-width: 1023px), (max-height: 600px) {
   .portfolio-header { position: absolute; background: transparent; border: 0; }
+}
+/* Continuous scene track. Desktop frames stick and stack: each one recedes as the next slides over it. */
+:root { --frame-gap: clamp(.45rem, 1.2vw, 1.1rem); }
+html.lenis, html.lenis body { height: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+html.scroll-locked { overflow: hidden; }
+.portfolio-shell { position: relative; overflow-x: clip; }
+.scene-track { position: relative; overflow: clip; }
+.scene-frame { position: relative; height: 100svh; padding: var(--frame-gap); }
+.scene-surface { position: relative; height: 100%; width: 100%; overflow: hidden; border-radius: clamp(1.25rem, 2.1vw, 2rem); border: 1px solid var(--border); background: var(--background); box-shadow: 0 1.5rem 4rem #20163038; transform-origin: 50% 0; }
+.scene-shade { position: absolute; inset: 0; z-index: 70; border-radius: inherit; background: var(--canvas); opacity: 0; pointer-events: none; }
+.section-dock { position: fixed; }
+@media (min-width: 1024px) and (min-height: 601px) {
+  .portfolio-header { position: fixed; top: var(--frame-gap); inset-inline: var(--frame-gap); }
+  .section-dock { right: calc(var(--frame-gap) + 26px); bottom: calc(var(--frame-gap) + 12px); }
+}
+/* Compact screens read as one native document: sections keep their natural height. */
+@media (max-width: 1023px), (max-height: 600px) {
+  html { scroll-padding-top: calc(90px + env(safe-area-inset-top)); scroll-padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .scene-frame { height: auto; padding: 0; }
+  .scene-surface { height: auto; border: 0; border-radius: 0; box-shadow: none; }
+}
+@media (min-width: 1024px) and (min-height: 601px) and (prefers-reduced-motion: no-preference) {
+  .scene-frame { position: sticky; top: 0; }
+  /* Projects holds for one extra viewport while its floating cards compose into the gallery. */
+  .scene-frame[data-scene-frame="work"] { height: 200svh; top: -100svh; }
+  .scene-frame[data-scene-frame="work"] > .scene-surface { position: sticky; top: var(--frame-gap); height: calc(100svh - 2 * var(--frame-gap)); }
+}
+.about-underline { display: block; width: min(13rem, 55%); height: .85rem; margin-top: 14px; overflow: visible; }
+.about-underline path { stroke-dasharray: 1; stroke-dashoffset: 0; }
+@media (min-width: 768px) { .about-frame { clip-path: inset(0 0 0 0 round 1.5rem); } }
+.skill-rule { position: absolute; inset: 0 0 auto; height: 1px; background: var(--border); }
+/* Contact: the journey's motifs converge on the orb; a slow backdrop keeps the final frame alive. */
+.contact-heading-line { display: block; overflow: hidden; padding-bottom: .06em; margin-bottom: -.06em; }
+.contact-heading-line > span { display: block; }
+.contact-heading-line--signed { padding-bottom: .34em; margin-bottom: -.34em; }
+.contact-underline { position: absolute; left: -3%; bottom: -.24em; width: 106%; height: .26em; overflow: visible; }
+.contact-underline path { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.contact-backdrop { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.contact-backdrop > span { position: absolute; border-radius: 50%; }
+.contact-backdrop > span:first-child { width: 72vw; height: 72vw; right: -24vw; top: -34vw; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 15%, transparent), transparent 64%); }
+.contact-backdrop > span:last-child { width: 56vw; height: 56vw; left: 14vw; bottom: -38vw; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 10%, transparent), transparent 62%); }
+.contact-converge { position: absolute; z-index: 0; left: clamp(52%, 57vw, 64%); bottom: clamp(5.5rem, 10svh, 7.5rem); width: clamp(4.5rem, 7vw, 7rem); aspect-ratio: 1; color: var(--accent); pointer-events: none; }
+.contact-converge > * { position: absolute; left: 50%; top: 50%; translate: -50% -50%; }
+.contact-orb { width: 100%; height: 100%; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent); box-shadow: 0 0 0 1rem color-mix(in srgb, var(--accent-fill) 8%, transparent); }
+.contact-converge-orbit { width: 235%; height: 80%; border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); border-radius: 50%; rotate: -14deg; }
+.contact-converge-ring { width: 160%; height: 160%; border: 1px dashed color-mix(in srgb, var(--accent) 38%, transparent); border-radius: 50%; }
+.contact-converge-star { left: -34%; top: -12%; width: 24%; height: 24%; fill: none; stroke: currentColor; stroke-width: 3; }
+.contact-converge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.contact-converge-dot:nth-child(4) { left: -78%; top: 34%; }
+.contact-converge-dot:nth-child(5) { left: 170%; top: 86%; opacity: .6; }
+.contact-converge-dot:nth-child(6) { left: 30%; top: -52%; opacity: .8; }
+@keyframes contact-drift { to { transform: translate3d(-6vw, 6vh, 0) rotate(24deg); } }
+@keyframes contact-breathe { 50% { scale: 1.05; } }
+@media (prefers-reduced-motion: no-preference) {
+  .contact-backdrop > span:first-child { animation: contact-drift 26s ease-in-out infinite alternate; }
+  .contact-backdrop > span:last-child { animation: contact-drift 34s ease-in-out -12s infinite alternate-reverse; }
+  .contact-orb { animation: contact-breathe 5.5s ease-in-out infinite; }
 }

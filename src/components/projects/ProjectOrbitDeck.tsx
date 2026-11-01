@@ -1,6 +1,6 @@
 "use client";
 
-import { animate, createTimeline } from "animejs";
+import { gsap } from "gsap";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { useLayoutEffect, useRef, useSyncExternalStore } from "react";
@@ -43,49 +43,43 @@ export function ProjectOrbitDeck({ projects, activeIndex, direction, onSelect, o
     const elements = root.current?.querySelectorAll<HTMLElement>("[data-orbit-card]");
     if (!elements) return;
     const reduced = reduceMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const animations: Array<ReturnType<typeof animate> | ReturnType<typeof createTimeline>> = [];
     for (const id of lastPositions.current.keys()) {
       if (!projects.some(project => project.id === id)) lastPositions.current.delete(id);
     }
-    elements.forEach((element, index) => {
-      const project = projects[index];
-      const position = getPosition(index, activeIndex, projects.length);
-      const distance = Math.abs(position);
-      const side = Math.sign(position);
-      const previous = lastPositions.current.get(project.id);
-      const pose = {
-        x: `${side * (distance === 1 ? (compact ? 68 : 60) : 95)}%`,
-        y: distance === 0 ? 0 : distance === 1 ? 12 : 30,
-        z: distance === 0 ? 0 : distance === 1 ? (compact ? -150 : -220) : -480,
-        rotateY: side * (distance === 1 ? (compact ? -38 : -58) : -100),
-        rotateZ: side * (distance === 1 ? 2 : 5),
-        scale: distance === 0 ? 1 : distance === 1 ? 0.9 : 0.7,
-        opacity: distance < 2 ? 1 : 0,
-      };
-      if (compact || reduced) Object.assign(pose, { x: "0%", y: 0, z: 0, rotateY: 0, rotateZ: 0, scale: 1, opacity: distance === 0 ? 1 : 0 });
-      const wrapped = previous !== undefined && Math.abs(position - previous) > projects.length / 2;
-      if (wrapped && !reduced && !compact) {
-        // A wrapping card takes the rear route; it never flashes across the front.
-        animations.push(createTimeline()
-          .add(element, { opacity: 0, z: -450, duration: 180, ease: "in(3)" }, 0)
-          .set(element, { ...pose, opacity: 0 }, 180)
-          .add(element, { opacity: pose.opacity, duration: 450, ease: "out(3)" }, 330));
-      } else {
-        animations.push(animate(element, {
-          ...pose,
-          ...(previous === undefined && !reduced && !compact ? {
-            rotateY: [pose.rotateY + direction.current * 55, pose.rotateY],
-            z: [pose.z - 220, pose.z],
-            opacity: [0, pose.opacity],
-          } : {}),
-          duration: reduced ? 0 : compact ? 300 : 1000,
-          ease: "inOut(3)",
-        }));
-      }
-      lastPositions.current.set(project.id, position);
-    });
-    // Cancel keeps the current pose so rapid navigation continues without snapping.
-    return () => animations.forEach(animation => animation.cancel());
+    const context = gsap.context(() => {
+      elements.forEach((element, index) => {
+        const project = projects[index];
+        const position = getPosition(index, activeIndex, projects.length);
+        const distance = Math.abs(position);
+        const side = Math.sign(position);
+        const previous = lastPositions.current.get(project.id);
+        const pose = {
+          xPercent: side * (distance === 1 ? (compact ? 68 : 60) : 95),
+          y: distance === 0 ? 0 : distance === 1 ? 12 : 30,
+          z: distance === 0 ? 0 : distance === 1 ? (compact ? -150 : -220) : -480,
+          rotationY: side * (distance === 1 ? (compact ? -38 : -58) : -100),
+          rotationZ: side * (distance === 1 ? 2 : 5),
+          scale: distance === 0 ? 1 : distance === 1 ? 0.9 : 0.7,
+          opacity: distance < 2 ? 1 : 0,
+        };
+        if (compact || reduced) Object.assign(pose, { xPercent: 0, y: 0, z: 0, rotationY: 0, rotationZ: 0, scale: 1, opacity: distance === 0 ? 1 : 0 });
+        const wrapped = previous !== undefined && Math.abs(position - previous) > projects.length / 2;
+        if (wrapped && !reduced && !compact) {
+          // A wrapping card takes the rear route; it never flashes across the front.
+          gsap.timeline()
+            .to(element, { opacity: 0, z: -450, duration: 0.18, ease: "power3.in" })
+            .set(element, { ...pose, opacity: 0 })
+            .to(element, { opacity: pose.opacity, duration: 0.45, ease: "power3.out" }, 0.33);
+        } else if (previous === undefined && !reduced && !compact) {
+          gsap.fromTo(element, { ...pose, rotationY: pose.rotationY + direction.current * 55, z: pose.z - 220, opacity: 0 }, { ...pose, duration: 1, ease: "power3.inOut" });
+        } else {
+          gsap.to(element, { ...pose, duration: reduced ? 0 : compact ? 0.3 : 1, ease: "power3.inOut" });
+        }
+        lastPositions.current.set(project.id, position);
+      });
+    }, root);
+    // Killing without reverting keeps the current pose, so rapid navigation continues without snapping.
+    return () => context.kill();
   }, [activeIndex, projects, reduceMotion, direction, compact]);
 
   return <div ref={root} className={styles.orbitDeck}>
@@ -107,7 +101,7 @@ export function ProjectOrbitDeck({ projects, activeIndex, direction, onSelect, o
             if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) { swiped.current = true; onStep(dx < 0 ? 1 : -1); }
           }} onTouchCancel={() => { touch.current = null; }}>
           <span aria-hidden="true" className={styles.cardEdge} />
-          <span className={styles.previewImage}><Image src={project.coverImage} alt={`${project.title} project presentation`} fill loading={Math.abs(position) <= 1 ? "eager" : "lazy"} sizes="(min-width: 1440px) 820px, (min-width: 1024px) 60vw, 85vw" /></span>
+          <span className={styles.previewImage} data-project-media={project.slug} data-active-media={active || undefined}><Image src={project.coverImage} alt={`${project.title} project presentation`} fill loading={Math.abs(position) <= 1 ? "eager" : "lazy"} sizes="(min-width: 1440px) 820px, (min-width: 1024px) 60vw, 85vw" /></span>
           <span aria-hidden="true" className={styles.depthSheen} />
           <span className={styles.previewCta}>{active ? "Explore project" : project.shortTitle}<ArrowUpRight size={18} aria-hidden="true" /></span>
         </button>

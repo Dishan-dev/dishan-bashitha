@@ -9,10 +9,11 @@ import { SiJavascript, SiSpringboot, SiTypescript } from "react-icons/si";
 import { useState } from "react";
 import { portfolioMotion } from "@/lib/motion";
 import { Scene } from "@/components/portfolio/Scene";
+import type { Choreography } from "@/hooks/useSceneMotion";
 import { SceneLabel } from "@/components/ui/SceneLabel";
 import { projects } from "@/data/projects";
 
-type IntroSceneProps = { isReady?: boolean; onEnter?: () => void; isTransitioning?: boolean; onNavigate?: (index: number) => void };
+type IntroSceneProps = { isReady?: boolean; onEnter?: () => void; onNavigate?: (index: number) => void };
 const featuredProject = projects[0];
 const navItems = [{ label: "Work", index: 2 }, { label: "Experience", index: 5 }, { label: "Projects", index: 3 }, { label: "About", index: 1 }, { label: "Contact", index: 6 }];
 const capabilities = [
@@ -31,8 +32,22 @@ const technologies = [
 ];
 const editorialEase = portfolioMotion.ease;
 
+/**
+ * As About slides over the cover, its layers part at different depths: the headline lifts
+ * and recedes, the portrait rises a little forward, and the colour panel sinks away.
+ * Motion owns hover and entrance transforms, so scroll moves inner or neighbouring layers.
+ */
+const introChoreography: Choreography = ({ exit }) => {
+  exit(".intro-heading", { yPercent: -22, scale: 0.94, transformOrigin: "0% 0%" });
+  exit(".intro-impact > *", { yPercent: -45, stagger: 0.05 });
+  exit(".intro-portrait img", { yPercent: -5, scale: 1.05, transformOrigin: "50% 100%" });
+  exit(".intro-color-panel", { yPercent: 16, scaleX: 0.95 });
+  exit(".intro-orbits", { scale: 1.16, rotation: 6, yPercent: -6 });
+  exit(".intro-bio > *, .intro-featured > *", { y: -56, stagger: 0.03 });
+};
+
 /** Reference-inspired full-viewport cover; all content belongs to one composed frame. */
-export function IntroScene({ isReady = true, onEnter = () => undefined, isTransitioning = false, onNavigate = () => undefined }: IntroSceneProps) {
+export function IntroScene({ isReady = true, onEnter = () => undefined, onNavigate = () => undefined }: IntroSceneProps) {
   const reduceMotion = useReducedMotion();
   const tiltX = useSpring(0, { stiffness: 90, damping: 20 });
   const tiltY = useSpring(0, { stiffness: 90, damping: 20 });
@@ -59,6 +74,7 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
       id="intro"
       eyebrow=""
       className="relative isolate p-0"
+      choreography={introChoreography}
       onPointerMove={(event) => {
         if (reduceMotion || event.pointerType !== "mouse") return;
         const bounds = event.currentTarget.getBoundingClientRect();
@@ -75,10 +91,10 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
         <nav aria-label="Portfolio sections" className="hidden items-center gap-[clamp(1.25rem,3vw,3.5rem)] md:flex">
           {navItems.map((item) => <button key={item.label} type="button" onClick={() => onNavigate(item.index)} className="text-sm font-medium hover:text-[var(--accent)]">{item.label}</button>)}
         </nav>
-        <button type="button" onClick={onEnter} disabled={isTransitioning} className="rounded-full bg-[var(--accent-fill)] px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03] disabled:cursor-wait">Let&apos;s Connect <span aria-hidden="true" className="ml-2">↗</span></button>
+        <button type="button" onClick={onEnter} className="rounded-full bg-[var(--accent-fill)] px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.03]">Let&apos;s Connect <span aria-hidden="true" className="ml-2">↗</span></button>
       </header>
 
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
+      <div aria-hidden="true" className="intro-orbits pointer-events-none absolute inset-0 -z-20">
         <motion.div
           style={{ x: reduceMotion ? 0 : glowX, y: reduceMotion ? 0 : glowY }}
           transition={{ type: "spring", stiffness: 45, damping: 18, mass: 0.8 }}
@@ -158,7 +174,7 @@ export function IntroScene({ isReady = true, onEnter = () => undefined, isTransi
         <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.13em] text-white/70">Based in Sri Lanka</p>
         <h2 className="mt-4 whitespace-nowrap text-[clamp(1.65rem,2.35vw,2.85rem)] font-semibold leading-tight tracking-[-0.06em]">Full Stack Developer</h2>
         <p className="mt-3 max-w-[25rem] text-sm leading-relaxed text-white/80">Passionate about clean code, modern web technologies and solving real-world problems.</p>
-        <button data-magnetic type="button" onClick={onEnter} disabled={isTransitioning} className="mt-5 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)] disabled:cursor-wait">{isTransitioning ? "Entering" : "Explore My Work"} <span aria-hidden="true" className="ml-2">→</span></button>
+        <button data-magnetic type="button" onClick={onEnter} className="mt-5 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-medium text-[var(--background)]">Explore My Work <span aria-hidden="true" className="ml-2">→</span></button>
         <p className="mt-5 font-[family-name:var(--font-mono)] text-[9px] uppercase tracking-[0.12em] text-white/70">TypeScript · React · Next.js · Motion</p>
       </motion.div>
 
