@@ -2,7 +2,7 @@
   --companion-size: 44px;
   --frame-gap: clamp(.45rem, 1.2vw, 1.1rem);
   --hang-start: 80px;
-  position: absolute;
+  position: fixed;
   z-index: 60;
   top: calc(var(--frame-gap) + var(--hang-start));
   right: calc(var(--frame-gap) + 24px);

@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, BriefcaseBusiness, GraduationCap, 
 import { portfolioMotion } from "@/lib/motion";
 import styles from "./ExperienceScene.module.css";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import type { Choreography } from "@/hooks/useSceneMotion";
 
 const experienceGroups = [
   {
@@ -115,6 +116,22 @@ const timelines = [
 
 const categoryIcons = [BriefcaseBusiness, Users, GraduationCap];
 
+/**
+ * The detail panel arrives tilted and set back in depth, overlapping the timeline, with two
+ * ghost layers fanned out behind it. Everything collapses flat as the frame settles.
+ */
+const experienceChoreography: Choreography = ({ enter, select }) => {
+  enter(".experience-heading-line", { yPercent: 108 }, { start: 0.2, end: 0.7 });
+  enter("[data-experience-intro]", { y: 24, opacity: 0 }, { start: 0.4, end: 0.85 });
+  enter("[data-experience-categories]", { y: 20, opacity: 0 }, { start: 0.3, end: 0.75 });
+  enter("[data-experience-panel]", { rotationY: -16, rotationX: 6, xPercent: -14, z: -180, transformPerspective: 1600, transformOrigin: "0% 50%" }, { start: 0.08, end: 0.96, compact: { y: 40, opacity: 0 } });
+  select("[data-experience-ghost]").forEach((ghost, index) => enter(ghost, {
+    xPercent: -12 - index * 13, yPercent: 4 + index * 5, rotationY: -20 - index * 6, z: -120 - index * 130, opacity: 0.9 - index * 0.25,
+    transformPerspective: 1600, transformOrigin: "0% 50%",
+  }, { start: 0.05, end: 0.92, compact: false }));
+  enter("[data-experience-index] li", { x: -44, z: -90, opacity: 0, stagger: 0.08, transformPerspective: 1200 }, { start: 0.3, end: 0.9, compact: { x: -20, opacity: 0 } });
+};
+
 export function ExperienceScene() {
   const reduceMotion = useReducedMotion();
   const instance = useId();
@@ -139,18 +156,18 @@ export function ExperienceScene() {
     }
   };
 
-  return <Scene id="experience" eyebrow="" className={`experience-scene ${styles.scene}`}>
+  return <Scene id="experience" eyebrow="" className={`experience-scene ${styles.scene}`} choreography={experienceChoreography}>
     <div className={styles.content}>
       <header className={styles.heading}>
         <div>
           <SceneLabel sceneId="experience" />
-          <h1 id="experience-title">A journey in <span>motion.</span></h1>
+          <h1 id="experience-title"><span className={styles.headingMask}><span className="experience-heading-line block">A journey in <span className={styles.accentWord}>motion.</span></span></span></h1>
         </div>
-        <p className={styles.intro}>Building software. Leading teams.{" "}<br />Always learning.</p>
+        <p data-experience-intro className={styles.intro}>Building software. Leading teams.{" "}<br />Always learning.</p>
       </header>
       <div className={styles.body}>
-        <aside className={styles.index}>
-          <nav aria-label="Experience categories" className={styles.categories}>
+        <aside data-experience-index className={styles.index}>
+          <nav data-experience-categories aria-label="Experience categories" className={styles.categories}>
             {timelines.map((item, index) => <button key={item.id} type="button" aria-pressed={categoryIndex === index} aria-controls={`${instance}-entries`} onClick={() => selectCategory(index)}>
               {item.label}<span>{String(item.entries.length).padStart(2, "0")}</span>
               {categoryIndex === index && <motion.i aria-hidden="true" layoutId={`${instance}-category`} transition={{ duration: reduceMotion ? 0 : 0.35, ease: portfolioMotion.ease }} />}
@@ -171,11 +188,13 @@ export function ExperienceScene() {
             <div><button type="button" aria-label="Previous experience" disabled={entryIndex === 0} onClick={() => selectEntry(entryIndex - 1)}><ArrowLeft size={17} /></button><button type="button" aria-label="Next experience" disabled={entryIndex === timeline.entries.length - 1} onClick={() => selectEntry(entryIndex + 1)}><ArrowRight size={17} /></button></div>
           </div>
         </aside>
-        <div ref={detail} id={`${instance}-detail`} className={styles.detail} aria-labelledby={`${instance}-role`}>
+        <div ref={detail} data-experience-panel id={`${instance}-detail`} className={styles.detail} aria-labelledby={`${instance}-role`}>
+          <span aria-hidden="true" data-experience-ghost className={styles.ghost} />
+          <span aria-hidden="true" data-experience-ghost className={styles.ghost} />
           <span aria-hidden="true" className={styles.year}>{year ?? String(entryIndex + 1).padStart(2, "0")}</span>
           <span aria-hidden="true" className={styles.orbit} />
           <motion.article key={`${timeline.id}-${entryIndex}`} className={styles.article}
-            initial={reduceMotion ? false : { opacity: 0, x: direction * 22 }} animate={{ opacity: 1, x: 0 }}
+            initial={reduceMotion ? false : { opacity: 0, x: direction * 22, rotateY: direction * -9 }} animate={{ opacity: 1, x: 0, rotateY: 0 }} style={{ transformPerspective: 1200 }}
             transition={{ duration: reduceMotion ? 0 : 0.55, ease: portfolioMotion.ease }}>
             <div className={styles.meta}><span className={styles.icon}><Icon size={22} strokeWidth={1.4} /></span><span>{entry.category}</span><span className={styles.detailPeriod}>{entry.period}</span></div>
             <h2 id={`${instance}-role`}>{entry.role}</h2>

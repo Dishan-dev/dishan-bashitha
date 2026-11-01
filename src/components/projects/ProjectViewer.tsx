@@ -1,16 +1,18 @@
 "use client";
 
-import { motion, useMotionValue } from "framer-motion";
+import { motion, useMotionValue, usePresence } from "framer-motion";
+import { gsap } from "gsap";
 import Image from "next/image";
 import { ArrowDown, ArrowLeft, ArrowUpRight, Check, Code2, FileText, Layers3, Maximize2, Sparkles, X } from "lucide-react";
-import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Project } from "@/data/projects";
-import { portfolioMotion } from "@/lib/motion";
+import { portfolioMotion, reducedQuery } from "@/lib/motion";
+import { createFlight, flightBox, imageFit, isOnScreen, type FlightBox } from "@/lib/sharedElement";
 import { ThemeToggle } from "@/components/portfolio/ThemeToggle";
 import styles from "./ProjectViewer.module.css";
 
-type ProjectViewerProps = { project: Project; onClose: () => void; entranceDelay?: number };
+type ProjectViewerProps = { project: Project; onClose: () => void };
 const projectAccents: Record<string, { light: string; dark: string }> = {
   learnix: { light: "#6841b9", dark: "#bea4ff" },
   "primecore-bank": { light: "#275ea4", dark: "#8dbbff" },
@@ -18,9 +20,14 @@ const projectAccents: Record<string, { light: string; dark: string }> = {
   planitnow: { light: "#8a491c", dark: "#edbb8f" },
 };
 const chapterIcons = { Overview: Sparkles, Features: Layers3, Engineering: Code2, Source: FileText };
+const boxVars = ({ left, top, width, height, borderRadius }: FlightBox) => ({ left, top, width, height, borderRadius });
+const projectMedia = (slug: string) => document.querySelector<HTMLElement>(`[data-project-media="${slug}"][data-active-media]`);
 
-export function ProjectViewer({ project, onClose, entranceDelay = 0 }: ProjectViewerProps) {
+export function ProjectViewer({ project, onClose }: ProjectViewerProps) {
   const dialog = useRef<HTMLElement>(null);
+  const heroImage = useRef<HTMLDivElement>(null);
+  const opening = useRef<gsap.core.Timeline | null>(null);
+  const [isPresent, safeToRemove] = usePresence();
   const scrollArea = useRef<HTMLDivElement>(null);
   const sections = useRef<(HTMLElement | null)[]>([]);
   const instance = useId();
@@ -37,6 +44,54 @@ export function ProjectViewer({ project, onClose, entranceDelay = 0 }: ProjectVi
     const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 28;
     container.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? "instant" : "smooth" });
   }, [reduceMotion]);
+
+  // The selected card's image expands into the hero; the story is revealed once it lands.
+  useLayoutEffect(() => {
+    const element = dialog.current;
+    const target = heroImage.current;
+    if (!element || !target || reduceMotion || window.matchMedia(reducedQuery).matches) return;
+    const source = projectMedia(project.slug);
+    const shared = isOnScreen(source);
+    const timeline = gsap.timeline({ defaults: { ease: portfolioMotion.gsapEase } });
+    opening.current = timeline;
+    timeline.fromTo(element, { opacity: 0 }, { opacity: 1, duration: shared ? 0.45 : 0.35, ease: "power2.out" }, 0);
+    if (shared) {
+      const flight = createFlight(source, flightBox(source));
+      gsap.set([source, target], { visibility: "hidden" });
+      timeline.to(flight, { ...boxVars(flightBox(target)), duration: portfolioMotion.expand, ease: "expo.inOut" }, 0)
+        .add(() => { gsap.set([source, target], { clearProps: "visibility" }); flight.remove(); });
+    } else {
+      // Direct links and off-screen sources compose the hero in place, with no blank state.
+      timeline.from(target, { clipPath: "inset(12% 9% 12% 9% round 16px)", scale: 1.06, duration: 1.1 }, 0);
+    }
+    const settled = shared ? portfolioMotion.expand - 0.3 : 0.2;
+    timeline.from(element.querySelectorAll("[data-viewer-title] > span"), { yPercent: 104, duration: 1, stagger: 0.08 }, settled);
+    timeline.from(element.querySelectorAll("[data-viewer-reveal]"), { y: 26, opacity: 0, duration: 0.8, stagger: 0.05 }, settled + 0.08);
+    // Interrupted openings (rapid closing, Strict Mode) finish instantly so nothing is left hidden.
+    return () => { timeline.progress(1, false).kill(); opening.current = null; };
+  }, [project.slug, reduceMotion]);
+
+  // Closing reverses the flight into whichever card now represents the project.
+  useEffect(() => {
+    if (isPresent) return;
+    const element = dialog.current;
+    const target = heroImage.current;
+    opening.current?.progress(1, false).kill();
+    const source = projectMedia(project.slug);
+    if (!element || !target || reduceMotion || window.matchMedia(reducedQuery).matches) { safeToRemove(); return; }
+    const timeline = gsap.timeline({ onComplete: safeToRemove });
+    if (isOnScreen(source) && isOnScreen(target)) {
+      const flight = createFlight(target, flightBox(target), imageFit(source));
+      gsap.set([source, target], { visibility: "hidden" });
+      timeline.to(element.querySelectorAll("[data-viewer-reveal], [data-viewer-title]"), { opacity: 0, y: -10, duration: 0.25, ease: "power2.in" }, 0)
+        .to(element, { opacity: 0, duration: 0.45, ease: "power2.inOut" }, 0.12)
+        .to(flight, { ...boxVars(flightBox(source)), duration: portfolioMotion.expand * 0.85, ease: "expo.inOut" }, 0.05)
+        .add(() => { gsap.set(source, { clearProps: "visibility" }); flight.remove(); });
+    } else {
+      timeline.to(element, { opacity: 0, y: 16, duration: 0.32, ease: "power2.in" });
+    }
+    return () => { timeline.progress(1, false).kill(); };
+  }, [isPresent, safeToRemove, project.slug, reduceMotion]);
 
   useEffect(() => {
     const element = dialog.current;
@@ -106,21 +161,18 @@ export function ProjectViewer({ project, onClose, entranceDelay = 0 }: ProjectVi
   }, [chapters.length, readingProgress]);
 
   return (
-    <motion.section ref={dialog} role="dialog" aria-modal="true" aria-labelledby={`${instance}-title`} tabIndex={-1}
-      initial={reduceMotion ? false : { opacity: 0, y: entranceDelay ? 0 : 24 }}
-      animate={{ opacity: 1, y: 0, transition: { delay: reduceMotion ? 0 : entranceDelay, duration: reduceMotion ? 0 : 0.5 } }}
-      exit={{ opacity: 0, y: reduceMotion ? 0 : 18, transition: { duration: reduceMotion ? 0 : 0.3 } }}
+    <section ref={dialog} role="dialog" aria-modal="true" aria-labelledby={`${instance}-title`} tabIndex={-1} data-lenis-prevent
       className={styles.viewer} style={{ "--case-accent-light": accent.light, "--case-accent-dark": accent.dark } as CSSProperties}>
       <header className={styles.topbar}>
         <button type="button" onClick={onClose} className={styles.back}><ArrowLeft size={17} aria-hidden="true" /><span>All projects</span></button>
-        <p>Selected work <span>/</span> {project.id} <span>/</span> {project.shortTitle}</p>
+        <p data-viewer-reveal>Selected work <span>/</span> {project.id} <span>/</span> {project.shortTitle}</p>
         <div className={styles.topActions}><ThemeToggle /><button type="button" onClick={onClose} className={styles.close} aria-label="Close project details"><span>Esc</span><X size={18} aria-hidden="true" /></button></div>
         <motion.span aria-hidden="true" className={styles.progress} style={{ scaleX: readingProgress }} />
       </header>
 
       <aside className={styles.sidebar}>
-        <div className={styles.sideIdentity}><span className={styles.sideNumber}>{project.id}<span> / CASE STUDY</span></span><h2>{project.shortTitle}</h2><p>{project.marker}</p></div>
-        <nav aria-label="Project chapters" className={styles.chapterNav}>
+        <div data-viewer-reveal className={styles.sideIdentity}><span className={styles.sideNumber}>{project.id}<span> / CASE STUDY</span></span><h2>{project.shortTitle}</h2><p>{project.marker}</p></div>
+        <nav data-viewer-reveal aria-label="Project chapters" className={styles.chapterNav}>
           {chapters.map((chapter, index) => {
             const Icon = chapterIcons[chapter as keyof typeof chapterIcons] ?? FileText;
             return <button key={chapter} type="button" onClick={() => goToChapter(index)} aria-current={index === activeChapter ? "location" : undefined} aria-controls={`${instance}-${index}`}>
@@ -128,26 +180,26 @@ export function ProjectViewer({ project, onClose, entranceDelay = 0 }: ProjectVi
             </button>;
           })}
         </nav>
-        <div className={styles.sideFooter}><span className={styles.statusDot} /> From idea to implementation<p>{project.year} · {project.marker}</p></div>
+        <div data-viewer-reveal className={styles.sideFooter}><span className={styles.statusDot} /> From idea to implementation<p>{project.year} · {project.marker}</p></div>
       </aside>
 
       <div ref={scrollArea} className={styles.scrollArea} tabIndex={0} aria-label={`${project.title} case study`}>
         <div className={styles.document}>
           {chapters.map((chapter, index) => <section key={chapter} ref={(element) => { sections.current[index] = element; }} id={`${instance}-${index}`} aria-labelledby={`${instance}-${chapter}-heading`} className={styles.chapter}>
             {chapter === "Overview" && <>
+              <figure className={styles.preview}>
+                <div data-viewer-reveal className={styles.previewBar}><span><i /><i /><i /></span><p>{project.shortTitle} / Project showcase</p><a href={project.coverImage} target="_blank" rel="noopener noreferrer" aria-label={`View ${project.title} full-size image in a new tab`}><Maximize2 size={14} /></a></div>
+                <div ref={heroImage} className={styles.imageFrame}><Image src={project.coverImage} alt={`${project.title} project presentation and interface previews`} fill sizes="(max-width: 760px) 100vw, (max-width: 1200px) 75vw, 1100px" loading="eager" className={styles.coverImage} /></div>
+                <figcaption data-viewer-reveal><span>{project.role}</span><span>{project.year}</span></figcaption>
+              </figure>
               <div className={styles.hero}>
-                <p className={styles.eyebrow}><span /> {project.marker} <span className={styles.heroYear}>{project.year}</span></p>
-                <h1 id={`${instance}-title`}>{project.title}<span>.</span></h1>
-                <div className={styles.heroBottom}><p>{project.description}</p><div className={styles.heroActions}>
+                <p data-viewer-reveal className={styles.eyebrow}><span /> {project.marker} <span className={styles.heroYear}>{project.year}</span></p>
+                <h1 id={`${instance}-title`} data-viewer-title><span>{project.title}<span>.</span></span></h1>
+                <div data-viewer-reveal className={styles.heroBottom}><p>{project.description}</p><div className={styles.heroActions}>
                   {project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">View source<ArrowUpRight size={16} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>}
                   {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">Live site<ArrowUpRight size={16} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>}
                 </div></div>
               </div>
-              <motion.figure className={styles.preview} initial={reduceMotion ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduceMotion ? 0 : 0.7, delay: reduceMotion ? 0 : entranceDelay + 0.15, ease: portfolioMotion.ease }}>
-                <div className={styles.previewBar}><span><i /><i /><i /></span><p>{project.shortTitle} / Project showcase</p><a href={project.coverImage} target="_blank" rel="noopener noreferrer" aria-label={`View ${project.title} full-size image in a new tab`}><Maximize2 size={14} /></a></div>
-                <div className={styles.imageFrame}><Image src={project.coverImage} alt={`${project.title} project presentation and interface previews`} fill sizes="(max-width: 760px) 100vw, (max-width: 1200px) 75vw, 1100px" loading="eager" className={styles.coverImage} /></div>
-                <figcaption><span>{project.role}</span><span>{project.year}</span></figcaption>
-              </motion.figure>
               <div className={styles.overview}>
                 <div><p className={styles.eyebrow}>01 / The idea</p><h2 id={`${instance}-Overview-heading`}>A closer look<span>.</span></h2></div>
                 <div><p className={styles.overviewText}>{project.overview}</p><ul className={styles.capabilities} aria-label="Project capabilities">{project.capabilities.map(item => <li key={item}><Check size={14} aria-hidden="true" />{item}</li>)}</ul></div>
@@ -179,6 +231,6 @@ export function ProjectViewer({ project, onClose, entranceDelay = 0 }: ProjectVi
           <div className={styles.colophon}><span>Dishan Bashitha / Selected work</span><button type="button" onClick={() => goToChapter(0)}>Back to top<ArrowDown size={14} aria-hidden="true" /></button></div>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

@@ -53,7 +53,7 @@ export function PageCompanion({ activeIndex, direction, hidden, onNavigate }: Pa
   return (
     <aside ref={root} data-page-guide aria-label="Robot page guide" hidden={hidden} className={styles.track}
       onBlur={(event) => { if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) setOpenForScene(null); }}>
-      {isOpen && <motion.nav ref={menu} id={menuId} aria-label="Explore portfolio pages" className={styles.menu}
+      {isOpen && <motion.nav ref={menu} id={menuId} data-lenis-prevent aria-label="Explore portfolio pages" className={styles.menu}
         style={progress <= 0.5 ? { top: `${progress * 100}%` } : { bottom: `${(1 - progress) * 100}%` }}
         initial={reduceMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
         <div className={styles.menuHeading}><div><span>Your little guide</span><p>Where to next?</p></div><button type="button" aria-label="Close page guide" onClick={() => { setOpenForScene(null); trigger.current?.focus(); }}><X size={16} /></button></div>

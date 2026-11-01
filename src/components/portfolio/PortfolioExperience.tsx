@@ -1,8 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { FrameTransition } from "@/components/motion/FrameTransition";
+import { useCallback, useEffect, useState } from "react";
 import { PortfolioLoader } from "@/components/motion/PortfolioLoader";
 import { PortfolioHeader } from "@/components/portfolio/PortfolioHeader";
 import { SceneNavigator } from "@/components/portfolio/SceneNavigator";
@@ -13,10 +12,12 @@ import { ExperienceScene } from "@/components/scenes/ExperienceScene";
 import { IntroScene } from "@/components/scenes/IntroScene";
 import { SkillsScene } from "@/components/scenes/SkillsScene";
 import { WorkScene } from "@/components/scenes/WorkScene";
+import { scenes } from "@/data/scenes";
 import { useSceneNavigation } from "@/hooks/useSceneNavigation";
+import { stackedQuery } from "@/lib/motion";
+import { lockScroll, startSmoothScroll, stopSmoothScroll } from "@/lib/portfolioScroll";
 
 const sceneComponents = {
-  intro: IntroScene,
   about: AboutScene,
   work: WorkScene,
   skills: SkillsScene,
@@ -24,32 +25,15 @@ const sceneComponents = {
   contact: ContactScene,
 };
 
-function isInteractiveElement(target: EventTarget | null) {
-  return target instanceof HTMLElement && Boolean(target.closest("input, textarea, select, button, a, [contenteditable='true']"));
-}
-
+/** One continuous document: desktop frames stack as the next scene slides over the last. */
 export function PortfolioExperience() {
-  const { activeIndex, activeScene, direction, navigateTo, nextScene, previousScene } = useSceneNavigation();
+  const { activeIndex, direction, navigateTo } = useSceneNavigation();
   const reduceMotion = useReducedMotion();
-  const wheelDistance = useRef(0);
-  const wheelResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const enterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isIntroTransitioning, setIsIntroTransitioning] = useState(false);
   const [isProjectViewerOpen, setIsProjectViewerOpen] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
   const [isLoaderLeaving, setIsLoaderLeaving] = useState(false);
-  const ActiveScene = sceneComponents[activeScene.id];
-  const isCompact = () => window.matchMedia("(max-width: 1023px), (max-height: 600px)").matches;
 
-  const enterPortfolio = useCallback(() => {
-    if (isIntroTransitioning || !navigateTo(2)) return;
-    setIsIntroTransitioning(true);
-    enterTimer.current = setTimeout(() => setIsIntroTransitioning(false), reduceMotion ? 0 : 1250);
-  }, [isIntroTransitioning, navigateTo, reduceMotion]);
-
-  useEffect(() => () => {
-    if (enterTimer.current) clearTimeout(enterTimer.current);
-  }, []);
+  const enterPortfolio = useCallback(() => { navigateTo(2); }, [navigateTo]);
 
   useEffect(() => {
     const leaveTimer = window.setTimeout(() => setIsLoaderLeaving(true), reduceMotion ? 80 : 450);
@@ -60,6 +44,15 @@ export function PortfolioExperience() {
     };
   }, [reduceMotion]);
 
+  // Smoothing only where the stacked desktop choreography runs; touch keeps native momentum.
+  useEffect(() => {
+    const media = window.matchMedia(stackedQuery);
+    const configure = () => { if (media.matches) startSmoothScroll(); else stopSmoothScroll(); };
+    configure();
+    media.addEventListener("change", configure);
+    return () => { media.removeEventListener("change", configure); stopSmoothScroll(); };
+  }, []);
+
   useEffect(() => {
     const restart = () => { navigateTo(0); };
     window.addEventListener("portfolio:restart", restart);
@@ -67,78 +60,32 @@ export function PortfolioExperience() {
   }, [navigateTo]);
 
   useEffect(() => {
-    const handleProjectViewer = (event: Event) => setIsProjectViewerOpen(Boolean((event as CustomEvent<boolean>).detail));
+    const handleProjectViewer = (event: Event) => {
+      const open = Boolean((event as CustomEvent<boolean>).detail);
+      setIsProjectViewerOpen(open);
+      lockScroll(open);
+    };
     window.addEventListener("portfolio:project-viewer", handleProjectViewer);
     return () => window.removeEventListener("portfolio:project-viewer", handleProjectViewer);
   }, []);
 
-  useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      if (isCompact()) return;
-      if (document.body.dataset.projectViewer === "open") return;
-      if (event.target instanceof HTMLElement && event.target.closest("[data-page-guide]")) return;
-      // Let longer contact, skills, and experience content scroll before changing scenes.
-      let scrollTarget = event.target instanceof HTMLElement ? event.target : null;
-      while (scrollTarget && scrollTarget !== document.body) {
-        const { overflowY } = window.getComputedStyle(scrollTarget);
-        const canScroll = /auto|scroll/.test(overflowY) && scrollTarget.scrollHeight > scrollTarget.clientHeight;
-        if (canScroll && ((event.deltaY > 0 && scrollTarget.scrollTop + scrollTarget.clientHeight < scrollTarget.scrollHeight - 1) || (event.deltaY < 0 && scrollTarget.scrollTop > 0))) {
-          wheelDistance.current = 0;
-          return;
-        }
-        scrollTarget = scrollTarget.parentElement;
-      }
-      if ((activeScene.id === "work" || activeScene.id === "experience") && Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      event.preventDefault();
-      if (!event.deltaY) return;
-
-      wheelDistance.current += event.deltaY;
-      if (wheelResetTimer.current) clearTimeout(wheelResetTimer.current);
-      wheelResetTimer.current = setTimeout(() => { wheelDistance.current = 0; }, 140);
-
-      if (Math.abs(wheelDistance.current) < 65) return;
-      const distance = wheelDistance.current;
-      wheelDistance.current = 0;
-      if (distance > 0) nextScene(); else previousScene();
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      if (wheelResetTimer.current) clearTimeout(wheelResetTimer.current);
-    };
-  }, [activeScene.id, nextScene, previousScene]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (document.body.dataset.projectViewer === "open") return;
-      if (isInteractiveElement(event.target) || isCompact()) return;
-      if ((activeScene.id === "work" || activeScene.id === "experience") && (event.key === "ArrowLeft" || event.key === "ArrowRight")) return;
-      if (event.key === "ArrowDown" || event.key === "ArrowRight") {
-        event.preventDefault();
-        nextScene();
-      }
-      if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
-        event.preventDefault();
-        previousScene();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeScene.id, nextScene, previousScene]);
-
   return (
-    <main className="portfolio-shell isolate h-[100svh] touch-pan-y overflow-hidden" aria-roledescription="scene-based portfolio">
+    <main className="portfolio-shell isolate" aria-roledescription="cinematic portfolio">
       {showLoader && <PortfolioLoader isLeaving={isLoaderLeaving} />}
-      <div className="relative h-full">
-        <FrameTransition frameKey={activeScene.id} direction={direction}>
-          {!isProjectViewerOpen && <PortfolioHeader activeIndex={activeIndex} onNavigate={navigateTo} />}
-          {activeScene.id === "intro" ? <IntroScene isReady={isLoaderLeaving || !showLoader} onEnter={enterPortfolio} isTransitioning={isIntroTransitioning} onNavigate={navigateTo} /> : <ActiveScene />}
-          {!isProjectViewerOpen && <SceneNavigator activeIndex={activeIndex} onNavigate={navigateTo} />}
-        </FrameTransition>
-        <PageCompanion activeIndex={activeIndex} direction={direction} hidden={showLoader || isProjectViewerOpen} onNavigate={navigateTo} />
+      {!isProjectViewerOpen && <PortfolioHeader activeIndex={activeIndex} onNavigate={navigateTo} />}
+      <div data-scene-track className="scene-track">
+        {scenes.map(({ id }) => {
+          const SceneComponent = id === "intro" ? null : sceneComponents[id];
+          return <div key={id} data-scene-frame={id} className="scene-frame">
+            <div data-scene-surface className="scene-surface">
+              {SceneComponent ? <SceneComponent /> : <IntroScene isReady={isLoaderLeaving || !showLoader} onEnter={enterPortfolio} onNavigate={navigateTo} />}
+              <span aria-hidden="true" data-scene-shade className="scene-shade" />
+            </div>
+          </div>;
+        })}
       </div>
+      {!isProjectViewerOpen && <SceneNavigator activeIndex={activeIndex} onNavigate={navigateTo} />}
+      <PageCompanion activeIndex={activeIndex} direction={direction} hidden={showLoader || isProjectViewerOpen} onNavigate={navigateTo} />
     </main>
   );
 }
