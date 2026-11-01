@@ -14,6 +14,7 @@ import { Contact } from "./Contact";
 import { Education } from "./Education";
 import { ExperienceCarousel } from "./ExperienceCarousel";
 import { Hero } from "./Hero";
+import { Loader } from "./Loader";
 import { ProjectDetail } from "./ProjectDetail";
 import { ProjectPanels } from "./ProjectPanels";
 import styles from "./Flow.module.css";
@@ -61,6 +62,7 @@ export function FlowExperience() {
   const shell = useRef<HTMLElement>(null);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const pill = useRef<HTMLDivElement>(null);
   const liquid = useRef<HTMLSpanElement>(null);
   const openProject = projects.find(project => project.slug === openSlug);
@@ -140,7 +142,12 @@ export function FlowExperience() {
   // One Lenis instance on GSAP's ticker; reduced motion keeps native scrolling.
   useEffect(() => {
     const media = window.matchMedia(reducedQuery);
-    const configure = () => { if (media.matches) stopSmoothScroll(); else startSmoothScroll(); ScrollTrigger.refresh(); };
+    const configure = () => {
+      if (media.matches) stopSmoothScroll(); else startSmoothScroll();
+      // The page stays still behind the loader.
+      if (document.documentElement.hasAttribute("data-flow-loading")) lockScroll(true);
+      ScrollTrigger.refresh();
+    };
     ScrollTrigger.config({ ignoreMobileResize: true });
     configure();
     media.addEventListener("change", configure);
@@ -193,6 +200,11 @@ export function FlowExperience() {
     else { window.history.replaceState(window.history.state, "", "#projects"); setOpenSlug(null); }
   }, []);
 
+  const loaded = useCallback(() => {
+    setLoading(false);
+    if (document.body.dataset.projectViewer !== "open") lockScroll(false);
+  }, []);
+
   // "Next project" swaps the case study in place, without flying back to the panel first.
   const showNext = useCallback((slug: string) => {
     switching.current = true;
@@ -218,6 +230,7 @@ export function FlowExperience() {
 
   return (
     <main ref={shell} data-flow className={styles.flow} onClick={onLinkClick}>
+      {loading && <Loader onDone={loaded} />}
       {!openProject && (
         <nav className={styles.nav} aria-label="Sections" data-surface={paperSections.has(active) ? "paper" : "dark"}>
           <div ref={pill} className={`${styles.pill} ${styles.desktopPill}`}>
@@ -251,7 +264,7 @@ export function FlowExperience() {
       <Stack><Education /></Stack>
       <Stack><ProjectPanels onOpen={open} /></Stack>
       <Stack><Contact /></Stack>
-      <Companion active={active} hidden={Boolean(openProject)} onNext={next} />
+      <Companion active={active} hidden={loading || Boolean(openProject)} onNext={next} />
       <AnimatePresence mode="wait" onExitComplete={() => { switching.current = false; if (!openRef.current) returnFocus.current?.focus({ preventScroll: true }); }}>
         {openProject && <ProjectDetail key={openProject.slug} project={openProject} onClose={close} onNext={showNext} switchingRef={switching} />}
       </AnimatePresence>

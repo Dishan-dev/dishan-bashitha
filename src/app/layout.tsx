@@ -33,10 +33,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fcfbfe" },
-    { media: "(prefers-color-scheme: dark)", color: "#17131e" },
-  ],
+  // Matches the cover's violet so mobile browser chrome blends into the first screen.
+  themeColor: "#07041a",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

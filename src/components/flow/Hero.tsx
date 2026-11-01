@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import { projects } from "@/data/projects";
 import { all, one, useFlowMotion, type FlowSetup } from "./useFlowMotion";
+import { isLoading, loadedEvent } from "./Loader";
 import styles from "./Flow.module.css";
 
 const featured = projects[0];
@@ -22,11 +23,16 @@ const capabilities = [
  */
 const heroMotion: FlowSetup = (hero) => {
   const tilt = one(hero, "[data-hero-tilt]");
-  gsap.from(all(hero, "[data-line] > span"), { yPercent: 110, duration: 1.2, ease: "expo.out", stagger: 0.09, delay: 0.1 });
-  gsap.from(one(hero, "[data-hero-portrait]"), { y: 60, opacity: 0, duration: 1.4, ease: "expo.out", delay: 0.2 });
-  gsap.from(one(hero, "[data-hero-panel]"), { yPercent: 18, opacity: 0, duration: 1.2, ease: "expo.out", delay: 0.3 });
-  gsap.from(all(hero, "[data-hero-fade]"), { opacity: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08, delay: 0.45 });
-  gsap.from(one(hero, "[data-hero-spark]"), { scale: 0, rotation: -90, duration: 0.9, ease: "back.out(2)", delay: 0.6 });
+  // The entrance is held (already in its start state) until the loader lifts.
+  const intro = gsap.timeline({ paused: true })
+    .from(all(hero, "[data-line] > span"), { yPercent: 110, duration: 1.2, ease: "expo.out", stagger: 0.09 }, 0.1)
+    .from(one(hero, "[data-hero-portrait]"), { y: 60, opacity: 0, duration: 1.4, ease: "expo.out" }, 0.2)
+    .from(one(hero, "[data-hero-panel]"), { yPercent: 18, opacity: 0, duration: 1.2, ease: "expo.out" }, 0.3)
+    .from(all(hero, "[data-hero-fade]"), { opacity: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08 }, 0.45)
+    .from(one(hero, "[data-hero-spark]"), { scale: 0, rotation: -90, duration: 0.9, ease: "back.out(2)" }, 0.6);
+  const play = () => intro.play();
+  if (isLoading()) window.addEventListener(loadedEvent, play, { once: true });
+  else play();
 
   const range = () => ({ trigger: hero, start: "top top", end: "bottom top", scrub: true });
   gsap.to(one(hero, "[data-hero-frame]"), { scale: 0.92, borderRadius: 44, ease: "none", scrollTrigger: range() });
@@ -36,7 +42,7 @@ const heroMotion: FlowSetup = (hero) => {
   gsap.to(one(hero, "[data-hero-panel]"), { yPercent: 14, ease: "none", scrollTrigger: range() });
   gsap.to(one(hero, "[data-hero-orbits]"), { scale: 1.18, rotation: 8, ease: "none", scrollTrigger: range() });
 
-  if (!tilt || !window.matchMedia("(pointer: fine)").matches) return;
+  if (!tilt || !window.matchMedia("(pointer: fine)").matches) return () => window.removeEventListener(loadedEvent, play);
   const rotateX = gsap.quickTo(tilt, "rotationX", { duration: 0.9, ease: "power3" });
   const rotateY = gsap.quickTo(tilt, "rotationY", { duration: 0.9, ease: "power3" });
   // The background answers the pointer: a glow trails it, dots light up beneath it, and the
@@ -72,7 +78,7 @@ const heroMotion: FlowSetup = (hero) => {
   };
   hero.addEventListener("pointermove", move);
   hero.addEventListener("pointerleave", leave);
-  return () => { hero.removeEventListener("pointermove", move); hero.removeEventListener("pointerleave", leave); };
+  return () => { window.removeEventListener(loadedEvent, play); hero.removeEventListener("pointermove", move); hero.removeEventListener("pointerleave", leave); };
 };
 
 /** Hovering the portrait opens a lens onto the illustrated version underneath. */
