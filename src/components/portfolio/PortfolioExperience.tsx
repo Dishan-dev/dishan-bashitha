@@ -32,6 +32,8 @@ export function PortfolioExperience() {
   const { activeIndex, activeScene, direction, navigateTo, nextScene, previousScene } = useSceneNavigation();
   const reduceMotion = useReducedMotion();
   const wheelDistance = useRef(0);
+  const workProgressRef = useRef(0);
+  const [workProgress, setWorkProgress] = useState(0);
   const wheelResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const enterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isIntroTransitioning, setIsIntroTransitioning] = useState(false);
@@ -73,6 +75,14 @@ export function PortfolioExperience() {
   }, []);
 
   useEffect(() => {
+    if (activeScene.id !== "work") return;
+    const entryProgress = direction < 0 ? 1 : 0;
+    workProgressRef.current = entryProgress;
+    setWorkProgress(entryProgress);
+    wheelDistance.current = 0;
+  }, [activeScene.id, direction]);
+
+  useEffect(() => {
     const handleWheel = (event: WheelEvent) => {
       if (isCompact()) return;
       if (document.body.dataset.projectViewer === "open") return;
@@ -91,6 +101,20 @@ export function PortfolioExperience() {
       if ((activeScene.id === "work" || activeScene.id === "experience") && Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       event.preventDefault();
       if (!event.deltaY) return;
+      // The Projects chapter is a spatial sequence, not an immediate page jump.
+      // Consume vertical movement while cards assemble or scatter, then let
+      // normal chapter navigation take over at the ends of that sequence.
+      if (activeScene.id === "work") {
+        const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
+        const current = workProgressRef.current;
+        if ((delta > 0 && current < 1) || (delta < 0 && current > 0)) {
+          const next = Math.min(1, Math.max(0, current + delta / 820));
+          workProgressRef.current = next;
+          setWorkProgress(next);
+          wheelDistance.current = 0;
+          return;
+        }
+      }
 
       wheelDistance.current += event.deltaY;
       if (wheelResetTimer.current) clearTimeout(wheelResetTimer.current);
@@ -134,7 +158,7 @@ export function PortfolioExperience() {
       <div className="relative h-full">
         <FrameTransition frameKey={activeScene.id} direction={direction}>
           {!isProjectViewerOpen && <PortfolioHeader activeIndex={activeIndex} onNavigate={navigateTo} />}
-          {activeScene.id === "intro" ? <IntroScene isReady={isLoaderLeaving || !showLoader} onEnter={enterPortfolio} isTransitioning={isIntroTransitioning} onNavigate={navigateTo} /> : <ActiveScene />}
+          {activeScene.id === "intro" ? <IntroScene isReady={isLoaderLeaving || !showLoader} onEnter={enterPortfolio} isTransitioning={isIntroTransitioning} onNavigate={navigateTo} /> : activeScene.id === "work" ? <WorkScene progress={workProgress} /> : <ActiveScene />}
           {!isProjectViewerOpen && <SceneNavigator activeIndex={activeIndex} onNavigate={navigateTo} />}
         </FrameTransition>
         <PageCompanion activeIndex={activeIndex} direction={direction} hidden={showLoader || isProjectViewerOpen} onNavigate={navigateTo} />
