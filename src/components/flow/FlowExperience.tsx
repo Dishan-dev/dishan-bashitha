@@ -264,7 +264,7 @@ export function FlowExperience() {
       <Stack><Education /></Stack>
       <Stack><ProjectPanels onOpen={open} /></Stack>
       <Stack><Contact /></Stack>
-      <Companion active={active} hidden={loading || Boolean(openProject)} onNext={next} />
+      <Companion active={active} hidden={loading || Boolean(openProject)} onNext={next} onGo={goToSection} onOpen={open} />
       <AnimatePresence mode="wait" onExitComplete={() => { switching.current = false; if (!openRef.current) returnFocus.current?.focus({ preventScroll: true }); }}>
         {openProject && <ProjectDetail key={openProject.slug} project={openProject} onClose={close} onNext={showNext} switchingRef={switching} />}
       </AnimatePresence>
