@@ -119,7 +119,7 @@ export function Hero({ onOpen }: { onOpen: (slug: string) => void }) {
         <div data-hero-portrait className={styles.heroPortrait}>
           <div data-hero-tilt className={styles.heroTilt} onPointerMove={moveLens}>
             <Image src="/images/DishanBashitha.png" alt="Dishan Bashitha" fill priority quality={90} sizes="(max-width: 900px) 100vh, 160vh" />
-            <Image src="/images/DishanBashitha-anime-hoodie-aligned.png" alt="" fill sizes="(max-width: 900px) 100vh, 160vh" className={styles.heroLens} />
+            <Image src="/images/DishanBashitha-anime-hoodie-matched.png" alt="" fill sizes="(max-width: 900px) 100vh, 160vh" className={styles.heroLens} />
           </div>
         </div>
 
