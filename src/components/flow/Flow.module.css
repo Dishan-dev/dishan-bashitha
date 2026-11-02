@@ -187,11 +187,16 @@
 .exp { position: relative; height: 100svh; min-height: 620px; overflow: hidden; background: var(--paper); color: var(--on-paper); }
 .expHeading { position: absolute; left: var(--gutter); top: var(--title-top); z-index: 30; }
 .expHeading .eyebrow { color: var(--accent-paper); }
-.expCount { position: absolute; right: var(--gutter); top: var(--title-top); z-index: 30; font: 12px var(--font-mono), monospace; letter-spacing: .12em; color: var(--muted-paper); }
+.stepper { position: absolute; right: var(--gutter); top: var(--title-top); z-index: 130; display: flex; align-items: center; gap: 10px; font: 12px var(--font-mono), monospace; letter-spacing: .12em; color: rgba(255, 255, 255, .7); }
+.stepper button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid rgba(255, 255, 255, .22); border-radius: 50%; color: #fff; cursor: pointer; transition: background-color .25s, border-color .25s, color .25s, opacity .25s; }
+.stepper button:hover:not(:disabled) { background: var(--violet); border-color: var(--violet); color: #fff; }
+.stepper button:disabled { opacity: .3; cursor: default; }
+.paperStepper { color: var(--muted-paper); }
+.paperStepper button { border-color: var(--line-paper); color: var(--on-paper); }
 .marquee { position: absolute; top: 50%; left: 0; transform: translateY(-50%); white-space: nowrap; font-size: clamp(56px, 9vw, 124px); font-weight: 400; letter-spacing: -.045em; pointer-events: none; }
 .marqueeTrack { display: inline-flex; gap: .5em; align-items: center; }
 .ring { display: inline-block; width: .24em; height: .24em; border: 2px solid currentColor; border-radius: 50%; }
-.stage { position: absolute; inset: clamp(120px, 16svh, 150px) 0 0; display: grid; place-items: center; perspective: 1600px; transform-style: preserve-3d; }
+.stage { position: absolute; inset: clamp(120px, 16svh, 150px) 0 0; display: grid; place-items: center; perspective: 1600px; transform-style: preserve-3d; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .xcard { grid-area: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; width: min(84vw, 470px); height: min(56svh, 500px); min-height: 340px; padding: 30px; border-radius: 30px; color: #fff; backface-visibility: hidden; will-change: transform; }
 .cardTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; color: rgba(255, 255, 255, .8); }
 .tag { padding: 9px 16px; border-radius: 999px; background: rgba(0, 0, 0, .28); color: #fff; white-space: nowrap; }
@@ -269,7 +274,7 @@
 /* ---------- All projects: framed screens on tinted panels ---------- */
 .projects { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: #000; }
 .projectsHeading { position: absolute; left: var(--gutter); top: var(--title-top); z-index: 3; }
-.track { display: flex; gap: 24px; width: max-content; height: 100%; padding: clamp(190px, 25svh, 230px) 24px 32px; }
+.track { display: flex; gap: 24px; width: max-content; height: 100%; padding: clamp(190px, 25svh, 230px) 24px 32px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .panel { position: relative; flex: none; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: clamp(20px, 3vw, 48px); width: min(86vw, 1100px); height: 100%; padding: clamp(24px, 3.4vw, 48px); overflow: hidden; border: 1px solid rgba(255, 255, 255, .08); border-radius: 22px; perspective: 1600px;
   background: radial-gradient(70% 80% at 80% 50%, color-mix(in srgb, var(--tint) 55%, transparent), transparent 70%), radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--tint) 28%, transparent), transparent 70%), #07060f; }
 .panelCopy { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; align-self: stretch; }
@@ -291,11 +296,18 @@
 .contactTitle, .contactEyebrow { position: relative; z-index: 2; }
 .sub { position: relative; z-index: 2; max-width: 420px; margin-top: clamp(24px, 4vh, 40px); }
 .sub p { margin: 0 0 22px; font-size: 15px; line-height: 1.55; color: rgba(255, 255, 255, .85); }
-.channels { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 24px 0 0; padding: 0; list-style: none; font-size: 14px; }
-.channels a, .channels button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; border-bottom: 1px solid rgba(255, 255, 255, .3); color: rgba(255, 255, 255, .9); cursor: pointer; }
-.channels a:hover, .channels button:hover { border-color: #fff; color: #fff; }
-/* Centred with a margin: GSAP owns this element's transform. The SVG is square. */
-.star { position: absolute; right: -8%; top: 50%; z-index: 1; width: min(62vw, 700px); margin-top: calc(min(62vw, 700px) * -.5); }
+.available { display: flex; align-items: center; flex-wrap: wrap; gap: 0 4px; margin: 0 0 16px !important; font: 11px/1.8 var(--font-mono), monospace !important; letter-spacing: .1em; text-transform: uppercase; color: #fff !important; }
+.available i { width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 0 4px rgba(61, 220, 132, .18); }
+.available span { color: rgba(255, 255, 255, .6); }
+/* A small directory: label, handle, action, one ruled row per channel. Wide screens give it the right-hand side. */
+.channels { position: absolute; right: var(--gutter); bottom: 84px; z-index: 2; width: min(36vw, 520px); margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(255, 255, 255, .16); }
+.channels li { border-bottom: 1px solid rgba(255, 255, 255, .16); }
+.channels a, .channels button { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; min-height: clamp(48px, 7.4svh, 64px); color: #fff; text-align: left; cursor: pointer; }
+.channels small { font: 10px var(--font-mono), monospace; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .55); }
+.channels span { overflow: hidden; font-size: clamp(15px, 1.35vw, 20px); letter-spacing: -.01em; text-overflow: ellipsis; white-space: nowrap; }
+.channels em { display: grid; place-items: center; font: 11px var(--font-mono), monospace; font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .6); transition: color .25s, translate .25s; }
+.channels a:hover em, .channels button:hover em { color: #fff; translate: 2px -2px; }
+.channels a:hover span, .channels button:hover span { color: var(--lilac); }
 .contactFoot { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 26px; z-index: 2; display: flex; justify-content: space-between; gap: 16px; color: rgba(255, 255, 255, .7); font: 11px var(--font-mono), monospace; letter-spacing: .12em; text-transform: uppercase; }
 .contactFoot a:hover { color: #fff; }
 
@@ -313,18 +325,38 @@
   .heroSpark { right: 0; top: 34px; }
   .impactLine, .heroPanel, .heroFeatured { display: none; }
   .heroImpact p:last-child { max-width: 30rem; }
+  /* The name leads at a size that owns the width, with air between it, the eyebrow and the intro. */
+  .heroHeading { padding-top: 8px; }
+  .heroTitle { margin-top: 18px; font-size: clamp(58px, 18vw, 96px); line-height: .92; }
+  .heroSpark { top: 44px; }
+  .heroImpact { margin-top: 10px; }
+  .heroImpact p:last-child { font-size: 16px; line-height: 1.6; }
+  /* The rings frame the portrait instead of crossing the copy. */
+  .heroOrbits span:first-child { top: 44%; width: 128vw; height: 64vw; }
+  .heroOrbits span:nth-child(2) { top: 54%; width: 96vw; height: 36vw; }
+  .heroOrbits i { top: 62%; right: 6%; }
   /* The bio card overlaps the bottom of the photo, so the photo fades out instead of ending in a hard edge. */
-  .heroPortrait { position: relative; inset: auto; width: 100%; min-width: 0; height: min(46svh, 420px); margin: 0 auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 230px), rgba(0, 0, 0, .45) calc(100% - 150px), transparent calc(100% - 88px)); mask-image: linear-gradient(to bottom, #000 calc(100% - 230px), rgba(0, 0, 0, .45) calc(100% - 150px), transparent calc(100% - 88px)); }
+  .heroPortrait { position: relative; inset: auto; width: 100%; min-width: 0; height: min(42svh, 400px); margin: 0 auto; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 230px), rgba(0, 0, 0, .45) calc(100% - 150px), transparent calc(100% - 88px)); mask-image: linear-gradient(to bottom, #000 calc(100% - 230px), rgba(0, 0, 0, .45) calc(100% - 150px), transparent calc(100% - 88px)); }
   .heroBio { margin-top: -84px; padding: 20px; border: 1px solid rgba(255, 255, 255, .18); border-radius: 22px; background: linear-gradient(180deg, rgba(36, 20, 100, .82), rgba(20, 10, 60, .92)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2); }
-  .about { grid-template-columns: 1fr; padding-top: 40px; }
-  .lanyardCol { position: relative; height: auto; }
-  .aboutCopy { padding-top: 0; }
+  /* The heading leads, then the badge hangs below it, then the rest of the copy. */
+  .about { grid-template-columns: 1fr; gap: 0; padding-top: var(--title-top); }
+  .aboutCopy { display: contents; }
+  .aboutHead { order: -1; }
+  .lanyardCol { position: relative; height: auto; margin: 4px 0 8px; }
+  .strap { height: clamp(70px, 11svh, 110px); }
+  .badge { width: min(100%, 270px); }
   .panel { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: center; gap: 22px; padding: 22px; }
   .panelCopy { justify-content: flex-start; gap: 12px; align-self: start; }
   .meta { margin: 0; font-size: 13px; }
   .panelDesc { display: -webkit-box; overflow: hidden; font-size: 14px; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
   .chips { display: none; }
   .panelCta { padding: 9px 14px; font-size: 13px; }
+  /* Narrower screens: the directory follows the copy and the section grows to fit. */
+  .contact { height: auto; }
+  .contactFrame { height: auto; min-height: calc(100svh - 24px); }
+  .sub { max-width: 520px; }
+  .channels { position: static; width: auto; max-width: 520px; margin-top: 28px; }
+  .contactFoot { position: static; margin-top: auto; padding-top: 40px; }
 }
 @media (max-width: 720px) {
   /* Phones: the framed sections run edge to edge, with no light margin around them. */
@@ -334,15 +366,24 @@
   .bot { width: 46px; }
   .companion { bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); }
   .eduCard { padding: 24px; min-height: 0; }
+  /* Smaller, and level with the eyebrow so it clears the section title. */
+  .stepper { top: calc(var(--title-top) - 9px); gap: 6px; font-size: 11px; }
+  .stepper button { width: 32px; height: 32px; }
   .skillRow { grid-template-columns: 1fr; gap: 4px; }
-  .expCount { display: none; }
   .panelTitle { font-size: clamp(38px, 11vw, 56px); }
-  .star { right: -44%; top: 22%; margin-top: 0; opacity: .75; }
-  .contactFoot { flex-direction: column; gap: 6px; }
+  /* Phones: the copy and the directory carry the section on a calmer backdrop. */
+  .contactFrame { min-height: 100svh; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); background: radial-gradient(90% 45% at 100% 0%, rgba(107, 60, 242, .5) 0%, transparent 70%), linear-gradient(180deg, #0b0628 0%, #1c0c66 100%); }
+  .contactFoot { flex-direction: column; gap: 8px; padding-right: 64px; }
+}
+@media (max-width: 380px) {
+  .channels a, .channels button { grid-template-columns: 56px minmax(0, 1fr) auto; gap: 8px; }
+  .channels span { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .heroGlow span, .bot, .botHop, .botTip, .botEyes ellipse, .companion[data-waving] .botArmRight { animation: none; }
   .bubble { animation: none; }
+  .stepper { display: none; }
+  .stage, .track { touch-action: auto; }
   .stage { position: static; display: flex; gap: 16px; height: 100%; padding: 170px 20px 110px; overflow-x: auto; align-items: center; perspective: none; }
   .xcard { flex: none; }
   .marquee { display: none; }

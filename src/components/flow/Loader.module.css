@@ -10,12 +10,10 @@
 
 .center { position: relative; display: grid; justify-items: center; gap: 18px; text-align: center; }
 .star { width: clamp(42px, 5vw, 64px); fill: #cbbcff; filter: drop-shadow(0 0 24px rgba(203, 188, 255, .7)); animation: starIn 1s cubic-bezier(.3, 1.4, .5, 1) both, twinkle 2.4s 1s ease-in-out infinite; }
-.name { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .28em; margin: 0; font-size: clamp(44px, 8.4vw, 132px); font-weight: 500; line-height: .95; letter-spacing: -.055em; }
-.word { display: inline-flex; }
-.word[data-dim] { color: #b7a6ff; }
-.mask { display: inline-block; overflow: hidden; padding-bottom: .08em; }
-.char { display: inline-block; animation: rise .9s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(.25s + var(--i) * .045s); }
-.role { display: flex; align-items: center; gap: 12px; margin: 0; font: 11px var(--font-mono), monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(255, 255, 255, .7); animation: fade .8s 1s both; }
+.signature { display: block; width: min(92vw, 860px); height: auto; margin: -8px 0 -14px; overflow: visible; }
+.flourish { fill: none; stroke: #cbbcff; stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(203, 188, 255, .6)); }
+.pen { fill: #fff; opacity: 0; filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 18px #a78bff); }
+.role { display: flex; align-items: center; gap: 12px; margin: 0; font: 11px var(--font-mono), monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(255, 255, 255, .7); animation: fade .8s 2.3s both; }
 .role i { width: 5px; height: 5px; border-radius: 50%; background: #cbbcff; }
 
 .foot { position: absolute; left: clamp(20px, 5vw, 64px); right: clamp(20px, 5vw, 64px); bottom: clamp(30px, 6vh, 56px); display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
@@ -25,7 +23,6 @@
 .track { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .1); }
 .track span { display: block; height: 100%; background: linear-gradient(90deg, #6b3cf2, #cbbcff, #ff7ac4); transform: scaleX(0); transform-origin: 0 50%; }
 
-@keyframes rise { from { transform: translateY(110%); } }
 @keyframes fade { from { opacity: 0; transform: translateY(8px); } }
 @keyframes starIn { from { transform: scale(0) rotate(-120deg); } }
 @keyframes twinkle { 50% { opacity: .55; } }
@@ -36,5 +33,5 @@
   .status { font-size: 9px; letter-spacing: .1em; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .glow, .orbit span, .star, .char, .role, .status i { animation: none; }
+  .glow, .orbit span, .star, .role, .status i { animation: none; }
 }

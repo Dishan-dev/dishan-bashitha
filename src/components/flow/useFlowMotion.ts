@@ -23,5 +23,15 @@ export function useFlowMotion(root: RefObject<HTMLElement | null>, setup: FlowSe
   }, [root, setup]);
 }
 
+/** Phones show the hero and contact frames edge to edge, so those frames only resize above this. */
+export const framedQuery = "(min-width: 721px)";
+
+/** Runs part of a choreography only while `query` matches; the returned function undoes it. */
+export function whileMatching(query: string, setup: () => void) {
+  const media = gsap.matchMedia();
+  media.add(query, setup);
+  return () => media.revert();
+}
+
 export const all = (root: Element, selector: string) => Array.from(root.querySelectorAll<HTMLElement>(selector));
 export const one = (root: Element, selector: string) => root.querySelector<HTMLElement>(selector);
