@@ -1,13 +1,16 @@
 "use client";
 
 import { gsap } from "gsap";
-import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
+import { Great_Vibes } from "next/font/google";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { reducedQuery } from "@/lib/motion";
 import styles from "./Loader.module.css";
 
+const script = Great_Vibes({ weight: "400", subsets: ["latin"] });
 const name = "Dishan Bashitha";
 const statuses = ["Loading experiences", "Composing the stage", "Tuning the motion", "Almost there"];
-const minimum = 1.6;
+// Long enough for the name to be written out in full before the curtain lifts.
+const minimum = 2.8;
 const maximum = 6;
 
 /** Sections hold their entrance until the loader has lifted. */
@@ -15,15 +18,58 @@ export const loadedEvent = "flow:loaded";
 export const isLoading = () => document.documentElement.hasAttribute("data-flow-loading");
 
 /**
- * The opening curtain: the name rises letter by letter around a spinning star while a counter
- * follows real progress (fonts and the cover images). At 100 the letters lift away, the star
- * bursts, and the curtain rolls up to reveal the cover.
+ * The opening curtain: the name is written out in script by a glowing pen and underlined with a
+ * flourish while a counter follows real progress (fonts and the cover images). At 100 the
+ * signature lifts away, the star bursts, and the curtain rolls up to reveal the cover.
  */
+/**
+ * Writes the name left to right: a feathered mask sweeps across the script while a pen tip rides
+ * its edge, bobbing over the letters, then a flourish is drawn beneath. Returns a cleanup.
+ */
+function write(svg: SVGSVGElement | null, reduce: boolean) {
+  const text = svg?.querySelector<SVGTextElement>("[data-sig-text]");
+  const wipe = svg?.querySelector<SVGRectElement>("[data-sig-wipe]");
+  const pen = svg?.querySelector<SVGCircleElement>("[data-sig-pen]");
+  const flourish = svg?.querySelector<SVGPathElement>("[data-sig-flourish]");
+  if (!svg || !text || !wipe || !pen || !flourish) return () => {};
+  let timeline: gsap.core.Timeline | undefined;
+  let cancelled = false;
+  // Measure once the script face has arrived, so the sweep spans the real letters.
+  document.fonts.load(`150px ${script.style.fontFamily}`).catch(() => undefined).then(() => {
+    if (cancelled) return;
+    const box = text.getBBox();
+    const start = box.x - 12, span = box.width + 24;
+    const underline = 168 + 34;
+    flourish.setAttribute("d", `M ${start + span * 0.06} ${underline + 6} C ${start + span * 0.32} ${underline + 22}, ${start + span * 0.68} ${underline - 14}, ${start + span * 0.98} ${underline - 2}`);
+    const length = flourish.getTotalLength();
+    wipe.setAttribute("x", String(start));
+    if (reduce) { wipe.setAttribute("width", String(span / 0.9)); return; }
+    // Hidden until drawn: a zero-length dash would still show its round cap as a dot.
+    gsap.set(flourish, { strokeDasharray: length, strokeDashoffset: length, opacity: 0 });
+    const ink = { at: 0 };
+    timeline = gsap.timeline({ delay: 0.25 })
+      .set(pen, { opacity: 1 })
+      .to(ink, { at: 1, duration: 1.9, ease: "sine.inOut", onUpdate: () => {
+        // The solid ink ends at 90% of the mask and the feather runs on; the pen leads from inside it.
+        const width = (span * ink.at) / 0.9;
+        wipe.setAttribute("width", String(width));
+        pen.setAttribute("cx", String(start + width * 0.95));
+        pen.setAttribute("cy", String(box.y + box.height * (0.52 + Math.sin(ink.at * 46) * 0.24)));
+      } })
+      .set(flourish, { opacity: 1 }, ">-0.05")
+      .to(flourish, { strokeDashoffset: 0, duration: 0.55, ease: "power2.inOut" }, "<")
+      .to(pen, { attr: { cx: start + span * 0.98, cy: underline - 2 }, duration: 0.55, ease: "power2.inOut" }, "<")
+      .to(pen, { opacity: 0, duration: 0.4, ease: "power2.out" });
+  });
+  return () => { cancelled = true; timeline?.kill(); };
+}
+
 export function Loader({ onDone }: { onDone: () => void }) {
   const root = useRef<HTMLDivElement>(null);
   const count = useRef<HTMLSpanElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
   const status = useRef<HTMLSpanElement>(null);
+  const signature = useRef<SVGSVGElement>(null);
 
   // Marked before any section sets up its entrance, so they wait for the reveal.
   useLayoutEffect(() => {
@@ -50,6 +96,8 @@ export function Loader({ onDone }: { onDone: () => void }) {
     let done = 0;
     tasks.forEach(task => task.then(() => { done += 1; }));
 
+    const writing = write(signature.current, reduce);
+
     if (reduce) {
       let cancelled = false;
       Promise.race([Promise.all(tasks), new Promise(resolve => setTimeout(resolve, 2000))]).then(() => {
@@ -57,7 +105,7 @@ export function Loader({ onDone }: { onDone: () => void }) {
         finish();
         gsap.to(element, { opacity: 0, duration: 0.3, onComplete: onDone });
       });
-      return () => { cancelled = true; };
+      return () => { cancelled = true; writing(); };
     }
 
     const shown = { value: 0 };
@@ -85,17 +133,16 @@ export function Loader({ onDone }: { onDone: () => void }) {
       exiting = true;
       gsap.ticker.remove(tick);
       gsap.timeline({ defaults: { ease: "expo.inOut" }, onComplete: onDone })
-        .to(element.querySelectorAll("[data-char]"), { yPercent: -110, duration: 0.7, stagger: 0.025, ease: "power3.in" }, 0)
+        .to(signature.current, { yPercent: -40, opacity: 0, duration: 0.7, ease: "power3.in" }, 0)
         .to(element.querySelectorAll("[data-fade]"), { opacity: 0, y: -12, duration: 0.4, ease: "power2.in" }, 0)
         .to(element.querySelector("[data-star]"), { scale: 9, rotation: 135, opacity: 0, duration: 1.1 }, 0.15)
         .to(element, { clipPath: "inset(0% 0% 100% 0% round 0 0 48px 48px)", duration: 1.05 }, 0.55)
         .add(finish, 0.8);
     };
     gsap.ticker.add(tick);
-    return () => { gsap.ticker.remove(tick); };
+    return () => { gsap.ticker.remove(tick); writing(); };
   }, [onDone]);
 
-  let index = 0;
   return (
     <div ref={root} className={styles.loader} role="status" aria-live="polite" aria-label="Loading Dishan Bashitha’s portfolio">
       <div className={styles.glow} aria-hidden="true" />
@@ -104,13 +151,19 @@ export function Loader({ onDone }: { onDone: () => void }) {
 
       <div className={styles.center} aria-hidden="true">
         <svg data-star className={styles.star} viewBox="0 0 200 200"><path d="M100 0C108 62 138 92 200 100C138 108 108 138 100 200C92 138 62 108 0 100C62 92 92 62 100 0Z" /></svg>
-        <p className={styles.name}>
-          {name.split(" ").map((word, wordIndex) => (
-            <span key={word} className={styles.word} data-dim={wordIndex ? "true" : undefined}>
-              {word.split("").map(char => <span key={index} className={styles.mask}><span data-char className={styles.char} style={{ "--i": index++ } as CSSProperties}>{char}</span></span>)}
-            </span>
-          ))}
-        </p>
+        <svg ref={signature} className={styles.signature} viewBox="0 0 1000 260">
+          <defs>
+            <linearGradient id="loader-ink" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#ffffff" /><stop offset=".55" stopColor="#e6dcff" /><stop offset="1" stopColor="#b7a6ff" /></linearGradient>
+            {/* The written part is white; its leading edge feathers out like wet ink. */}
+            <linearGradient id="loader-feather" x1="0" y1="0" x2="1" y2="0"><stop offset=".9" stopColor="#fff" /><stop offset="1" stopColor="#000" /></linearGradient>
+            <mask id="loader-write" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="260"><rect data-sig-wipe x="0" y="0" width="0" height="260" fill="url(#loader-feather)" /></mask>
+          </defs>
+          <g mask="url(#loader-write)">
+            <text data-sig-text x="500" y="168" textAnchor="middle" fill="url(#loader-ink)" style={{ fontFamily: script.style.fontFamily, fontSize: 150 }}>{name}</text>
+          </g>
+          <path data-sig-flourish className={styles.flourish} d="" />
+          <circle data-sig-pen className={styles.pen} r="6.5" cx="0" cy="0" />
+        </svg>
         <p data-fade className={styles.role}>Software Engineer <i /> Portfolio ’26</p>
       </div>
 

@@ -1,17 +1,19 @@
 "use client";
 
 import { gsap } from "gsap";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Fragment, useRef } from "react";
 import { experience } from "@/data/experience";
 import { all, one, useFlowMotion, type FlowSetup } from "./useFlowMotion";
+import { sideways } from "./sideways";
 import styles from "./Flow.module.css";
 
 const tones = [styles.c1, styles.c2, styles.c3, styles.c4];
 const themes = ["Building software", "Leading teams", "Always learning"];
 const pad = (value: number) => String(value).padStart(2, "0");
 
-/** A pinned 3D carousel: scrolling turns each role to the front over a drifting marquee. */
+/** A pinned 3D carousel: scrolling, swiping or the arrows turn each role to the front over a drifting marquee. */
 const experienceMotion: FlowSetup = (section) => {
   const cards = all(section, "[data-xcard]");
   const track = one(section, "[data-marquee]");
@@ -40,12 +42,16 @@ const experienceMotion: FlowSetup = (section) => {
     scrollTrigger: { trigger: section, start: "top 70%", toggleActions: "play none none reverse" } });
   gsap.from(one(section, "[data-stage]"), { yPercent: 30, opacity: 0, ease: "none",
     scrollTrigger: { trigger: section, start: "top bottom", end: "top 30%", scrub: true } });
-  ScrollTrigger.create({
+  let sync = () => {};
+  const pin = ScrollTrigger.create({
     trigger: section, start: "top top", end: () => `+=${window.innerHeight * last * 0.5}`,
     pin: true, scrub: true, invalidateOnRefresh: true,
-    snap: { snapTo: 1 / last, duration: { min: 0.2, max: 0.5 }, ease: "power2.inOut" },
-    onUpdate: self => render(self.progress * last),
+    snap: { snapTo: 1 / last, inertia: false, duration: { min: 0.2, max: 0.5 }, ease: "power2.inOut" },
+    onUpdate: self => { render(self.progress * last); sync(); },
   });
+  const steps = sideways(section, one(section, "[data-stage]") ?? section, pin, last);
+  sync = steps.sync;
+  return steps.kill;
 };
 
 export function ExperienceCarousel() {
@@ -59,13 +65,17 @@ export function ExperienceCarousel() {
         <p className={styles.eyebrow}>03 · Experience</p>
         <h2 id="experience-title" className={styles.sectionTitle}><span data-line className={styles.line}><span>A journey in motion.</span></span></h2>
       </div>
-      <p className={styles.expCount} aria-hidden="true"><span data-exp-current>01</span> / {pad(experience.length)}</p>
+      <div className={`${styles.stepper} ${styles.paperStepper}`}>
+        <button type="button" data-step="-1" aria-label="Show previous role"><ChevronLeft size={18} /></button>
+        <span aria-hidden="true"><span data-exp-current>01</span> / {pad(experience.length)}</span>
+        <button type="button" data-step="1" aria-label="Show next role"><ChevronRight size={18} /></button>
+      </div>
       <div className={styles.marquee} aria-hidden="true">
         <div data-marquee className={styles.marqueeTrack}>
           {marquee.map((theme, index) => <Fragment key={index}>{index > 0 && <span className={styles.ring} />}<span>{theme}</span></Fragment>)}
         </div>
       </div>
-      <ol data-stage className={styles.stage}>
+      <ol data-stage data-lenis-prevent-touch className={styles.stage}>
         {experience.map((entry, index) => (
           <li key={`${entry.organization}-${entry.role}`} data-xcard className={`${styles.xcard} ${tones[index % tones.length]}`}>
             <div className={styles.cardTop}><span className={styles.tag}>{entry.period}</span>{entry.category !== entry.period && <span>{entry.category}</span>}</div>

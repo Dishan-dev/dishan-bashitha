@@ -16,7 +16,7 @@ const aboutMotion: FlowSetup = (about) => {
   gsap.from(all(about, "[data-line] > span"), { yPercent: 110, duration: 1.1, ease: "expo.out", stagger: 0.09,
     scrollTrigger: { trigger: about, start: "top 70%", toggleActions: "play none none reverse" } });
   gsap.from(all(about, "[data-about-reveal]"), { opacity: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08,
-    scrollTrigger: { trigger: one(about, "[data-about-copy]"), start: "top 70%", toggleActions: "play none none reverse" } });
+    scrollTrigger: { trigger: one(about, "[data-about-reveal]"), start: "top 85%", toggleActions: "play none none reverse" } });
   all(about, "[data-skill]").forEach(row => gsap.from(row, { opacity: 0, y: 20, duration: 0.8, ease: "power3.out",
     scrollTrigger: { trigger: row, start: "top 92%", toggleActions: "play none none reverse" } }));
 };
@@ -61,13 +61,15 @@ export function About() {
       velocity = Math.max(-3, Math.min(3, velocity + delta * 0.012));
       wake();
     };
+    // Touch scrolling is fast and coarse, so only a fine pointer's scrolling nudges the badge.
+    const nudges = window.matchMedia("(pointer: fine)").matches;
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) { velocity += 1.6; wake(); } });
     observer.observe(element);
     element.addEventListener("pointerdown", down);
     element.addEventListener("pointermove", move);
     element.addEventListener("pointerup", up);
     element.addEventListener("pointercancel", up);
-    window.addEventListener("scroll", scroll, { passive: true });
+    if (nudges) window.addEventListener("scroll", scroll, { passive: true });
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
@@ -103,11 +105,13 @@ export function About() {
       </div>
 
       <div data-about-copy className={styles.aboutCopy}>
-        <p className={styles.eyebrow}>02 · About</p>
-        <h2 id="about-title" className={styles.sectionTitle}>
-          <span data-line className={styles.line}><span>Curious by default.</span></span>
-          <span data-line className={`${styles.line} ${styles.dim}`}><span>Intentional by choice.</span></span>
-        </h2>
+        <div className={styles.aboutHead}>
+          <p className={styles.eyebrow}>02 · About</p>
+          <h2 id="about-title" className={styles.sectionTitle}>
+            <span data-line className={styles.line}><span>Curious by default.</span></span>
+            <span data-line className={`${styles.line} ${styles.dim}`}><span>Intentional by choice.</span></span>
+          </h2>
+        </div>
         <div className={styles.aboutText}>
           <p data-about-reveal>Software Engineering undergraduate at the University of Moratuwa, with professional experience building full-stack applications.</p>
           <p data-about-reveal>I work with Java, Spring Boot, React, Next.js, Node.js, and PostgreSQL to build maintainable products, from REST APIs and authentication to real-time systems and cloud deployment.</p>

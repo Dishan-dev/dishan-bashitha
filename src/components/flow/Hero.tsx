@@ -5,7 +5,7 @@ import { Box, Code2, GraduationCap, Sparkles, UserRound } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
 import { projects } from "@/data/projects";
-import { all, one, useFlowMotion, type FlowSetup } from "./useFlowMotion";
+import { all, framedQuery, one, useFlowMotion, whileMatching, type FlowSetup } from "./useFlowMotion";
 import { isLoading, loadedEvent } from "./Loader";
 import styles from "./Flow.module.css";
 
@@ -35,14 +35,15 @@ const heroMotion: FlowSetup = (hero) => {
   else play();
 
   const range = () => ({ trigger: hero, start: "top top", end: "bottom top", scrub: true });
-  gsap.to(one(hero, "[data-hero-frame]"), { scale: 0.92, borderRadius: 44, ease: "none", scrollTrigger: range() });
+  // Phones keep the frame edge to edge; shrinking it there would show a light border around it.
+  const unframe = whileMatching(framedQuery, () => { gsap.to(one(hero, "[data-hero-frame]"), { scale: 0.92, borderRadius: 44, ease: "none", scrollTrigger: range() }); });
   gsap.to(one(hero, "[data-hero-heading]"), { yPercent: -24, opacity: 0.4, ease: "none", scrollTrigger: range() });
   gsap.to(one(hero, "[data-hero-impact]"), { yPercent: -36, ease: "none", scrollTrigger: range() });
   gsap.to(one(hero, "[data-hero-portrait]"), { yPercent: -6, scale: 1.05, ease: "none", scrollTrigger: range() });
   gsap.to(one(hero, "[data-hero-panel]"), { yPercent: 14, ease: "none", scrollTrigger: range() });
   gsap.to(one(hero, "[data-hero-orbits]"), { scale: 1.18, rotation: 8, ease: "none", scrollTrigger: range() });
 
-  if (!tilt || !window.matchMedia("(pointer: fine)").matches) return () => window.removeEventListener(loadedEvent, play);
+  if (!tilt || !window.matchMedia("(pointer: fine)").matches) return () => { unframe(); window.removeEventListener(loadedEvent, play); };
   const rotateX = gsap.quickTo(tilt, "rotationX", { duration: 0.9, ease: "power3" });
   const rotateY = gsap.quickTo(tilt, "rotationY", { duration: 0.9, ease: "power3" });
   // The background answers the pointer: a glow trails it, dots light up beneath it, and the
@@ -78,7 +79,7 @@ const heroMotion: FlowSetup = (hero) => {
   };
   hero.addEventListener("pointermove", move);
   hero.addEventListener("pointerleave", leave);
-  return () => { window.removeEventListener(loadedEvent, play); hero.removeEventListener("pointermove", move); hero.removeEventListener("pointerleave", leave); };
+  return () => { unframe(); window.removeEventListener(loadedEvent, play); hero.removeEventListener("pointermove", move); hero.removeEventListener("pointerleave", leave); };
 };
 
 /** Hovering the portrait opens a lens onto the illustrated version underneath. */
