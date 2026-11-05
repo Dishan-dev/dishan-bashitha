@@ -18,7 +18,8 @@ const capabilities = [
 ];
 
 /**
- * The cover's layers arrive in order, the portrait follows the pointer, and on scroll the
+ * The cover's layers arrive in order (the portrait first as the illustration, which then opens
+ * from the face outward onto the real photo), the portrait follows the pointer, and on scroll the
  * frame recedes while headline, portrait and glass panel part at different depths.
  */
 const heroMotion: FlowSetup = (hero) => {
@@ -29,7 +30,9 @@ const heroMotion: FlowSetup = (hero) => {
     .from(one(hero, "[data-hero-portrait]"), { y: 60, opacity: 0, duration: 1.4, ease: "expo.out" }, 0.2)
     .from(one(hero, "[data-hero-panel]"), { yPercent: 18, opacity: 0, duration: 1.2, ease: "expo.out" }, 0.3)
     .from(all(hero, "[data-hero-fade]"), { opacity: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08 }, 0.45)
-    .from(one(hero, "[data-hero-spark]"), { scale: 0, rotation: -90, duration: 0.9, ease: "back.out(2)" }, 0.6);
+    .from(one(hero, "[data-hero-spark]"), { scale: 0, rotation: -90, duration: 0.9, ease: "back.out(2)" }, 0.6)
+    .to(one(hero, "[data-hero-intro]"), { "--reveal": "150%", duration: 1.5, ease: "power2.inOut" }, 1.25)
+    .set(one(hero, "[data-hero-intro]"), { display: "none" });
   const play = () => intro.play();
   if (isLoading()) window.addEventListener(loadedEvent, play, { once: true });
   else play();
@@ -120,6 +123,8 @@ export function Hero({ onOpen }: { onOpen: (slug: string) => void }) {
           <div data-hero-tilt className={styles.heroTilt} onPointerMove={moveLens}>
             <Image src="/images/DishanBashitha.png" alt="Dishan Bashitha" fill priority quality={90} sizes="(max-width: 900px) 100vh, 160vh" />
             <Image src="/images/DishanBashitha-anime-hoodie-matched.png" alt="" fill sizes="(max-width: 900px) 100vh, 160vh" className={styles.heroLens} />
+            {/* First-load cover: the illustration, opened away to show the photo beneath. */}
+            <Image data-hero-intro src="/images/DishanBashitha-anime-hoodie-matched.png" alt="" fill priority sizes="(max-width: 900px) 100vh, 160vh" className={styles.heroIntro} />
           </div>
         </div>
 
