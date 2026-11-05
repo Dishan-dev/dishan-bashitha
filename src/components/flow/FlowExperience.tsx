@@ -23,7 +23,7 @@ const navLinks = [["home", "Home"], ["about", "About"], ["experience", "Experien
 const sectionLabels: Record<string, string> = { ...Object.fromEntries(navLinks), contact: "Contact" };
 const sectionIds = ["home", "about", "experience", "education", "projects", "contact"];
 // Sections whose top edge sits on the paper background; the glass switches to dark text there.
-const paperSections = new Set(["about", "experience", "education"]);
+const paperSections = new Set(["about", "experience", "education", "projects"]);
 const projectFromHash = () => projects.find(project => window.location.hash === `#project-${project.slug}`)?.slug ?? null;
 
 /**

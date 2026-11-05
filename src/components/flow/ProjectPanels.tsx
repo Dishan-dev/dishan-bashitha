@@ -51,7 +51,7 @@ export function ProjectPanels({ onOpen }: { onOpen: (slug: string) => void }) {
         <p className={styles.eyebrow}>05 · Projects</p>
         <h2 id="projects-title" className={styles.sectionTitle}><span data-line className={styles.line}><span>All projects.</span></span></h2>
       </header>
-      <div className={styles.stepper}>
+      <div className={`${styles.stepper} ${styles.paperStepper}`}>
         <button type="button" data-step="-1" aria-label="Show previous project"><ChevronLeft size={18} /></button>
         <span aria-hidden="true"><span data-project-current>01</span> / {pad(projects.length)}</span>
         <button type="button" data-step="1" aria-label="Show next project"><ChevronRight size={18} /></button>
