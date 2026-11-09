@@ -8,6 +8,7 @@ import { projects } from "@/data/projects";
 import { all, one, useFlowMotion, type FlowSetup } from "./useFlowMotion";
 import { tintFor } from "./projectTints";
 import { sideways } from "./sideways";
+import { openInPlace, projectHref } from "./projectLink";
 import styles from "./Flow.module.css";
 
 const pad = (value: number) => String(value).padStart(2, "0");
@@ -69,10 +70,10 @@ export function ProjectPanels({ onOpen }: { onOpen: (slug: string) => void }) {
             <figure data-window className={styles.panelWindow}>
               <div className={styles.windowBar} aria-hidden="true"><span><i /><i /><i /></span>{project.shortTitle}</div>
               <div data-project-media={project.slug} data-active-media className={styles.windowShot}>
-                <Image src={project.coverImage} alt="" fill sizes="(max-width: 720px) 90vw, 620px" />
+                <Image src={project.coverImage} alt={`${project.title} ${project.headline.toLowerCase()} interface`} fill sizes="(max-width: 720px) 90vw, 620px" />
               </div>
             </figure>
-            <button type="button" className={styles.panelOpen} onClick={() => onOpen(project.slug)} aria-label={`Open the ${project.title} case study`} />
+            <a href={projectHref(project.slug)} className={styles.panelOpen} onClick={openInPlace(() => onOpen(project.slug))} aria-label={`Open the ${project.title} case study`} />
           </article>
         ))}
       </div>

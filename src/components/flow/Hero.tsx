@@ -1,12 +1,13 @@
 "use client";
 
 import { gsap } from "gsap";
-import { Box, Code2, GraduationCap, Sparkles, UserRound } from "lucide-react";
+import { Box, Code2, GraduationCap, UserRound } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
 import { projects } from "@/data/projects";
 import { all, framedQuery, one, useFlowMotion, whileMatching, type FlowSetup } from "./useFlowMotion";
 import { isLoading, loadedEvent } from "./Loader";
+import { openInPlace, projectHref } from "./projectLink";
 import styles from "./Flow.module.css";
 
 const featured = projects[0];
@@ -30,7 +31,6 @@ const heroMotion: FlowSetup = (hero) => {
     .from(one(hero, "[data-hero-portrait]"), { y: 60, opacity: 0, duration: 1.4, ease: "expo.out" }, 0.2)
     .from(one(hero, "[data-hero-panel]"), { yPercent: 18, opacity: 0, duration: 1.2, ease: "expo.out" }, 0.3)
     .from(all(hero, "[data-hero-fade]"), { opacity: 0, y: 24, duration: 0.9, ease: "power3.out", stagger: 0.08 }, 0.45)
-    .from(one(hero, "[data-hero-spark]"), { scale: 0, rotation: -90, duration: 0.9, ease: "back.out(2)" }, 0.6)
     .to(one(hero, "[data-hero-intro]"), { "--reveal": "150%", duration: 1.5, ease: "power2.inOut" }, 1.25)
     .set(one(hero, "[data-hero-intro]"), { display: "none" });
   const play = () => intro.play();
@@ -111,7 +111,6 @@ export function Hero({ onOpen }: { onOpen: (slug: string) => void }) {
             <span data-line className={styles.line}><span>Dishan</span></span>
             <span data-line className={`${styles.line} ${styles.dim}`}><span>Bashitha</span></span>
           </h1>
-          <Sparkles data-hero-spark className={styles.heroSpark} aria-hidden="true" size={44} strokeWidth={1.25} />
         </div>
 
         <div data-hero-impact className={styles.heroImpact}>
@@ -143,10 +142,10 @@ export function Hero({ onOpen }: { onOpen: (slug: string) => void }) {
             {capabilities.map(({ label, icon: Icon }) => <li key={label[0]}><Icon aria-hidden="true" size={22} strokeWidth={1.35} />{label[0]}<br />{label[1]}</li>)}
           </ul>
           <p data-hero-fade className={styles.eyebrow}>Featured project</p>
-          <button data-hero-fade type="button" className={styles.featuredCard} onClick={() => onOpen(featured.slug)}>
+          <a data-hero-fade href={projectHref(featured.slug)} className={styles.featuredCard} onClick={openInPlace(() => onOpen(featured.slug))}>
             <span className={styles.featuredThumb}><Image src={featured.coverImage} alt="" fill sizes="112px" /></span>
             <span><strong>{featured.title}</strong><small>{featured.description}</small><em>View project →</em></span>
-          </button>
+          </a>
         </div>
       </div>
     </section>

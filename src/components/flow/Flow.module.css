@@ -119,7 +119,6 @@
 .heroPanel { position: absolute; inset: 50% clamp(12px, 1.6vw, 24px) clamp(12px, 1.6vw, 24px); border: 1px solid rgba(255, 255, 255, .16); border-radius: clamp(20px, 2.6vw, 36px); background: linear-gradient(180deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .04)); }
 .heroHeading { position: absolute; left: var(--gutter); top: clamp(92px, 15svh, 150px); z-index: 20; width: max-content; }
 .heroTitle { margin: 14px 0 0; font-size: clamp(48px, min(7.2vw, 13svh), 128px); font-weight: 500; line-height: .9; letter-spacing: -.055em; }
-.heroSpark { position: absolute; right: -54px; top: 30px; color: var(--lilac); }
 .heroImpact { position: absolute; right: var(--gutter); top: clamp(100px, 16svh, 160px); z-index: 20; width: min(25rem, 27vw); }
 .impactLine { margin: 0 0 16px; font-size: clamp(28px, 2.8vw, 46px); font-weight: 500; line-height: 1; letter-spacing: -.045em; }
 .impactLine span { color: var(--lilac); }
@@ -196,9 +195,12 @@
 .stepper button:disabled { opacity: .3; cursor: default; }
 .paperStepper { color: var(--muted-paper); }
 .paperStepper button { border-color: var(--line-paper); color: var(--on-paper); }
-.marquee { position: absolute; top: 50%; left: 0; transform: translateY(-50%); white-space: nowrap; font-size: clamp(56px, 9vw, 124px); font-weight: 400; letter-spacing: -.045em; pointer-events: none; }
-.marqueeTrack { display: inline-flex; gap: .5em; align-items: center; }
-.ring { display: inline-block; width: .24em; height: .24em; border: 2px solid currentColor; border-radius: 50%; }
+/* The themes run as a readable band in the clear space between the heading and the cards
+   (the cards' top edge is the stage inset plus half the space they leave). */
+.marquee { --card-top: calc(clamp(120px, 16svh, 150px) + (100svh - clamp(120px, 16svh, 150px) - clamp(340px, 56svh, 500px)) / 2); position: absolute; top: calc(var(--card-top) - 52px); left: 0; white-space: nowrap; font-size: clamp(17px, 1.6vw, 22px); font-weight: 400; letter-spacing: -.01em; color: var(--muted-paper); pointer-events: none; }
+.marqueeTrack { display: inline-flex; gap: .9em; align-items: center; }
+.ring { display: inline-block; width: .34em; height: .34em; border: 1.5px solid var(--accent-paper); border-radius: 50%; }
+@media (max-height: 700px) { .marquee { display: none; } }
 .stage { position: absolute; inset: clamp(120px, 16svh, 150px) 0 0; display: grid; place-items: center; perspective: 1600px; transform-style: preserve-3d; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .xcard { grid-area: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; width: min(84vw, 470px); height: min(56svh, 500px); min-height: 340px; padding: 30px; border-radius: 30px; color: #fff; backface-visibility: hidden; will-change: transform; }
 .cardTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; color: rgba(255, 255, 255, .8); }
@@ -361,13 +363,11 @@
   .hero { height: auto; }
   .heroFrame { display: flex; flex-direction: column; gap: 16px; min-height: calc(100svh - 24px); padding: calc(env(safe-area-inset-top, 0px) + 88px) 20px 20px; }
   .heroHeading, .heroImpact, .heroBio { position: relative; inset: auto; width: auto; }
-  .heroSpark { right: 0; top: 34px; }
   .impactLine, .heroPanel, .heroFeatured { display: none; }
   .heroImpact p:last-child { max-width: 30rem; }
   /* The name leads at a size that owns the width, with air between it, the eyebrow and the intro. */
   .heroHeading { padding-top: 8px; }
   .heroTitle { margin-top: 18px; font-size: clamp(58px, 18vw, 96px); line-height: .92; }
-  .heroSpark { top: 44px; }
   .heroImpact { margin-top: 10px; }
   .heroImpact p:last-child { font-size: 16px; line-height: 1.6; }
   /* The rings frame the portrait instead of crossing the copy. */

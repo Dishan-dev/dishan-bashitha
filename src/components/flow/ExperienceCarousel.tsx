@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Fragment, useRef } from "react";
 import { experience } from "@/data/experience";
+import { brakeTo, isTravelling, scrollToY, setScrollWeight } from "@/lib/portfolioScroll";
 import { all, one, useFlowMotion, type FlowSetup } from "./useFlowMotion";
 import { sideways } from "./sideways";
 import styles from "./Flow.module.css";
@@ -34,30 +35,78 @@ const experienceMotion: FlowSetup = (section) => {
         zIndex: 100 - Math.round(distance * 10),
       });
     });
-    gsap.set(track, { xPercent: -(position / last) * 45 });
+    gsap.set(track, { xPercent: -(position / last) * 30 });
     if (counter) counter.textContent = pad(Math.round(position) + 1);
   };
   render(0);
+  // The cards follow the scroll through a short ease, so turning between roles glides instead of
+  // jumping with every wheel tick.
+  const shown = { position: 0 };
+  const glide = gsap.quickTo(shown, "position", { duration: 0.55, ease: "power3.out", onUpdate: () => render(shown.position) });
   gsap.from(all(section, "[data-line] > span"), { yPercent: 110, duration: 1.1, ease: "expo.out", stagger: 0.09,
     scrollTrigger: { trigger: section, start: "top 70%", toggleActions: "play none none reverse" } });
   gsap.from(one(section, "[data-stage]"), { yPercent: 30, opacity: 0, ease: "none",
     scrollTrigger: { trigger: section, start: "top bottom", end: "top 30%", scrub: true } });
   let sync = () => {};
+  // The role the reader last rested on. A single flick may only turn one role from it, so no
+  // role is skipped in a hurry.
+  let settled = 0;
+  const roleY = (self: ScrollTrigger, index: number) => self.start + ((self.end - self.start) * index) / last;
+  // A fast scroll arriving at the carousel is caught at its first (or, coming back up, last) role.
+  const arrive = (self: ScrollTrigger, at: number) => {
+    settled = at;
+    if (!isTravelling() && Math.abs(self.getVelocity()) > 1600) brakeTo(roleY(self, at));
+  };
+  // Leaving in a hurry before the end role was shown: hold on that role first.
+  const leave = (self: ScrollTrigger, at: number) => {
+    if (isTravelling() || settled === at) return;
+    settled = at;
+    brakeTo(roleY(self, at));
+  };
   const pin = ScrollTrigger.create({
-    trigger: section, start: "top top", end: () => `+=${window.innerHeight * last * 0.5}`,
+    trigger: section, start: "top top", end: () => `+=${window.innerHeight * last * 0.85}`,
     pin: true, scrub: true, invalidateOnRefresh: true,
-    snap: { snapTo: 1 / last, inertia: false, duration: { min: 0.2, max: 0.5 }, ease: "power2.inOut" },
-    onUpdate: self => { render(self.progress * last); sync(); },
+    onEnter: self => arrive(self, 0),
+    onEnterBack: self => arrive(self, last),
+    onLeave: self => leave(self, last),
+    onLeaveBack: self => leave(self, 0),
+    // Scrolling is slightly heavier while the carousel holds the screen, so a hurried flick turns
+    // fewer roles; settling (below) does the rest.
+    onToggle: self => setScrollWeight(self.isActive ? 0.6 : 1),
+    onUpdate: self => {
+      const position = self.progress * last;
+      glide(position);
+      sync();
+      // Only a very hard flick is held, at the next role, before it can skip past it.
+      if (!isTravelling() && Math.abs(position - settled) > 1.5) {
+        settled += Math.sign(position - settled);
+        brakeTo(roleY(self, settled));
+      }
+    },
   });
+  // Settling runs through the smooth scroller once it has fully come to rest (GSAP's own snap
+  // fights Lenis's easing and can loop). Any deliberate nudge carries on to the next role in that
+  // direction; a tiny one eases back. Never more than one role from the last.
+  const rest = () => {
+    if (!pin.isActive || isTravelling()) return;
+    const position = pin.progress * last, nearest = Math.round(position);
+    // Already on a role (a settle, the arrows, a swipe or Bit put it there).
+    if (Math.abs(position - nearest) < 0.01) { settled = nearest; return; }
+    const drift = position - settled;
+    settled = Math.min(last, Math.max(0, Math.abs(drift) < 0.05 ? settled : settled + Math.sign(drift)));
+    scrollToY(roleY(pin, settled));
+  };
+  ScrollTrigger.addEventListener("scrollEnd", rest);
   const steps = sideways(section, one(section, "[data-stage]") ?? section, pin, last);
   sync = steps.sync;
-  return steps.kill;
+  return () => { setScrollWeight(1); ScrollTrigger.removeEventListener("scrollEnd", rest); steps.kill(); };
 };
 
 export function ExperienceCarousel() {
   const root = useRef<HTMLElement>(null);
   useFlowMotion(root, experienceMotion);
-  const marquee = [...themes, ...themes];
+  // Repeated so the band always spans the screen as it drifts.
+  const marquee = [...themes, ...themes, ...themes, ...themes];
 
   return (
     <section ref={root} id="experience" className={styles.exp} aria-labelledby="experience-title">

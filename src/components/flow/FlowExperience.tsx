@@ -24,7 +24,9 @@ const sectionLabels: Record<string, string> = { ...Object.fromEntries(navLinks),
 const sectionIds = ["home", "about", "experience", "education", "projects", "contact"];
 // Sections whose top edge sits on the paper background; the glass switches to dark text there.
 const paperSections = new Set(["about", "experience", "education", "projects"]);
-const projectFromHash = () => projects.find(project => window.location.hash === `#project-${project.slug}`)?.slug ?? null;
+// A case study lives at /projects/<slug> (its shareable address); older #project-<slug> links still open it.
+const projectFromUrl = () => projects.find(project => window.location.pathname === `/projects/${project.slug}` || window.location.hash === `#project-${project.slug}`)?.slug ?? null;
+const projectPath = (slug: string) => `/projects/${slug}`;
 
 /**
  * Where a link to a section lands: the start of a pinned sequence, otherwise the top of its
@@ -54,8 +56,9 @@ function goToSection(id: string, immediate = false) {
   return true;
 }
 
-export function FlowExperience() {
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+/** `initialProject` renders that case study open from the first (server) render, for its own page. */
+export function FlowExperience({ initialProject }: { initialProject?: string } = {}) {
+  const [openSlug, setOpenSlug] = useState<string | null>(initialProject ?? null);
   const openRef = useRef<string | null>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const switching = useRef(false);
@@ -159,7 +162,7 @@ export function FlowExperience() {
     window.history.scrollRestoration = "manual";
     const restore = () => {
       ScrollTrigger.refresh();
-      const slug = projectFromHash();
+      const slug = projectFromUrl();
       // A case-study link opens over Projects, so closing it lands among the panels.
       if (slug) { goToSection("projects", true); setOpenSlug(slug); }
       else if (window.location.hash) goToSection(window.location.hash.slice(1), true);
@@ -174,7 +177,7 @@ export function FlowExperience() {
   // History drives the viewer; closing it returns to the page exactly where it was.
   useEffect(() => {
     const onHistory = () => {
-      const slug = projectFromHash();
+      const slug = projectFromUrl();
       if (slug || openRef.current) { setOpenSlug(slug); return; }
       if (window.location.hash) goToSection(window.location.hash.slice(1));
       else scrollToY(0);
@@ -192,12 +195,12 @@ export function FlowExperience() {
   const open = useCallback((slug: string) => {
     returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setOpenSlug(slug);
-    window.history.pushState({ ...window.history.state, projectViewer: slug }, "", `#project-${slug}`);
+    window.history.pushState({ ...window.history.state, projectViewer: slug }, "", projectPath(slug));
   }, []);
 
   const close = useCallback(() => {
     if (openRef.current && window.history.state?.projectViewer === openRef.current) window.history.back();
-    else { window.history.replaceState(window.history.state, "", "#projects"); setOpenSlug(null); }
+    else { window.history.replaceState(window.history.state, "", "/#projects"); setOpenSlug(null); }
   }, []);
 
   const loaded = useCallback(() => {
@@ -209,7 +212,7 @@ export function FlowExperience() {
   const showNext = useCallback((slug: string) => {
     switching.current = true;
     setOpenSlug(slug);
-    window.history.replaceState({ ...window.history.state, projectViewer: slug }, "", `#project-${slug}`);
+    window.history.replaceState({ ...window.history.state, projectViewer: slug }, "", projectPath(slug));
   }, []);
 
   // The companion walks the reader forward one section at a time, then back to the top.
@@ -241,7 +244,7 @@ export function FlowExperience() {
           </div>
           {/* Phones and tablets: brand, the current section, and a menu sheet. */}
           <div className={`${styles.pill} ${styles.mobileBar}`}>
-            <a className={styles.brand} href="#home" aria-label="Home" onClick={() => setMenuOpen(false)}>DB</a>
+            <a className={styles.brand} href="#home" aria-label="DB, Dishan Bashitha: back to top" onClick={() => setMenuOpen(false)}>DB</a>
             <span key={active} className={styles.current} aria-hidden="true">{sectionLabels[active]}</span>
             <button type="button" className={styles.menuButton} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="flow-menu" onClick={() => setMenuOpen(open => !open)}>
               <span data-open={menuOpen ? "true" : undefined} /><span data-open={menuOpen ? "true" : undefined} />

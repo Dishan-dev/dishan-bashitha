@@ -15,12 +15,12 @@ npm run dev
 
 Deploy to a host that supports Next.js or a Node.js server. This project uses Next.js image optimization; do not publish the source or `.next` directory as a plain static website.
 
-1. Set `SITE_URL` in the host's production build environment to the final HTTPS origin, for example `https://your-domain.com` (no path). For local production testing, copy `.env.example` to `.env.local` and fill it in.
+1. The canonical origin is `https://dishan.me` (set in `src/lib/site.ts`). `SITE_URL` can override it, for example for a local production test; it must be an HTTPS origin without a path.
 2. Install with `npm ci`.
 3. Run `npm run lint`, `npm run typecheck`, and `npm run build`.
 4. Start with `npm start`, or let the hosting platform run its Next.js integration.
 
-`SITE_URL` controls canonical links, social image URLs, robots.txt, and sitemap.xml. Rebuild after changing it. If it is unset, indexing is disabled and the sitemap is empty; set it before the public launch. Keep it unset for non-public previews.
+The canonical origin drives canonical links, social image URLs, structured data, robots.txt and sitemap.xml. Only the production deployment is indexable: Vercel preview deployments (`VERCEL_ENV` other than `production`) send `noindex` and a disallow-all robots.txt. The previous address, `dishan-bashitha.vercel.app`, redirects permanently to `https://dishan.me` (see `next.config.ts`). Optionally set `GOOGLE_SITE_VERIFICATION` to emit a Search Console verification tag.
 
 The production app includes SVG and ICO favicons, an Apple touch icon, home-screen icons, a web manifest, a 1200×630 social preview, and baseline response headers. The manifest does not provide offline support.
 

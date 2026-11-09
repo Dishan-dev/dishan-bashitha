@@ -3,22 +3,31 @@
 import { gsap } from "gsap";
 import { GraduationCap } from "lucide-react";
 import { useRef } from "react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { education } from "@/data/experience";
+import { brakeTo, isTravelling } from "@/lib/portfolioScroll";
 import { all, one, useFlowMotion, type FlowSetup } from "./useFlowMotion";
 import styles from "./Flow.module.css";
 
 const tones = [styles.c1, styles.c4, styles.c3];
 
-/** A rail draws down beside the qualifications while each card tilts up into place. */
+/**
+ * A rail draws down beside the qualifications while each card tilts up into place. A hurried
+ * scroll is caught as it reaches the section so the qualifications are not flown past.
+ */
 const educationMotion: FlowSetup = (section) => {
+  const catchAt = (self: ScrollTrigger, y: number) => { if (!isTravelling() && Math.abs(self.getVelocity()) > 1600) brakeTo(y); };
+  ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom bottom",
+    onEnter: self => catchAt(self, self.start), onEnterBack: self => catchAt(self, self.end) });
   gsap.from(all(section, "[data-line] > span"), { yPercent: 110, duration: 1.1, ease: "expo.out", stagger: 0.09,
     scrollTrigger: { trigger: section, start: "top 70%", toggleActions: "play none none reverse" } });
   const list = one(section, "[data-edu-list]");
   gsap.fromTo(one(section, "[data-edu-progress]"), { scaleY: 0 }, { scaleY: 1, ease: "none",
     scrollTrigger: { trigger: list, start: "top 70%", end: "bottom 60%", scrub: true } });
   all(section, "[data-edu-item]").forEach(item => {
-    gsap.from(item, { rotationX: 18, y: 90, opacity: 0, transformPerspective: 1200, transformOrigin: "50% 100%", ease: "power2.out",
-      scrollTrigger: { trigger: item, start: "top 95%", end: "top 60%", scrub: true } });
+    // Played (not scrubbed) as soon as the card enters, so a quick scroll never passes a half-faded card.
+    gsap.from(item, { rotationX: 14, y: 60, opacity: 0, transformPerspective: 1200, transformOrigin: "50% 100%", duration: 0.7, ease: "power3.out",
+      scrollTrigger: { trigger: item, start: "top 92%", toggleActions: "play none none reverse" } });
   });
 };
 

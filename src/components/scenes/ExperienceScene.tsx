@@ -67,7 +67,7 @@ const experienceGroups = [
         period: "2024 — 2028",
         role: "BSc (Hons) Information Technology & Management",
         organization: "UNIVERSITY OF MORATUWA",
-        description: "Undergraduate study in Katubedda, Sri Lanka. Ongoing GPA: 3.54 / 4.00.",
+        description: "Undergraduate study in Katubedda, Sri Lanka.",
         focus: "Information Technology / Management",
       },
       {

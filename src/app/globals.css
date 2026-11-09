@@ -43,7 +43,8 @@
 
 * { box-sizing: border-box; }
 
-html { background: var(--canvas); }
+/* The scrollbar keeps its space while the loader or a case study locks the page, so nothing shifts. */
+html { background: var(--canvas); scrollbar-gutter: stable; }
 
 body {
   margin: 0;

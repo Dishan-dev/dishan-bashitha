@@ -8,25 +8,35 @@ import styles from "./Loader.module.css";
 
 const script = Great_Vibes({ weight: "400", subsets: ["latin"] });
 const name = "Dishan Bashitha";
-const statuses = ["Loading experiences", "Composing the stage", "Tuning the motion", "Almost there"];
+const [first, last] = name.split(" ");
 // Long enough for the name to be written out in full before the curtain lifts.
 const minimum = 2.8;
 const maximum = 6;
+
+/**
+ * Visitors from a shared link (LinkedIn's in-app browser, a ?ref=linkedin or utm_source link, or a
+ * case-study address) get a brisk curtain: they came for something specific and leave quickly.
+ */
+function isQuickVisit() {
+  const params = new URLSearchParams(window.location.search);
+  const source = `${params.get("ref") ?? ""} ${params.get("utm_source") ?? ""}`.toLowerCase();
+  return source.includes("linkedin") || /LinkedInApp/i.test(navigator.userAgent) || window.location.pathname.startsWith("/projects/");
+}
 
 /** Sections hold their entrance until the loader has lifted. */
 export const loadedEvent = "flow:loaded";
 export const isLoading = () => document.documentElement.hasAttribute("data-flow-loading");
 
 /**
- * The opening curtain: the name is written out in script by a glowing pen and underlined with a
+ * The opening curtain: the name is written out in script by a pen and underlined with a
  * flourish while a counter follows real progress (fonts and the cover images). At 100 the
- * signature lifts away, the star bursts, and the curtain rolls up to reveal the cover.
+ * signature lifts away and the curtain rolls up to reveal the cover.
  */
 /**
  * Writes the name left to right: a feathered mask sweeps across the script while a pen tip rides
  * its edge, bobbing over the letters, then a flourish is drawn beneath. Returns a cleanup.
  */
-function write(svg: SVGSVGElement | null, reduce: boolean) {
+function write(svg: SVGSVGElement | null, reduce: boolean, speed = 1) {
   const text = svg?.querySelector<SVGTextElement>("[data-sig-text]");
   const wipe = svg?.querySelector<SVGRectElement>("[data-sig-wipe]");
   const pen = svg?.querySelector<SVGCircleElement>("[data-sig-pen]");
@@ -59,7 +69,8 @@ function write(svg: SVGSVGElement | null, reduce: boolean) {
       .set(flourish, { opacity: 1 }, ">-0.05")
       .to(flourish, { strokeDashoffset: 0, duration: 0.55, ease: "power2.inOut" }, "<")
       .to(pen, { attr: { cx: start + span * 0.98, cy: underline - 2 }, duration: 0.55, ease: "power2.inOut" }, "<")
-      .to(pen, { opacity: 0, duration: 0.4, ease: "power2.out" });
+      .to(pen, { opacity: 0, duration: 0.4, ease: "power2.out" })
+      .timeScale(speed);
   });
   return () => { cancelled = true; timeline?.kill(); };
 }
@@ -68,7 +79,6 @@ export function Loader({ onDone }: { onDone: () => void }) {
   const root = useRef<HTMLDivElement>(null);
   const count = useRef<HTMLSpanElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
-  const status = useRef<HTMLSpanElement>(null);
   const signature = useRef<SVGSVGElement>(null);
 
   // Marked before any section sets up its entrance, so they wait for the reveal.
@@ -96,7 +106,9 @@ export function Loader({ onDone }: { onDone: () => void }) {
     let done = 0;
     tasks.forEach(task => task.then(() => { done += 1; }));
 
-    const writing = write(signature.current, reduce);
+    const quick = isQuickVisit();
+    const least = quick ? 1.2 : minimum, most = quick ? 3 : maximum;
+    const writing = write(signature.current, reduce, quick ? 2.4 : 1);
 
     if (reduce) {
       let cancelled = false;
@@ -111,19 +123,16 @@ export function Loader({ onDone }: { onDone: () => void }) {
     const shown = { value: 0 };
     const start = performance.now();
     let exiting = false;
-    let lastStatus = -1;
     const render = () => {
       const value = Math.round(shown.value);
-      if (count.current) count.current.textContent = String(value).padStart(3, "0");
+      if (count.current) count.current.textContent = String(value);
       if (bar.current) bar.current.style.transform = `scaleX(${shown.value / 100})`;
-      const index = Math.min(statuses.length - 1, Math.floor(shown.value / 26));
-      if (status.current && index !== lastStatus) { status.current.textContent = statuses[index]; lastStatus = index; }
     };
     // The counter eases toward real progress but never outruns the minimum stage time.
     const tick = () => {
       const elapsed = (performance.now() - start) / 1000;
-      const real = elapsed > maximum ? 1 : done / tasks.length;
-      const target = Math.min(real, elapsed / minimum) * 100;
+      const real = elapsed > most ? 1 : done / tasks.length;
+      const target = Math.min(real, elapsed / least) * 100;
       shown.value += (target - shown.value) * 0.12;
       if (target >= 100 && shown.value > 99.4) { shown.value = 100; exit(); }
       render();
@@ -135,7 +144,6 @@ export function Loader({ onDone }: { onDone: () => void }) {
       gsap.timeline({ defaults: { ease: "expo.inOut" }, onComplete: onDone })
         .to(signature.current, { yPercent: -40, opacity: 0, duration: 0.7, ease: "power3.in" }, 0)
         .to(element.querySelectorAll("[data-fade]"), { opacity: 0, y: -12, duration: 0.4, ease: "power2.in" }, 0)
-        .to(element.querySelector("[data-star]"), { scale: 9, rotation: 135, opacity: 0, duration: 1.1 }, 0.15)
         .to(element, { clipPath: "inset(0% 0% 100% 0% round 0 0 48px 48px)", duration: 1.05 }, 0.55)
         .add(finish, 0.8);
     };
@@ -144,34 +152,33 @@ export function Loader({ onDone }: { onDone: () => void }) {
   }, [onDone]);
 
   return (
-    <div ref={root} className={styles.loader} role="status" aria-live="polite" aria-label="Loading Dishan Bashitha’s portfolio">
+    <div ref={root} data-loader className={styles.loader} role="status" aria-live="polite" aria-label="Loading Dishan Bashitha’s portfolio">
       <div className={styles.glow} aria-hidden="true" />
-      <div className={styles.grid} aria-hidden="true" />
-      <div className={styles.orbit} aria-hidden="true"><span /><span /></div>
 
       <div className={styles.center} aria-hidden="true">
-        <svg data-star className={styles.star} viewBox="0 0 200 200"><path d="M100 0C108 62 138 92 200 100C138 108 108 138 100 200C92 138 62 108 0 100C62 92 92 62 100 0Z" /></svg>
+        <p data-fade className={styles.eyebrow}>Software Engineer · Sri Lanka</p>
         <svg ref={signature} className={styles.signature} viewBox="0 0 1000 260">
           <defs>
-            <linearGradient id="loader-ink" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#ffffff" /><stop offset=".55" stopColor="#e6dcff" /><stop offset="1" stopColor="#b7a6ff" /></linearGradient>
             {/* The written part is white; its leading edge feathers out like wet ink. */}
             <linearGradient id="loader-feather" x1="0" y1="0" x2="1" y2="0"><stop offset=".9" stopColor="#fff" /><stop offset="1" stopColor="#000" /></linearGradient>
             <mask id="loader-write" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="260"><rect data-sig-wipe x="0" y="0" width="0" height="260" fill="url(#loader-feather)" /></mask>
           </defs>
           <g mask="url(#loader-write)">
-            <text data-sig-text x="500" y="168" textAnchor="middle" fill="url(#loader-ink)" style={{ fontFamily: script.style.fontFamily, fontSize: 150 }}>{name}</text>
+            {/* Two-tone like the cover's headline: the surname in lilac. */}
+            <text data-sig-text x="500" y="168" textAnchor="middle" className={styles.ink} style={{ fontFamily: script.style.fontFamily, fontSize: 150 }}>
+              {first} <tspan className={styles.inkDim}>{last}</tspan>
+            </text>
           </g>
           <path data-sig-flourish className={styles.flourish} d="" />
-          <circle data-sig-pen className={styles.pen} r="6.5" cx="0" cy="0" />
+          <circle data-sig-pen className={styles.pen} r="3.5" cx="0" cy="0" />
         </svg>
-        <p data-fade className={styles.role}>Software Engineer <i /> Portfolio ’26</p>
       </div>
 
       <div data-fade className={styles.foot} aria-hidden="true">
-        <span ref={count} className={styles.count}>000</span>
-        <span className={styles.status}><i /><span ref={status}>{statuses[0]}</span></span>
+        <span className={styles.count}><span ref={count}>0</span><small>%</small></span>
+        <span className={styles.track}><span ref={bar} /></span>
+        <span className={styles.label}>Portfolio ’26</span>
       </div>
-      <span data-fade className={styles.track} aria-hidden="true"><span ref={bar} /></span>
     </div>
   );
 }

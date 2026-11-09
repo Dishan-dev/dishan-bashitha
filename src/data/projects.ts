@@ -6,6 +6,8 @@ export interface Project {
   slug: string;
   title: string;
   shortTitle: string;
+  /** What the project is, in a few words, for page titles and search results. */
+  headline: string;
   description: string;
   year: string;
   role: string;
@@ -24,7 +26,7 @@ export interface Project {
 
 export const projects: readonly Project[] = [
   {
-    id: "01", slug: "learnix", title: "LearniX", shortTitle: "LearniX", year: "2026",
+    id: "01", slug: "learnix", title: "LearniX", shortTitle: "LearniX", year: "2026", headline: "AI-Powered Learning Platform",
     role: "AI-powered learning platform", marker: "AI / Realtime",
     description: "AI-assisted quiz creation, classroom workspaces, and live multiplayer assessments for students and lecturers.",
     overview: "Learnix connects assessment preparation with interactive learning. Lecturers organize workspaces and assign quizzes; students practise individually, join live quiz rooms, and review their attempts and performance.",
@@ -50,7 +52,7 @@ export const projects: readonly Project[] = [
     ],
   },
   {
-    id: "02", slug: "primecore-bank", title: "PrimeCore Bank", shortTitle: "PrimeCore", year: "2025",
+    id: "02", slug: "primecore-bank", title: "PrimeCore Bank", shortTitle: "PrimeCore", year: "2025", headline: "Role-Based Banking Application",
     role: "Group project · Bank Officer module", marker: "Fintech / Full Stack",
     description: "A role-based banking application combining credit evaluation, loan eligibility, expense tracking, and money-transfer workflows.",
     overview: "Built as a group project under industry mentorship from Zone24x7, with my primary responsibility being the Bank Officer module, frontend-to-API integration, and collaboration on overall system integration. PrimeCore brings customer financial tools and banking operations into role-based workspaces through CreditLens, LoanSense, SpendIQ, and Transact.",
@@ -76,7 +78,7 @@ export const projects: readonly Project[] = [
     ],
   },
   {
-    id: "03", slug: "hotel-management-system", title: "Emerald Stay", shortTitle: "Emerald Stay", year: "2025",
+    id: "03", slug: "hotel-management-system", title: "Emerald Stay", shortTitle: "Emerald Stay", year: "2025", headline: "Hotel Management System",
     role: "Hotel management system", marker: "Hospitality / Full Stack",
     description: "A hotel operations platform with customer reservations, front-desk workflows, manager reports, and travel-company block bookings.",
     overview: "Emerald Stay connects the guest booking journey with daily hotel operations. Dedicated customer, clerk, manager, and travel-company portals handle reservations, arrivals, departures, room inventory, and billing.",
@@ -103,7 +105,7 @@ export const projects: readonly Project[] = [
   {
     // Retain the existing project brief until the source repository is supplied.
     // Dishan-dev/planitnow is empty; do not infer its implementation or stack.
-    id: "04", slug: "planitnow", title: "PlanItNow", shortTitle: "PlanItNow", year: "2024",
+    id: "04", slug: "planitnow", title: "PlanItNow", shortTitle: "PlanItNow", year: "2024", headline: "Event Planning Platform",
     role: "Event planning platform", marker: "Events / Full Stack",
     description: "An event planning platform that brings event details, trusted suppliers, budgets, and charitable giving into one simple workspace.",
     overview: "PlanItNow brings event planning, supplier discovery, budget management, and charitable giving into a shared workspace.",

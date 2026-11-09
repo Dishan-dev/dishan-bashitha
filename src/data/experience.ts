@@ -16,7 +16,7 @@ export const experience: readonly ExperienceEntry[] = [
 ];
 
 export const education: readonly ExperienceEntry[] = [
-  { period: "2024 — 2028", role: "BSc (Hons) IT & Management", organization: "University of Moratuwa", category: "Education", description: "Undergraduate study in Katubedda, Sri Lanka. Ongoing GPA 3.54 / 4.00." },
+  { period: "2024 — 2028", role: "BSc (Hons) IT & Management", organization: "University of Moratuwa", category: "Education", description: "Undergraduate study in Katubedda, Sri Lanka." },
   { period: "2022 — 2025", role: "BEng (Hons) Software Engineering", organization: "London Metropolitan University", category: "Education", description: "Awarded First Class Honours." },
   { period: "HND", role: "Software Engineering", organization: "ESOFT Metro Campus", category: "Education", description: "Higher National Diploma in Software Engineering, Kurunegala." },
 ];

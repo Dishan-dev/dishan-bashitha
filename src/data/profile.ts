@@ -6,6 +6,6 @@ export const profile = {
   location: "Kurunegala, Sri Lanka",
   linkedin: "https://www.linkedin.com/in/dishan-bashitha-60a138295/",
   github: "https://github.com/Dishan-dev",
-  website: "https://dishan-bashitha.vercel.app/",
+  website: "https://dishan.me/",
   resume: "/DISHAN_BASHITHA.pdf",
 } as const;

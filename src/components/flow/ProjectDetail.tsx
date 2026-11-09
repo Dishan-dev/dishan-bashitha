@@ -2,13 +2,14 @@
 
 import { usePresence } from "framer-motion";
 import { gsap } from "gsap";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Code2, FileText, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Code2, FileText, Link2, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useId, useLayoutEffect, useRef, type CSSProperties, type RefObject } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { projects, type Project } from "@/data/projects";
 import { portfolioMotion, reducedQuery } from "@/lib/motion";
 import { createFlight, flightBox, imageFit, isOnScreen, type FlightBox } from "@/lib/sharedElement";
 import { ParticleField } from "./ParticleField";
+import { openInPlace, projectHref } from "./projectLink";
 import { tintFor } from "./projectTints";
 import styles from "./ProjectDetail.module.css";
 
@@ -146,7 +147,10 @@ export function ProjectDetail({ project, onClose, onNext, switchingRef }: Projec
       <header className={styles.bar}>
         <button type="button" className={styles.glass} onClick={onClose}><ArrowLeft size={16} aria-hidden="true" />All projects</button>
         <p className={`${styles.glass} ${styles.crumb}`}>05 · Projects <span>/</span> {project.id} {project.shortTitle}</p>
-        <button type="button" className={styles.glass} onClick={onClose} aria-label="Close project details"><span className={styles.key}>Esc</span><X size={16} aria-hidden="true" /></button>
+        <span className={styles.barEnd}>
+          <ShareButton project={project} />
+          <button type="button" className={styles.glass} onClick={onClose} aria-label="Close project details"><span className={styles.key}>Esc</span><X size={16} aria-hidden="true" /></button>
+        </span>
       </header>
 
       <div ref={scroller} className={styles.scroller}>
@@ -225,14 +229,41 @@ export function ProjectDetail({ project, onClose, onNext, switchingRef }: Projec
         </section>}
 
         <footer className={styles.next} style={{ "--next-tint": tintFor(next.slug) } as CSSProperties}>
-          <button type="button" data-reveal className={styles.nextButton} onClick={() => onNext(next.slug)}>
+          <a href={projectHref(next.slug)} data-reveal className={styles.nextButton} onClick={openInPlace(() => onNext(next.slug))}>
             <small>Next project · {next.id}</small>
             <strong>{next.title}<ArrowRight aria-hidden="true" /></strong>
             <span>{next.description}</span>
-          </button>
+          </a>
           <button type="button" className={styles.back} onClick={onClose}><ArrowLeft size={16} aria-hidden="true" />Back to all projects</button>
         </footer>
       </div>
     </section>
+  );
+}
+
+/**
+ * Shares the case study's own address (/projects/<slug>), which carries its own preview card.
+ * Phones get the native share sheet (straight into the LinkedIn app); elsewhere it is copied.
+ */
+function ShareButton({ project }: { project: Project }) {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 1800);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+  const share = async () => {
+    const url = new URL(`/projects/${project.slug}`, window.location.origin).href;
+    if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share({ title: `${project.title} — Dishan Bashitha`, text: project.description, url }); } catch { /* dismissed */ }
+      return;
+    }
+    try { await navigator.clipboard.writeText(url); setCopied(true); } catch { window.prompt("Copy this link", url); }
+  };
+  return (
+    <button type="button" className={styles.glass} onClick={share} aria-label={copied ? "Link copied" : `Share a link to ${project.title}`}>
+      {copied ? <Check size={16} aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}
+      <span className={styles.shareLabel}>{copied ? "Copied" : "Share"}</span>
+    </button>
   );
 }
