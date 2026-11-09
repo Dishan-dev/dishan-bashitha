@@ -3,22 +3,14 @@
 import { gsap } from "gsap";
 import { GraduationCap } from "lucide-react";
 import { useRef } from "react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { education } from "@/data/experience";
-import { brakeTo, isTravelling } from "@/lib/portfolioScroll";
 import { all, one, useFlowMotion, type FlowSetup } from "./useFlowMotion";
 import styles from "./Flow.module.css";
 
 const tones = [styles.c1, styles.c4, styles.c3];
 
-/**
- * A rail draws down beside the qualifications while each card tilts up into place. A hurried
- * scroll is caught as it reaches the section so the qualifications are not flown past.
- */
+/** A rail draws down beside the qualifications while each card tilts up into place. */
 const educationMotion: FlowSetup = (section) => {
-  const catchAt = (self: ScrollTrigger, y: number) => { if (!isTravelling() && Math.abs(self.getVelocity()) > 1600) brakeTo(y); };
-  ScrollTrigger.create({ trigger: section, start: "top top", end: "bottom bottom",
-    onEnter: self => catchAt(self, self.start), onEnterBack: self => catchAt(self, self.end) });
   gsap.from(all(section, "[data-line] > span"), { yPercent: 110, duration: 1.1, ease: "expo.out", stagger: 0.09,
     scrollTrigger: { trigger: section, start: "top 70%", toggleActions: "play none none reverse" } });
   const list = one(section, "[data-edu-list]");

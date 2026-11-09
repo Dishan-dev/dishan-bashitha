@@ -18,9 +18,6 @@ export type SceneGeometry = {
 };
 
 let lenis: Lenis | null = null;
-// Wheel input is scaled by this; pinned sequences make scrolling a touch heavier while they run.
-let wheelWeight = 1;
-export const setScrollWeight = (weight: number) => { wheelWeight = weight; };
 const tick = (time: number) => lenis?.raf(time * 1000);
 
 export const isStacked = () => window.matchMedia(stackedQuery).matches;
@@ -49,8 +46,7 @@ export const sceneGeometryFor = (id: string) => sceneGeometry().find(scene => sc
 /** One Lenis instance, advanced by GSAP's ticker so ScrollTrigger and smoothing share a frame. */
 export function startSmoothScroll() {
   if (lenis) return lenis;
-  lenis = new Lenis({ autoRaf: false, lerp: 0.09, wheelMultiplier: 0.95, smoothWheel: true, syncTouch: false,
-    virtualScroll: data => { data.deltaY *= wheelWeight; data.deltaX *= wheelWeight; return true; } });
+  lenis = new Lenis({ autoRaf: false, lerp: 0.09, wheelMultiplier: 0.95, smoothWheel: true, syncTouch: false });
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add(tick);
   gsap.ticker.lagSmoothing(0);
@@ -70,21 +66,10 @@ export function lockScroll(locked: boolean) {
   document.documentElement.classList.toggle("scroll-locked", locked);
 }
 
-// True while a scripted journey (nav link, arrows, Bit's tour) is under way; scroll brakes stand aside.
-let travelling = false;
-let travelTimer = 0;
-export const isTravelling = () => travelling;
-
-const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 const easeInOutQuint = (t: number) => t < 0.5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2;
 
-export function scrollToY(top: number, { immediate = false, onComplete: done }: { immediate?: boolean; onComplete?: () => void } = {}) {
+export function scrollToY(top: number, { immediate = false, onComplete }: { immediate?: boolean; onComplete?: () => void } = {}) {
   const distance = Math.abs(top - window.scrollY);
-  travelling = true;
-  window.clearTimeout(travelTimer);
-  // A fallback in case a journey is interrupted and never reports completion.
-  travelTimer = window.setTimeout(() => { travelling = false; }, 2400);
-  const onComplete = () => { travelling = false; window.clearTimeout(travelTimer); done?.(); };
   if (lenis) {
     // Longer journeys take slightly longer, but never become an artificial wait.
     const duration = Math.min(1.9, 0.85 + (distance / window.innerHeight) * 0.16);
@@ -96,24 +81,6 @@ export function scrollToY(top: number, { immediate = false, onComplete: done }: 
   window.scrollTo({ top, behavior: instant ? "instant" : "smooth" });
   if (instant) onComplete?.();
   else window.addEventListener("scrollend", () => onComplete?.(), { once: true });
-}
-
-/**
- * Stops a hurried scroll at a resting point: input pauses while the page eases there, then a
- * short beat absorbs the rest of the flick before scrolling resumes.
- */
-export function brakeTo(top: number) {
-  if (!lenis) { window.scrollTo({ top, behavior: "smooth" }); return; }
-  const smooth = lenis;
-  travelling = true;
-  window.clearTimeout(travelTimer);
-  smooth.stop();
-  smooth.scrollTo(top, { duration: 0.75, easing: easeOutCubic, force: true, onComplete: () => {
-    travelTimer = window.setTimeout(() => {
-      travelling = false;
-      if (!document.documentElement.classList.contains("scroll-locked")) smooth.start();
-    }, 220);
-  } });
 }
 
 export function scrollToScene(id: string, options?: Parameters<typeof scrollToY>[1]) {

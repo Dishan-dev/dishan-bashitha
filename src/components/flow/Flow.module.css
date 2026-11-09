@@ -153,7 +153,7 @@
 .about .eyebrow { color: var(--accent-paper); }
 .lanyardCol { position: sticky; top: 0; align-self: start; display: flex; flex-direction: column; align-items: center; height: 100svh; }
 .lanyardDrop { width: min(100%, 320px); }
-.lanyard { display: flex; flex-direction: column; align-items: center; transform-origin: 50% 0; touch-action: none; }
+.lanyard { display: flex; flex-direction: column; align-items: center; transform-origin: 50% 0; touch-action: pan-y; }
 .strap { position: relative; width: 34px; height: clamp(150px, 26svh, 260px); overflow: hidden; background: linear-gradient(90deg, #4a22d6, #6b3cf2 50%, #4a22d6); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
 .strap i { position: absolute; left: 50%; bottom: 8px; translate: -50% 0; writing-mode: vertical-rl; font: 600 10px var(--font-mono), monospace; font-style: normal; letter-spacing: .3em; white-space: nowrap; color: rgba(255, 255, 255, .78); }
 .clip { position: relative; z-index: 2; width: 46px; height: 28px; margin-top: -2px; border-radius: 6px 6px 12px 12px; background: linear-gradient(180deg, #ececf2, #8d8c99 60%, #d3d3dc); box-shadow: 0 4px 10px rgba(0, 0, 0, .25); }
@@ -197,10 +197,6 @@
 .paperStepper button { border-color: var(--line-paper); color: var(--on-paper); }
 /* The themes run as a readable band in the clear space between the heading and the cards
    (the cards' top edge is the stage inset plus half the space they leave). */
-.marquee { --card-top: calc(clamp(120px, 16svh, 150px) + (100svh - clamp(120px, 16svh, 150px) - clamp(340px, 56svh, 500px)) / 2); position: absolute; top: calc(var(--card-top) - 52px); left: 0; white-space: nowrap; font-size: clamp(17px, 1.6vw, 22px); font-weight: 400; letter-spacing: -.01em; color: var(--muted-paper); pointer-events: none; }
-.marqueeTrack { display: inline-flex; gap: .9em; align-items: center; }
-.ring { display: inline-block; width: .34em; height: .34em; border: 1.5px solid var(--accent-paper); border-radius: 50%; }
-@media (max-height: 700px) { .marquee { display: none; } }
 .stage { position: absolute; inset: clamp(120px, 16svh, 150px) 0 0; display: grid; place-items: center; perspective: 1600px; transform-style: preserve-3d; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .xcard { grid-area: 1 / 1; display: flex; flex-direction: column; justify-content: space-between; width: min(84vw, 470px); height: min(56svh, 500px); min-height: 340px; padding: 30px; border-radius: 30px; color: #fff; backface-visibility: hidden; will-change: transform; }
 .cardTop { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; color: rgba(255, 255, 255, .8); }
@@ -310,8 +306,23 @@
 .projects { --panel-base: #fff; --panel-glow: 34%; --panel-drop: rgba(40, 30, 90, .22); position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: var(--paper); color: var(--on-paper); }
 :global(:root[data-theme="dark"]) .projects { --panel-base: #07060f; --panel-glow: 55%; --panel-drop: rgba(0, 0, 0, .55); }
 .projects .eyebrow { color: var(--accent-paper); }
-.projectsHeading { position: absolute; left: var(--gutter); top: var(--title-top); z-index: 3; }
-.track { display: flex; gap: 24px; width: max-content; height: 100%; padding: clamp(190px, 25svh, 230px) 24px 32px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.projectsHeading { position: absolute; left: var(--gutter); right: var(--gutter); top: var(--title-top); z-index: 3; pointer-events: none; }
+.projectsHeading > * { pointer-events: auto; }
+/* Filter chips under the heading: one row, scrolling sideways when it overflows. */
+.filters { display: flex; gap: 8px; width: fit-content; max-width: 100%; margin: 18px 0 0; padding: 2px 40px 2px 0; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
+.filters::-webkit-scrollbar { display: none; }
+.filters button { display: inline-flex; flex: none; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 1px solid var(--line-paper); border-radius: 999px; background: color-mix(in srgb, var(--on-paper) 3%, transparent); color: var(--on-paper); font-size: 13px; white-space: nowrap; cursor: pointer; transition: background-color .25s, border-color .25s, color .25s; }
+.filters button svg { width: 15px; height: 15px; color: var(--muted-paper); transition: color .25s; }
+.filters button small { font: 11px var(--font-mono), monospace; color: var(--muted-paper); }
+@media (hover: hover) {
+  .filters button:hover { border-color: var(--accent-paper); }
+  .filters button:hover svg { color: var(--accent-paper); }
+}
+.filters button[aria-pressed="true"] { border-color: var(--on-paper); background: var(--on-paper); color: var(--paper); }
+.filters button[aria-pressed="true"] svg, .filters button[aria-pressed="true"] small { color: color-mix(in srgb, var(--paper) 75%, transparent); }
+/* The top padding leaves room for the heading and the filter row. */
+.track { display: flex; gap: 24px; width: max-content; height: 100%; padding: calc(clamp(190px, 25svh, 230px) + 54px) 24px 32px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .panel { position: relative; flex: none; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: clamp(20px, 3vw, 48px); width: min(86vw, 1100px); height: 100%; padding: clamp(24px, 3.4vw, 48px); overflow: hidden; border: 1px solid var(--line-paper); border-radius: 22px; perspective: 1600px;
   background: radial-gradient(70% 80% at 80% 50%, color-mix(in srgb, var(--tint) var(--panel-glow), transparent), transparent 70%), radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--tint) calc(var(--panel-glow) / 2), transparent), transparent 70%), var(--panel-base); }
 .panelCopy { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; align-self: stretch; }
@@ -409,7 +420,9 @@
   .stepper { top: calc(var(--title-top) - 9px); gap: 6px; font-size: 11px; }
   .stepper button { width: 32px; height: 32px; }
   .skillRow { grid-template-columns: 1fr; gap: 4px; }
-  .panelTitle { font-size: clamp(38px, 11vw, 56px); }
+  .panelTitle { font-size: clamp(32px, 9.5vw, 46px); }
+  .panelDesc { -webkit-line-clamp: 2; }
+  .panel { gap: 16px; padding: 18px; }
   /* Phones: the copy and the directory carry the section on a calmer backdrop. */
   .contactFrame { min-height: 100svh; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); background: radial-gradient(90% 45% at 100% 0%, rgba(107, 60, 242, .5) 0%, transparent 70%), linear-gradient(180deg, #0b0628 0%, #1c0c66 100%); }
   .contactFoot { flex-direction: column; gap: 8px; padding-right: 64px; }
@@ -425,6 +438,5 @@
   .stage, .track { touch-action: auto; }
   .stage { position: static; display: flex; gap: 16px; height: 100%; padding: 170px 20px 110px; overflow-x: auto; align-items: center; perspective: none; }
   .xcard { flex: none; }
-  .marquee { display: none; }
   .track { width: auto; overflow-x: auto; }
 }

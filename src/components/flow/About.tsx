@@ -25,6 +25,7 @@ export function About() {
   const root = useRef<HTMLElement>(null);
   const swing = useRef<HTMLDivElement>(null);
   useFlowMotion(root, aboutMotion);
+  // (On touch screens vertical swipes over the badge scroll the page; sideways drags swing it.)
   // A damped pendulum hung from the top of the column. Dragging swings the badge toward the
   // pointer, release lets it settle, and scrolling gives it a small push. It only runs while
   // visible, and stays still for reduced motion.
