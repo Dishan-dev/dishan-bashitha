@@ -2,7 +2,7 @@
 
 import { usePresence } from "framer-motion";
 import { gsap } from "gsap";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Code2, FileText, Link2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Code2, FileText, Link2, PlayCircle, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { projects, type Project } from "@/data/projects";
@@ -15,6 +15,7 @@ import styles from "./ProjectDetail.module.css";
 
 type ProjectDetailProps = { project: Project; onClose: () => void; onNext: (slug: string) => void; switchingRef: RefObject<boolean> };
 const boxVars = ({ left, top, width, height, borderRadius }: FlightBox) => ({ left, top, width, height, borderRadius });
+const isVideo = (url: string) => /(^https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(url);
 const panelShot = (slug: string) => document.querySelector<HTMLElement>(`[data-project-media="${slug}"][data-active-media]`);
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -164,6 +165,7 @@ export function ProjectDetail({ project, onClose, onNext, switchingRef }: Projec
               <p data-hero-reveal className={styles.lede}>{project.description}</p>
               <div data-hero-reveal className={styles.actions}>
                 {project.githubUrl && <a className={styles.solid} href={project.githubUrl} target="_blank" rel="noopener noreferrer">View source<ArrowUpRight size={16} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>}
+                {project.demoUrl && <a className={project.githubUrl ? styles.outline : styles.solid} href={project.demoUrl} target="_blank" rel="noopener noreferrer">Watch demo<PlayCircle size={16} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>}
                 {project.liveUrl && <a className={styles.outline} href={project.liveUrl} target="_blank" rel="noopener noreferrer">Live site<ArrowUpRight size={16} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>}
                 <button type="button" className={styles.outline} onClick={() => scroller.current?.scrollTo({ top: scroller.current.clientHeight, behavior: "smooth" })}>Read more</button>
               </div>
@@ -221,8 +223,8 @@ export function ProjectDetail({ project, onClose, onNext, switchingRef }: Projec
           <div data-reveal><p className={styles.eyebrow}>{number("Source")} · Source</p><h2 id={`${instance}-source`} className={styles.sectionTitle}>Inside <span>the build.</span></h2></div>
           <div className={styles.sources}>
             {project.sources.map(source => <a key={source.url} data-reveal href={source.url} target="_blank" rel="noopener noreferrer">
-              {source.url.endsWith(".pdf") ? <FileText size={20} aria-hidden="true" /> : <Code2 size={20} aria-hidden="true" />}
-              <span><strong>{source.label}</strong><small>{source.url.endsWith(".pdf") ? "PDF document" : "GitHub"}<span className="sr-only"> (opens in a new tab)</span></small></span>
+              {source.url.endsWith(".pdf") ? <FileText size={20} aria-hidden="true" /> : isVideo(source.url) ? <PlayCircle size={20} aria-hidden="true" /> : <Code2 size={20} aria-hidden="true" />}
+              <span><strong>{source.label}</strong><small>{source.url.endsWith(".pdf") ? "PDF document" : isVideo(source.url) ? "YouTube" : "GitHub"}<span className="sr-only"> (opens in a new tab)</span></small></span>
               <ArrowUpRight size={18} aria-hidden="true" />
             </a>)}
           </div>

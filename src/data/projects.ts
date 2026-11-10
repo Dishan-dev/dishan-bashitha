@@ -15,6 +15,8 @@ export interface Project {
   coverImage: string;
   chapters: readonly string[];
   liveUrl?: string;
+  /** A recorded walkthrough of the project (for example a YouTube video). */
+  demoUrl?: string;
   githubUrl?: string;
   marker: string;
   capabilities: readonly string[];
@@ -110,7 +112,8 @@ export const projects: readonly Project[] = [
     description: "An event planning platform that brings event details, trusted suppliers, budgets, and charitable giving into one simple workspace.",
     overview: "PlanItNow brings event planning, supplier discovery, budget management, and charitable giving into a shared workspace.",
     technologies: [], coverImage: "/images/planitnowProject.png", chapters: ["Overview"],
+    demoUrl: "https://youtu.be/YIqL5Icsjbg",
     capabilities: ["Event Planning", "Supplier Discovery", "Budget Management"],
-    features: [], engineering: [], sources: [],
+    features: [], engineering: [], sources: [{ label: "Demo video", url: "https://youtu.be/YIqL5Icsjbg" }],
   },
 ];
