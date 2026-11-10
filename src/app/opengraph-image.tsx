@@ -21,7 +21,7 @@ export default async function Image() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <div style={{ display: "flex", fontSize: 30, lineHeight: 1.3, color: "rgba(255, 255, 255, .88)" }}>
-              {`${projects.length} full-stack projects · Next.js · Spring Boot`}
+              {`${projects.length} projects · Next.js · Spring Boot`}
             </div>
             <div style={{ display: "flex", fontSize: 22, color: "#cbbcff" }}>dishan.me</div>
           </div>

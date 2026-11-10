@@ -1,7 +1,7 @@
 import type { IconType } from "react-icons";
 import {
   SiExpress, SiFlyway, SiJsonwebtokens, SiLangchain, SiNextdotjs, SiNodedotjs, SiOpenjdk, SiPostgresql, SiPrisma,
-  SiSocketdotio, SiSpringboot, SiSpringsecurity, SiTypescript,
+  SiPnpm, SiReact, SiSocketdotio, SiSpringboot, SiSpringsecurity, SiTailwindcss, SiTurborepo, SiTypescript,
 } from "react-icons/si";
 
 // Brand marks for the technologies named in the project data. Anything without a mark here is
@@ -20,4 +20,9 @@ export const techIcons: Record<string, IconType> = {
   "Spring Security": SiSpringsecurity,
   Flyway: SiFlyway,
   JWT: SiJsonwebtokens,
+  React: SiReact,
+  Turborepo: SiTurborepo,
+  "Tailwind CSS": SiTailwindcss,
+  pnpm: SiPnpm,
+  "TypeScript Compiler API": SiTypescript,
 };

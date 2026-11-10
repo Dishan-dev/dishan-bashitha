@@ -116,4 +116,31 @@ export const projects: readonly Project[] = [
     capabilities: ["Event Planning", "Supplier Discovery", "Budget Management"],
     features: [], engineering: [], sources: [{ label: "Demo video", url: "https://youtu.be/YIqL5Icsjbg" }],
   },
+  {
+    // Ongoing. Details from the repository README and docs/architecture.md (Dishan-dev/codeDNA).
+    id: "05", slug: "codedna", title: "CodeDNA", shortTitle: "CodeDNA", year: "2026", headline: "Learn How Real Apps Work",
+    role: "Code-learning platform · In development", marker: "Dev Education / In progress",
+    description: "Turns real codebases, including AI-generated apps, into animated feature stories and hands-on challenges built only from the source code.",
+    overview: "CodeDNA helps beginners and vibe coders understand real apps, including the ones an AI built for them, through animated feature stories and hands-on challenges instead of videos. Lessons are built only from real code, and anything it cannot follow is shown as an unknown part, never invented. It is in active development: the testing stage, an AI helper and a VS Code extension are still on the roadmap.",
+    technologies: ["Next.js", "TypeScript", "Turborepo", "Playwright", "React", "Tailwind CSS", "pnpm", "TypeScript Compiler API"],
+    coverImage: "/images/projectCodeDNA.png", chapters: ["Overview", "Features", "Engineering", "Source"],
+    liveUrl: "https://code-dna-gules.vercel.app/",
+    githubUrl: "https://github.com/Dishan-dev/codeDNA",
+    capabilities: ["Feature Stories", "Hands-on Challenges", "Code Analysis"],
+    features: [
+      { title: "Animated feature stories", description: "Buttons, forms, links and API routes are followed through the real calls into step-by-step stories, with branches, effects and an honest confidence label on every step." },
+      { title: "Lessons and challenges", description: "Each feature becomes a lesson (Watch, Understand, Try, Recap) with four challenge types: Predict, Order the steps, Spot the bug and Fill the gap. Progress, XP and streaks stay in the browser." },
+      { title: "Learn any app", description: "Start from a sample app, paste a public GitHub link, or point the CLI at a local folder. Code is only read, never run, and local projects never leave the learner's computer." },
+    ],
+    engineering: [
+      { title: "Monorepo structure", description: "A pnpm and Turborepo workspace separates the Next.js web app and CLI from packages for shared contracts, the analysis engine, GitHub import, Node helpers and learning UI components." },
+      { title: "Analysis engine", description: "A pure TypeScript engine builds an import graph and uses the TypeScript compiler's type checker to resolve calls, aliases and re-exports, with adapters for Next.js App Router routes and effects such as Prisma, Supabase, fetch and auth." },
+      { title: "Safety and limits", description: "Analysis runs in Node worker threads with memory and time limits. GitHub imports are pinned to a commit with size, file-count and rate limits, and Playwright with axe covers end-to-end and accessibility tests." },
+    ],
+    sources: [
+      { label: "Project repository", url: "https://github.com/Dishan-dev/codeDNA" },
+      { label: "Architecture overview", url: "https://github.com/Dishan-dev/codeDNA/blob/main/docs/architecture.md" },
+      { label: "Roadmap", url: "https://github.com/Dishan-dev/codeDNA/blob/main/docs/roadmap.md" },
+    ],
+  },
 ];

@@ -4,6 +4,7 @@ export const projectTints: Record<string, string> = {
   "primecore-bank": "#2f6fd6",
   "hotel-management-system": "#1f9d74",
   planitnow: "#d9772b",
+  codedna: "#4f46e5",
 };
 
 export const tintFor = (slug: string) => projectTints[slug] ?? projectTints.learnix;
