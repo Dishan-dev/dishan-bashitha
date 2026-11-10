@@ -31,6 +31,8 @@
   --pill-line: #2a2836;
 }
 :global(html:has([data-flow])), :global(body:has([data-flow])) { background: #000; }
+/* What shows around a section as it recedes: a soft grey on the light theme instead of black. */
+:global(:root[data-theme="light"]:has([data-flow])), :global(:root[data-theme="light"] body:has([data-flow])) { background: #cfcdd8; }
 .flow :focus-visible { outline: 2px solid var(--lilac); outline-offset: 3px; }
 :where(.flow a) { color: inherit; text-decoration: none; }
 
@@ -44,6 +46,11 @@
 .stack:nth-of-type(5) { z-index: 5; }
 .stack:nth-of-type(6) { z-index: 6; }
 .stackShade { position: absolute; inset: 0; z-index: 200; background: #05040b; opacity: 0; pointer-events: none; }
+/* Liquid-glass rim on a rising layer: a specular line along the rounded top edge, a soft sheen
+   fading down from it and a faint inner glow. Its opacity follows the hand-over. */
+.stackGlass { position: absolute; left: 0; right: 0; top: 0; z-index: 201; height: clamp(90px, 14svh, 150px); opacity: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .26) 0, rgba(255, 255, 255, .09) 2px, rgba(255, 255, 255, .05) 22%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, .55), inset 0 22px 34px -22px rgba(255, 255, 255, .35), inset 0 -1px 0 rgba(255, 255, 255, 0); }
 
 /* Masked lines: the inner span rises through its line box. */
 .line { display: block; overflow: hidden; padding-bottom: .08em; margin-bottom: -.08em; }
@@ -149,7 +156,7 @@
 .featuredCard em { display: block; margin-top: 6px; font-size: 12px; font-style: normal; color: var(--lilac); }
 
 /* ---------- About: lanyard badge beside the statement ---------- */
-.about { position: relative; overflow: clip; display: grid; grid-template-columns: minmax(280px, 5fr) 7fr; gap: clamp(32px, 5vw, 88px); padding: 0 var(--gutter) clamp(80px, 12vh, 140px); background: var(--paper); color: var(--on-paper); }
+.about { position: relative; overflow: clip; display: grid; grid-template-columns: minmax(280px, 5fr) 7fr; gap: clamp(32px, 5vw, 88px); padding: 0 var(--gutter) clamp(80px, 12vh, 140px); background: color-mix(in srgb, var(--paper) calc(var(--solid, 1) * 100%), transparent); color: var(--on-paper); }
 .about .eyebrow { color: var(--accent-paper); }
 .lanyardCol { position: sticky; top: 0; align-self: start; display: flex; flex-direction: column; align-items: center; height: 100svh; }
 .lanyardDrop { width: min(100%, 320px); }
@@ -186,7 +193,8 @@
 .skillRow dd { margin: 0; font-size: clamp(15px, 1.2vw, 18px); line-height: 1.45; }
 
 /* ---------- Experience: 3D card carousel ---------- */
-.exp { position: relative; height: 100svh; min-height: 620px; overflow: hidden; background: var(--paper); color: var(--on-paper); }
+/* Section backgrounds read --solid (set while a section rises as frosted glass; 1 = solid). */
+.exp { position: relative; height: 100svh; min-height: 620px; overflow: hidden; background: color-mix(in srgb, var(--paper) calc(var(--solid, 1) * 100%), transparent); color: var(--on-paper); }
 .expHeading { position: absolute; left: var(--gutter); top: var(--title-top); z-index: 30; }
 .expHeading .eyebrow { color: var(--accent-paper); }
 .stepper { position: absolute; right: var(--gutter); top: var(--title-top); z-index: 130; display: flex; align-items: center; gap: 10px; font: 12px var(--font-mono), monospace; letter-spacing: .12em; color: rgba(255, 255, 255, .7); }
@@ -212,12 +220,14 @@
 .expCta:hover { background: var(--violet); }
 
 /* ---------- Education: rail and tilting cards ---------- */
-.edu { position: relative; display: grid; grid-template-columns: minmax(260px, 5fr) 7fr; gap: clamp(32px, 5vw, 88px); padding: var(--title-top) var(--gutter) clamp(56px, 9vh, 96px); background: var(--paper); color: var(--on-paper); }
+/* A full screen like every other section: the heading keeps its usual place and the cards sit centred beside it. */
+.edu { position: relative; display: grid; grid-template-columns: minmax(260px, 5fr) 7fr; gap: clamp(32px, 5vw, 88px); min-height: 100svh; padding: var(--title-top) var(--gutter) clamp(56px, 9vh, 96px); background: color-mix(in srgb, var(--paper) calc(var(--solid, 1) * 100%), transparent); color: var(--on-paper); }
 .edu .eyebrow { color: var(--accent-paper); }
 .edu .sectionTitle .dim { color: var(--muted-paper); }
-.eduHeading { position: sticky; top: var(--title-top); align-self: start; }
+/* Stays in place with the section (it fits one screen and holds), rather than sticking and drifting. */
+.eduHeading { align-self: start; }
 .eduIntro { max-width: 22rem; margin: 22px 0 0; font-size: 16px; line-height: 1.55; color: var(--muted-paper); }
-.eduList { position: relative; display: grid; gap: 16px; margin: 0; padding: 0 0 0 34px; list-style: none; }
+.eduList { position: relative; align-self: center; display: grid; gap: 16px; margin: 0; padding: 0 0 0 34px; list-style: none; }
 .eduRail { position: absolute; left: 6px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--line-paper); }
 .eduRail i { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(var(--violet), #ff7ac4); transform-origin: 50% 0; }
 /* Compact cards: height follows the content, so all three fit on one screen on desktop. */
@@ -304,7 +314,7 @@
 
 /* ---------- All projects: framed screens on tinted panels ---------- */
 /* Follows the theme like the other paper sections: light tinted cards by day, deep ones by night. */
-.projects { --panel-base: #fff; --panel-glow: 34%; --panel-drop: rgba(40, 30, 90, .22); position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: var(--paper); color: var(--on-paper); }
+.projects { --panel-base: #fff; --panel-glow: 34%; --panel-drop: rgba(40, 30, 90, .22); position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: color-mix(in srgb, var(--paper) calc(var(--solid, 1) * 100%), transparent); color: var(--on-paper); }
 :global(:root[data-theme="dark"]) .projects { --panel-base: #07060f; --panel-glow: 55%; --panel-drop: rgba(0, 0, 0, .55); }
 .projects .eyebrow { color: var(--accent-paper); }
 .projectsHeading { position: absolute; left: var(--gutter); right: var(--gutter); top: var(--title-top); z-index: 3; pointer-events: none; }
@@ -322,6 +332,11 @@
 }
 .filters button[aria-pressed="true"] { border-color: var(--on-paper); background: var(--on-paper); color: var(--paper); }
 .filters button[aria-pressed="true"] svg, .filters button[aria-pressed="true"] small { color: color-mix(in srgb, var(--paper) 75%, transparent); }
+/* Progress through the pinned projects: a slim rail under the panels, one dot per project. */
+.projectsProgress { position: absolute; left: 50%; bottom: 13px; z-index: 4; width: min(440px, 64vw); height: 3px; translate: -50% 0; border-radius: 3px; background: var(--line-paper); pointer-events: none; }
+.projectsProgress span { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, var(--violet), #ff7ac4); transform: scaleX(0); transform-origin: 0 50%; }
+.projectsProgress i { position: absolute; top: 50%; left: 0; width: 9px; height: 9px; translate: -50% -50%; border: 2px solid var(--paper); border-radius: 50%; background: var(--line-paper); transition: background-color .3s, scale .3s; }
+.projectsProgress i[data-reached] { background: var(--accent-paper); scale: 1.15; }
 /* The top padding leaves room for the heading and the filter row. */
 .track { display: flex; gap: 24px; width: max-content; height: 100%; padding: calc(clamp(190px, 25svh, 230px) + 54px) 24px 32px; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .panel { position: relative; flex: none; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: clamp(20px, 3vw, 48px); width: min(86vw, 1100px); height: 100%; padding: clamp(24px, 3.4vw, 48px); overflow: hidden; border: 1px solid var(--line-paper); border-radius: 22px; perspective: 1600px;
@@ -339,11 +354,12 @@
 .panelOpen:focus-visible { outline-offset: -4px; }
 
 /* ---------- Contact ---------- */
-.contact { height: 100svh; min-height: 620px; padding: 12px; background: var(--paper); }
+.contact { height: 100svh; min-height: 620px; padding: 12px; background: color-mix(in srgb, var(--paper) calc(var(--solid, 1) * 100%), transparent); }
 /* Wide screens: copy on the left, the directory beside it, held in one centred column and
    centred vertically between the nav and the footer (the spacer rows share the free height). */
 .contactFrame { --contact-inline: max(var(--gutter), calc((100% - 1240px) / 2)); position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 500px); grid-template-rows: minmax(0, 1fr) auto auto auto minmax(0, 1.15fr) auto; column-gap: clamp(48px, 6vw, 112px); height: 100%; padding: calc(var(--title-top) - 12px) var(--contact-inline) 28px; overflow: hidden; border-radius: var(--frame-radius);
-  background: radial-gradient(55% 45% at 30% 100%, #f0b4ff 0%, #a259ff 30%, transparent 70%), radial-gradient(70% 60% at 40% 45%, #5a2fe6 0%, transparent 70%), linear-gradient(170deg, #070420 0%, #2a1294 60%, #3d1cc2 100%); }
+  --a: calc(var(--solid, 1) * 100%);
+  background: radial-gradient(55% 45% at 30% 100%, color-mix(in srgb, #f0b4ff var(--a), transparent) 0%, color-mix(in srgb, #a259ff var(--a), transparent) 30%, transparent 70%), radial-gradient(70% 60% at 40% 45%, color-mix(in srgb, #5a2fe6 var(--a), transparent) 0%, transparent 70%), linear-gradient(170deg, color-mix(in srgb, #070420 var(--a), transparent) 0%, color-mix(in srgb, #2a1294 var(--a), transparent) 60%, color-mix(in srgb, #3d1cc2 var(--a), transparent) 100%); }
 .contactTitle, .contactEyebrow { position: relative; z-index: 2; grid-column: 1; }
 .contactEyebrow { grid-row: 2; }
 .contactTitle { grid-row: 3; }
@@ -371,7 +387,6 @@
   .menu { display: flex; }
   .bubble { display: none; }
   .edu { grid-template-columns: 1fr; }
-  .eduHeading { position: relative; top: auto; }
   .hero { height: auto; }
   .heroFrame { display: flex; flex-direction: column; gap: 16px; min-height: calc(100svh - 24px); padding: calc(env(safe-area-inset-top, 0px) + 88px) 20px 20px; }
   .heroHeading, .heroImpact, .heroBio { position: relative; inset: auto; width: auto; }
@@ -426,7 +441,7 @@
   .panelDesc { -webkit-line-clamp: 2; }
   .panel { gap: 16px; padding: 18px; }
   /* Phones: the copy and the directory carry the section on a calmer backdrop. */
-  .contactFrame { min-height: 100svh; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); background: radial-gradient(90% 45% at 100% 0%, rgba(107, 60, 242, .5) 0%, transparent 70%), linear-gradient(180deg, #0b0628 0%, #1c0c66 100%); }
+  .contactFrame { min-height: 100svh; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); background: radial-gradient(90% 45% at 100% 0%, rgba(107, 60, 242, .5) 0%, transparent 70%), linear-gradient(180deg, color-mix(in srgb, #0b0628 var(--a), transparent) 0%, color-mix(in srgb, #1c0c66 var(--a), transparent) 100%); }
   .contactFoot { flex-direction: column; gap: 8px; padding-right: 64px; font-size: 10px; letter-spacing: .06em; }
 }
 /* Shorter phones (iPhone 16, Galaxy S24 and similar): fit the cover, buttons included, on the
@@ -454,6 +469,7 @@
   .channels span { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .projectsProgress { display: none; }
   .heroGlow span, .bot, .botHop, .botTip, .botEyes ellipse, .companion[data-waving] .botArmRight, .botZ i, .botHeart, .companion[data-talking] .botMouth { animation: none !important; }
   .bubble { animation: none; }
   .stepper { display: none; }

@@ -57,12 +57,11 @@ export function Contact() {
       <div data-contact-frame className={styles.contactFrame}>
         <p className={`${styles.eyebrow} ${styles.contactEyebrow}`}>06 · Contact</p>
         <h2 id="contact-title" className={`${styles.sectionTitle} ${styles.contactTitle}`}>
-          <span data-line className={styles.line}><span>Have something</span></span>
-          <span data-line className={styles.line}><span>interesting in mind?</span></span>
-          <span data-line className={`${styles.line} ${styles.dim}`}><span>Let’s build it.</span></span>
+          <span data-line className={styles.line}><span>Let’s work</span></span>
+          <span data-line className={`${styles.line} ${styles.dim}`}><span>together.</span></span>
         </h2>
         <div data-contact-sub className={styles.sub}>
-          <p>Open to meaningful projects, collaborations and conversations around software, products and creative technology.</p>
+          <p>Have a project, a role or a question? Send me a message and I’ll get back to you.</p>
           <div className={styles.btns}>
             <a className={`${styles.btn} ${styles.solid}`} href={`mailto:${profile.email}`}>Send an email</a>
             <a className={`${styles.btn} ${styles.ghost}`} href={profile.resume} download="DISHAN_BASHITHA.pdf">Résumé (PDF)</a>

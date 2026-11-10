@@ -88,7 +88,7 @@ export function About() {
       <div className={styles.lanyardCol}>
         <div data-lanyard-drop className={styles.lanyardDrop}>
           <div ref={swing} className={styles.lanyard}>
-            <span className={styles.strap} aria-hidden="true"><i>DISHAN · BUILD · SHIP · DISHAN · BUILD · SHIP</i></span>
+            <span className={styles.strap} aria-hidden="true"><i>DISHAN BASHITHA · DISHAN BASHITHA</i></span>
             <span className={styles.clip} aria-hidden="true" />
             <figure data-badge className={styles.badge}>
               <span className={styles.badgeSlot} aria-hidden="true" />
@@ -109,8 +109,8 @@ export function About() {
         <div className={styles.aboutHead}>
           <p className={styles.eyebrow}>02 · About</p>
           <h2 id="about-title" className={styles.sectionTitle}>
-            <span data-line className={styles.line}><span>Curious by default.</span></span>
-            <span data-line className={`${styles.line} ${styles.dim}`}><span>Intentional by choice.</span></span>
+            <span data-line className={styles.line}><span>Hi, I’m Dishan.</span></span>
+            <span data-line className={`${styles.line} ${styles.dim}`}><span>I build for the web.</span></span>
           </h2>
         </div>
         <div className={styles.aboutText}>

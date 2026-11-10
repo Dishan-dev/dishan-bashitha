@@ -46,7 +46,92 @@ function sectionOffset(id: string) {
 
 /** One layer of the stack: it sticks once fully read while the next layer slides over it. */
 function Stack({ children }: { children: ReactNode }) {
-  return <div data-stack className={styles.stack}>{children}<span data-stack-shade className={styles.stackShade} aria-hidden="true" /></div>;
+  return (
+    <div data-stack className={styles.stack}>
+      {children}
+      <span data-stack-shade className={styles.stackShade} aria-hidden="true" />
+      <span data-stack-glass className={styles.stackGlass} aria-hidden="true" />
+    </div>
+  );
+}
+
+const easeInOut = (t: number) => t * t * (3 - 2 * t);
+
+/**
+ * The hand-over between two layers, inspired by iOS sheets and liquid glass. The incoming section
+ * rises as a rounded sheet of frosted glass: its background is translucent and blurs the section
+ * behind it, with a bright rim along its top edge. Once it settles in place it turns fully solid
+ * over a moment. Meanwhile the layer underneath recedes, rounding off and dimming. Everything
+ * follows the scroll position and no styles are left behind at either end.
+ */
+function handOver(covered: HTMLElement, incoming: HTMLElement, compact: boolean) {
+  const glass = incoming.querySelector<HTMLElement>("[data-stack-glass]");
+  const shade = covered.querySelector<HTMLElement>("[data-stack-shade]");
+  // The section owns the background, so the frost and the rounded top live on it.
+  const sheet = incoming.querySelector<HTMLElement>("section");
+  const radius = compact ? 26 : 34, recede = compact ? 0.035 : 0.05;
+  // How solid the sheet's background is (0 clear, 1 solid) and how much it blurs what's behind.
+  const frost = { solid: 1, blur: 0 };
+  let settle: gsap.core.Tween | null = null;
+  const paint = () => {
+    if (!sheet) return;
+    if (frost.solid >= 1 && frost.blur <= 0) {
+      sheet.style.removeProperty("--solid");
+      sheet.style.removeProperty("backdrop-filter");
+      sheet.style.removeProperty("-webkit-backdrop-filter");
+      return;
+    }
+    sheet.style.setProperty("--solid", frost.solid.toFixed(3));
+    const filter = `blur(${frost.blur.toFixed(1)}px) saturate(1.6)`;
+    sheet.style.setProperty("backdrop-filter", filter);
+    sheet.style.setProperty("-webkit-backdrop-filter", filter);
+  };
+  const clearSheet = () => {
+    settle?.kill(); settle = null;
+    frost.solid = 1; frost.blur = 0; paint();
+    sheet?.style.removeProperty("border-radius");
+  };
+  const clear = () => {
+    covered.style.removeProperty("transform");
+    covered.style.removeProperty("transform-origin");
+    covered.style.removeProperty("clip-path");
+    clearSheet();
+    if (glass) glass.style.opacity = "0";
+    if (shade) shade.style.opacity = "0";
+  };
+  const apply = (progress: number) => {
+    if (progress <= 0) { clear(); return; }
+    const t = easeInOut(Math.min(1, progress));
+    // Only the bottom screenful of a tall layer is visible while it is stuck; it recedes about the centre of that.
+    const hidden = Math.max(0, covered.offsetHeight - window.innerHeight);
+    covered.style.transformOrigin = `50% ${hidden + window.innerHeight / 2}px`;
+    covered.style.transform = `scale(${1 - recede * t})`;
+    covered.style.clipPath = `inset(${hidden}px 0 0 0 round ${radius * t}px)`;
+    if (shade) shade.style.opacity = String(0.5 * t);
+    if (progress >= 1) {
+      // In place: the glass gradually becomes a solid surface.
+      sheet?.style.removeProperty("border-radius");
+      if (glass) glass.style.opacity = "0";
+      if (!settle && (frost.solid < 1 || frost.blur > 0)) {
+        settle = gsap.to(frost, { solid: 1, blur: 0, duration: 1.2, ease: "sine.inOut", onUpdate: paint, onComplete: () => { settle = null; paint(); } });
+      }
+      return;
+    }
+    // Rising: translucent frosted glass, a little more opaque as it nears its place.
+    settle?.kill(); settle = null;
+    frost.solid = 0.3 + 0.4 * t;
+    frost.blur = 26 - 8 * t;
+    paint();
+    const corner = radius * (1 - t);
+    sheet?.style.setProperty("border-radius", `${corner}px ${corner}px 0 0`);
+    if (glass) { glass.style.opacity = String(1 - t); glass.style.borderRadius = `${corner}px ${corner}px 0 0`; }
+  };
+  const trigger = ScrollTrigger.create({
+    trigger: incoming, start: "top bottom", end: "top top",
+    onUpdate: self => apply(self.progress),
+    onRefresh: self => apply(self.progress),
+  });
+  return { clear, kill: () => { trigger.kill(); clear(); } };
 }
 
 function goToSection(id: string, immediate = false) {
@@ -120,17 +205,20 @@ export function FlowExperience({ initialProject }: { initialProject?: string } =
     if (!main) return;
     const layers = Array.from(main.querySelectorAll<HTMLElement>("[data-stack]"));
     const measure = () => layers.forEach(layer => layer.style.setProperty("--stick", `${Math.min(0, window.innerHeight - layer.offsetHeight)}px`));
-    const lift = () => main.classList.add(styles.measuring);
+    // Hand-over styles are cleared while ScrollTrigger measures, so transforms never skew its offsets.
+    let handOvers: ReturnType<typeof handOver>[] = [];
+    const lift = () => { handOvers.forEach(item => item.clear()); main.classList.add(styles.measuring); };
     const settle = () => { main.classList.remove(styles.measuring); measure(); };
     const observer = new ResizeObserver(measure);
     layers.forEach(layer => observer.observe(layer));
     ScrollTrigger.addEventListener("refreshInit", lift);
     ScrollTrigger.addEventListener("refresh", settle);
-    // The covered layer dims as the next one slides over it.
+    // Each layer hands over to the next: the covered one recedes and dims as a glass sheet rises over it.
     const media = gsap.matchMedia();
     media.add(motionQuery, () => {
-      layers.slice(1).forEach((layer, index) => gsap.fromTo(layers[index].querySelector("[data-stack-shade]"), { opacity: 0 }, { opacity: 0.55, ease: "none",
-        scrollTrigger: { trigger: layer, start: "top bottom", end: "top top", scrub: true } }));
+      const compact = window.matchMedia("(max-width: 720px)").matches;
+      handOvers = layers.slice(1).map((layer, index) => handOver(layers[index], layer, compact));
+      return () => { handOvers.forEach(item => item.kill()); handOvers = []; };
     });
     measure();
     ScrollTrigger.refresh();

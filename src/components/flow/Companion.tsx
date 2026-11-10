@@ -13,10 +13,10 @@ type Stop = { id: string; say: string; hold?: number; flips?: number };
 const lines: Record<string, string> = {
   home: "Hi, I’m Bit, Dishan’s guide. Tap me for a tour!",
   about: "That’s Dishan. Try swinging the badge!",
-  experience: "Swipe or use the arrows to flip through the journey.",
-  education: "Always learning: three chapters so far.",
+  experience: "Swipe or use the arrows to flip through Dishan’s roles.",
+  education: "Here’s where Dishan studied.",
   projects: "Click a project to open its case study.",
-  contact: "Got an idea? Let’s build it together!",
+  contact: "Want to get in touch? Dishan’s links are right here.",
 };
 const waving = new Set(["home", "contact"]);
 
@@ -25,9 +25,9 @@ const tour: Stop[] = [
   { id: "home", say: "Sit back, I’ll show you around. Scroll or tap anywhere to take over.", hold: 3200 },
   { id: "about", say: "This is Dishan: a Software Engineering undergrad at Moratuwa who builds full stack.", hold: 4400 },
   { id: "experience", say: "Five roles so far. I’ll flip through them for you…", flips: 4 },
-  { id: "education", say: "Three chapters of learning, and counting.", hold: 3800 },
-  { id: "projects", say: "Four builds. Sliding through them now…", flips: 3 },
-  { id: "contact", say: "That’s the tour! Dishan is one message away.", hold: 4200 },
+  { id: "education", say: "Here’s where Dishan studied.", hold: 3800 },
+  { id: "projects", say: "Now Dishan’s projects. Sliding through them…", flips: 4 },
+  { id: "contact", say: "That’s the tour! You can reach Dishan here.", hold: 4200 },
 ];
 const travel = 1800;
 const flipEvery = 1400;

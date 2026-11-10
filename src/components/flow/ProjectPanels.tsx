@@ -25,7 +25,9 @@ const techs = (() => {
 
 /**
  * Pinned horizontal travel that settles on each project; swipes and the arrows step through
- * them too. Each window drifts against the travel and its copy settles in.
+ * them too. Each window drifts against the travel and its copy settles in. The pin holds for a
+ * while before the travel starts and after it ends, so the first and last projects stay on screen
+ * instead of being swept past, and a progress bar shows the way through.
  */
 const panelsMotion = (section: HTMLElement, count: number) => {
   const track = one(section, "[data-track]");
@@ -35,9 +37,32 @@ const panelsMotion = (section: HTMLElement, count: number) => {
   const last = count - 1;
   const counter = one(section, "[data-project-current]");
   const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+  // Scroll held on the first project before the travel, and on the last one after it (a little
+  // longer, as the eased travel finishes slightly behind the scroll).
+  const lead = () => Math.round(window.innerHeight * 0.6);
+  const tail = () => Math.round(window.innerHeight * 0.8);
+  const fill = one(section, "[data-projects-fill]");
+  const dots = all(section, "[data-projects-dot]");
+  // Each dot sits where its project comes to rest along the whole pinned stretch.
+  const placeDots = () => {
+    const total = lead() + distance() + tail();
+    dots.forEach((dot, index) => { dot.style.left = `${((lead() + (last > 0 ? (distance() * index) / last : 0)) / total) * 100}%`; });
+  };
+  const hold = ScrollTrigger.create({
+    trigger: section, start: "top top", end: () => `+=${lead() + distance() + tail()}`, pin: true, invalidateOnRefresh: true,
+    onRefresh: placeDots,
+    onUpdate: self => {
+      if (fill) fill.style.transform = `scaleX(${self.progress})`;
+      dots.forEach(dot => dot.toggleAttribute("data-reached", self.progress * 100 >= parseFloat(dot.style.left) - 0.5));
+    },
+  });
+  placeDots();
   let sync = () => {};
+  // The travel runs between the two holds; the hold above does the pinning. Its range is given
+  // as scroll positions from the hold, since a trigger on the pinned section itself would be
+  // measured as starting after the whole pinned stretch.
   const travel = gsap.to(track, { x: () => -distance(), ease: "none",
-    scrollTrigger: { trigger: section, start: "top top", end: () => `+=${distance()}`, pin: true, scrub: 1, invalidateOnRefresh: true,
+    scrollTrigger: { trigger: section, start: () => hold.start + lead(), end: () => hold.start + lead() + Math.max(1, distance()), scrub: 1, invalidateOnRefresh: true,
       ...(last > 0 ? { snap: { snapTo: 1 / last, inertia: false, duration: { min: 0.2, max: 0.5 }, delay: 0.1, ease: "power2.inOut" } } : {}),
       onUpdate: self => { if (counter) counter.textContent = pad(Math.round(self.progress * last) + 1); sync(); } } });
   // With nowhere to travel (a single matching project), panels simply show as they are.
@@ -47,16 +72,17 @@ const panelsMotion = (section: HTMLElement, count: number) => {
     gsap.from(all(panel, "[data-panel-type]"), { yPercent: 40, opacity: 0, stagger: 0.04, ease: "none",
       scrollTrigger: { trigger: panel, containerAnimation: travel, start: "left 85%", end: "left 35%", scrub: true } });
   });
-  if (!travel.scrollTrigger) return;
+  const resetBar = () => { if (fill) fill.style.removeProperty("transform"); dots.forEach(dot => { dot.removeAttribute("data-reached"); dot.style.removeProperty("left"); }); };
+  if (!travel.scrollTrigger) return () => { hold.kill(); resetBar(); };
   // A single matching project: nothing to step through.
   if (last < 1) {
     const buttons = all(section, "[data-step]") as HTMLButtonElement[];
     buttons.forEach(button => { button.disabled = true; });
-    return () => buttons.forEach(button => { button.disabled = false; });
+    return () => { buttons.forEach(button => { button.disabled = false; }); resetBar(); };
   }
   const steps = sideways(section, track, travel.scrollTrigger, last);
   sync = steps.sync;
-  return steps.kill;
+  return () => { steps.kill(); resetBar(); };
 };
 
 export function ProjectPanels({ onOpen }: { onOpen: (slug: string) => void }) {
@@ -110,6 +136,10 @@ export function ProjectPanels({ onOpen }: { onOpen: (slug: string) => void }) {
         <button type="button" data-step="-1" aria-label="Show previous project"><ChevronLeft size={18} /></button>
         <span aria-hidden="true"><span data-project-current>01</span> / {pad(visible.length)}</span>
         <button type="button" data-step="1" aria-label="Show next project"><ChevronRight size={18} /></button>
+      </div>
+      <div className={styles.projectsProgress} aria-hidden="true">
+        <span data-projects-fill />
+        {visible.map(project => <i key={project.slug} data-projects-dot />)}
       </div>
       <div data-track data-lenis-prevent-touch className={styles.track}>
         {visible.map(project => (

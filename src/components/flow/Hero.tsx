@@ -1,7 +1,7 @@
 "use client";
 
 import { gsap } from "gsap";
-import { Box, Code2, GraduationCap, UserRound } from "lucide-react";
+import { Code2, Database, LayoutTemplate, Server } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
 import { projects } from "@/data/projects";
@@ -12,10 +12,10 @@ import styles from "./Flow.module.css";
 
 const featured = projects[0];
 const capabilities = [
-  { label: ["Clean", "Architecture"], icon: Box },
-  { label: ["Scalable", "Solutions"], icon: Code2 },
-  { label: ["User", "Focused"], icon: UserRound },
-  { label: ["Always", "Learning"], icon: GraduationCap },
+  { label: ["Java &", "Spring Boot"], icon: Server },
+  { label: ["React &", "Next.js"], icon: LayoutTemplate },
+  { label: ["Node.js &", "Express"], icon: Code2 },
+  { label: ["PostgreSQL &", "MySQL"], icon: Database },
 ];
 
 /**
@@ -114,8 +114,8 @@ export function Hero({ onOpen }: { onOpen: (slug: string) => void }) {
         </div>
 
         <div data-hero-impact className={styles.heroImpact}>
-          <p data-hero-fade className={styles.impactLine}>I build digital experiences <span>that make an impact.</span></p>
-          <p data-hero-fade>Software Engineer skilled in building scalable web applications and delivering intuitive user experiences.</p>
+          <p data-hero-fade className={styles.impactLine}>I build full-stack <span>web applications.</span></p>
+          <p data-hero-fade>I’m a software engineer from Sri Lanka, working with React, Next.js, Java and Spring Boot.</p>
         </div>
 
         <div data-hero-portrait className={styles.heroPortrait}>
@@ -130,7 +130,7 @@ export function Hero({ onOpen }: { onOpen: (slug: string) => void }) {
         <div className={styles.heroBio}>
           <p data-hero-fade className={styles.eyebrow}>Based in Sri Lanka</p>
           <h2 data-hero-fade>Full Stack Developer</h2>
-          <p data-hero-fade>Passionate about clean code, modern web technologies and solving real-world problems.</p>
+          <p data-hero-fade>Studying IT &amp; Management at the University of Moratuwa.</p>
           <div data-hero-fade className={styles.btns}>
             <a className={`${styles.btn} ${styles.solid}`} href="#projects">Explore my work →</a>
             <a className={`${styles.btn} ${styles.ghost}`} href="#contact">Let’s talk</a>

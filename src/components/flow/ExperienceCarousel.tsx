@@ -90,7 +90,7 @@ export function ExperienceCarousel() {
     <section ref={root} id="experience" className={styles.exp} aria-labelledby="experience-title">
       <div className={styles.expHeading}>
         <p className={styles.eyebrow}>03 · Experience</p>
-        <h2 id="experience-title" className={styles.sectionTitle}><span data-line className={styles.line}><span>A journey in motion.</span></span></h2>
+        <h2 id="experience-title" className={styles.sectionTitle}><span data-line className={styles.line}><span>Where I’ve worked.</span></span></h2>
       </div>
       <div className={`${styles.stepper} ${styles.paperStepper}`}>
         <button type="button" data-step="-1" aria-label="Show previous role"><ChevronLeft size={18} /></button>
