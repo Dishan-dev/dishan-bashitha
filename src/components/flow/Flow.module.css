@@ -212,20 +212,21 @@
 .expCta:hover { background: var(--violet); }
 
 /* ---------- Education: rail and tilting cards ---------- */
-.edu { position: relative; display: grid; grid-template-columns: minmax(260px, 5fr) 7fr; gap: clamp(32px, 5vw, 88px); padding: var(--title-top) var(--gutter) clamp(90px, 14vh, 150px); background: var(--paper); color: var(--on-paper); }
+.edu { position: relative; display: grid; grid-template-columns: minmax(260px, 5fr) 7fr; gap: clamp(32px, 5vw, 88px); padding: var(--title-top) var(--gutter) clamp(56px, 9vh, 96px); background: var(--paper); color: var(--on-paper); }
 .edu .eyebrow { color: var(--accent-paper); }
 .edu .sectionTitle .dim { color: var(--muted-paper); }
 .eduHeading { position: sticky; top: var(--title-top); align-self: start; }
 .eduIntro { max-width: 22rem; margin: 22px 0 0; font-size: 16px; line-height: 1.55; color: var(--muted-paper); }
-.eduList { position: relative; display: grid; gap: 22px; margin: 0; padding: 0 0 0 34px; list-style: none; }
+.eduList { position: relative; display: grid; gap: 16px; margin: 0; padding: 0 0 0 34px; list-style: none; }
 .eduRail { position: absolute; left: 6px; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--line-paper); }
 .eduRail i { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(var(--violet), #ff7ac4); transform-origin: 50% 0; }
-.eduCard { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 36px; min-height: 250px; padding: 30px; overflow: hidden; border-radius: 28px; color: #fff; }
-.eduCard::before { content: ""; position: absolute; left: -35px; top: 34px; width: 12px; height: 12px; border: 3px solid var(--paper); border-radius: 50%; background: var(--violet); }
-.eduCard h3 { margin: 0; max-width: 18ch; font-size: clamp(26px, 2.6vw, 38px); font-weight: 400; line-height: 1.08; letter-spacing: -.02em; }
+/* Compact cards: height follows the content, so all three fit on one screen on desktop. */
+.eduCard { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; padding: 22px 28px 24px; overflow: hidden; border-radius: 28px; color: #fff; }
+.eduCard::before { content: ""; position: absolute; left: -35px; top: 28px; width: 12px; height: 12px; border: 3px solid var(--paper); border-radius: 50%; background: var(--violet); }
+.eduCard h3 { margin: 0; max-width: 34ch; font-size: clamp(22px, 2vw, 30px); font-weight: 400; line-height: 1.08; letter-spacing: -.02em; }
 .eduCard .org { margin: 0 0 10px; font: 11px/1.5 var(--font-mono), monospace; letter-spacing: .1em; text-transform: uppercase; color: rgba(255, 255, 255, .9); }
-.eduCard p:last-child { margin: 12px 0 0; font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, .78); }
-.eduIndex { position: absolute; right: 24px; bottom: -18px; font-size: clamp(90px, 10vw, 150px); font-weight: 500; line-height: 1; letter-spacing: -.06em; color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, .28); pointer-events: none; }
+.eduCard p:last-child { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, .78); }
+.eduIndex { position: absolute; right: 24px; bottom: -14px; font-size: clamp(64px, 6.5vw, 104px); font-weight: 500; line-height: 1; letter-spacing: -.06em; color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, .28); pointer-events: none; }
 
 /* ---------- Companion ---------- */
 .companion { --look-x: 0px; --look-y: 0px; position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); z-index: 55; display: flex; align-items: flex-end; gap: 10px; pointer-events: none; transition: opacity .35s, translate .35s; }
@@ -392,7 +393,8 @@
   .about { grid-template-columns: 1fr; gap: 0; padding-top: var(--title-top); }
   .aboutCopy { display: contents; }
   .aboutHead { order: -1; }
-  .lanyardCol { position: relative; height: auto; margin: 4px 0 8px; }
+  /* The strap hangs a little below the heading instead of touching its last line. */
+  .lanyardCol { position: relative; height: auto; margin: 22px 0 8px; }
   .strap { height: clamp(70px, 11svh, 110px); }
   .badge { width: min(100%, 270px); }
   .panel { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: center; gap: 22px; padding: 22px; }
@@ -425,10 +427,30 @@
   .panel { gap: 16px; padding: 18px; }
   /* Phones: the copy and the directory carry the section on a calmer backdrop. */
   .contactFrame { min-height: 100svh; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); background: radial-gradient(90% 45% at 100% 0%, rgba(107, 60, 242, .5) 0%, transparent 70%), linear-gradient(180deg, #0b0628 0%, #1c0c66 100%); }
-  .contactFoot { flex-direction: column; gap: 8px; padding-right: 64px; }
+  .contactFoot { flex-direction: column; gap: 8px; padding-right: 64px; font-size: 10px; letter-spacing: .06em; }
+}
+/* Shorter phones (iPhone 16, Galaxy S24 and similar): fit the cover, buttons included, on the
+   first screen by tightening its spacing and using a shorter portrait. */
+@media (max-width: 720px) and (max-height: 880px) {
+  .heroFrame { gap: 12px; padding-top: calc(env(safe-area-inset-top, 0px) + 76px); }
+  .heroTitle { margin-top: 12px; font-size: clamp(52px, 16vw, 82px); }
+  .heroImpact p:last-child { font-size: 15px; line-height: 1.5; }
+  .heroPortrait { height: min(35svh, 330px); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 170px), rgba(0, 0, 0, .45) calc(100% - 110px), transparent calc(100% - 60px)); mask-image: linear-gradient(to bottom, #000 calc(100% - 170px), rgba(0, 0, 0, .45) calc(100% - 110px), transparent calc(100% - 60px)); }
+  .heroBio { margin-top: -60px; padding: 18px; }
+}
+/* Compact Androids (Galaxy S24 class, about 360x780): one more notch so the buttons still fit. */
+@media (max-width: 720px) and (max-height: 800px) {
+  .heroFrame { gap: 10px; padding-top: calc(env(safe-area-inset-top, 0px) + 70px); }
+  .heroTitle { font-size: clamp(48px, 14vw, 72px); }
+  .heroImpact p:last-child { font-size: 14px; }
+  .heroPortrait { height: min(30svh, 300px); }
+  .heroBio { padding: 16px; }
+  .heroBio p:not(.eyebrow) { margin: 8px 0 14px; font-size: 13px; }
 }
 @media (max-width: 380px) {
-  .channels a, .channels button { grid-template-columns: 56px minmax(0, 1fr) auto; gap: 8px; }
+  /* Room for the longest label (LINKEDIN) on 360px phones. */
+  .channels a, .channels button { grid-template-columns: 70px minmax(0, 1fr) auto; gap: 8px; }
+  .channels small { letter-spacing: .08em; }
   .channels span { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {

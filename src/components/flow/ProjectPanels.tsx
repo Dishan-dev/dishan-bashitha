@@ -70,9 +70,12 @@ export function ProjectPanels({ onOpen }: { onOpen: (slug: string) => void }) {
 
   // After filtering, re-measure the page (the section's travel changed length) and return to the
   // first matching project.
-  const filtered = useRef(false);
+  // Compared with the last filter seen, so it runs only when the filter actually changes (not on
+  // first load, nor when React re-runs effects in development).
+  const shownTech = useRef(tech);
   useEffect(() => {
-    if (!filtered.current) { filtered.current = true; return; }
+    if (shownTech.current === tech) return;
+    shownTech.current = tech;
     const frame = requestAnimationFrame(() => {
       ScrollTrigger.refresh();
       const pin = ScrollTrigger.getAll().find(trigger => trigger.pin === root.current);
