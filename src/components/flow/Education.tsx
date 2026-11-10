@@ -14,8 +14,10 @@ const educationMotion: FlowSetup = (section) => {
   gsap.from(all(section, "[data-line] > span"), { yPercent: 110, duration: 1.1, ease: "expo.out", stagger: 0.09,
     scrollTrigger: { trigger: section, start: "top 70%", toggleActions: "play none none reverse" } });
   const list = one(section, "[data-edu-list]");
+  // The rail completes as the section's bottom reaches the screen's bottom, which is the moment
+  // the section settles and the next one starts to slide over it.
   gsap.fromTo(one(section, "[data-edu-progress]"), { scaleY: 0 }, { scaleY: 1, ease: "none",
-    scrollTrigger: { trigger: list, start: "top 70%", end: "bottom 60%", scrub: true } });
+    scrollTrigger: { trigger: list, start: "top 70%", endTrigger: section, end: "bottom bottom", scrub: true } });
   all(section, "[data-edu-item]").forEach(item => {
     // Played (not scrubbed) as soon as the card enters, so a quick scroll never passes a half-faded card.
     gsap.from(item, { rotationX: 14, y: 60, opacity: 0, transformPerspective: 1200, transformOrigin: "50% 100%", duration: 0.7, ease: "power3.out",

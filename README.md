@@ -32,4 +32,4 @@ The production app includes SVG and ICO favicons, an Apple touch icon, home-scre
 
 ## Verify the deployed site
 
-Check `/`, `/favicon.ico`, `/icon.svg`, `/apple-icon.png`, `/manifest.webmanifest`, `/social-preview.png`, `/robots.txt`, and `/sitemap.xml`. Confirm the canonical and Open Graph URLs use the public domain, test section navigation and both themes, and open the site on a phone.
+Check `/`, `/favicon.ico`, `/icon1.svg`, `/icon2.png` (192×192, the largest raster favicon for Google Search), `/apple-icon.png`, `/manifest.webmanifest`, `/opengraph-image`, `/robots.txt`, and `/sitemap.xml`. Confirm the canonical and Open Graph URLs use the public domain, test section navigation and both themes, and open the site on a phone.
